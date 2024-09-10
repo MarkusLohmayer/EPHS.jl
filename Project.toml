@@ -1,0 +1,17 @@
+name = "EPHS"
+uuid = "a154ac86-a732-4cd8-94ce-a74caa38ec4b"
+authors = ["Markus Lohmayer <markus.lohmayer@gmail.com>"]
+version = "0.1.0"
+
+[deps]
+Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
+
+[compat]
+Reexport = "1.2.2"
+
+[extras]
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Random", "Test"]
