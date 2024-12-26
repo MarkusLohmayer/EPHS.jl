@@ -1,50 +1,96 @@
 
-# """
-#     ocompose(pattern::Pattern, rs::Dtry{Rhizome})
+# For the moment, this is primarily an academic exercise
+# to convince ourselves that the EPHS syntax
+# (i.e. `Interface`s as objects and `Pattern{Nothing,Nothing}`s as morphisms)
+# form a `Dtry`-multicategory.
 
-# Composition operation for the Dtry-multicategory of rhizomes.
-# """
-# function compose(r::Pattern{F,P}, rs::Dtry{Pattern{}}) where {F,P}
-#   # paired :: Dtry{Tuple{Dtry{InnerPort}, Rhizome}}
-#   paired = zip(r.boxes, rs)
-#   boxes = flatten(mapwithkey(Dtry{Dtry{InnerPort}}, paired) do k, (interface, r′)
-#     # k :: DtryVar
-#     # interface :: Dtry{InnerPort}
-#     # r′ :: Rhizome
-#     # We want to create the new collection of boxes
 
-#     # Map nested boxes
-#     map(Dtry{InnerPort}, r′.boxes) do b
-#       # b :: Dtry{InnerPort}
-#       map(InnerPort, b) do p
-#         # p :: InnerPort
-#         # p.junction :: namespace(b.junctions)
-#         jvar = p.junction
-#         j = r′.junctions[jvar]
-#         if j.exposed == true
-#           # If exposed, then use the junction that the port is connected to
-#           InnerPort(p.type, interface[jvar].junction)
-#         else
-#           # Otherwise, attach to a newly added junction from the rhizome `r′`
-#           # which is attached at path `k`
-#           InnerPort(p.type, k * jvar)
-#         end
-#       end
-#     end
-#   end)
-#   # Add all unexposed junctions
-#   newjunctions = flatten(
-#     map(Dtry{Junction}, rs) do r′
-#       internal_junctions = filter(j -> !j.exposed, r′.junctions)
-#       if isnothing(internal_junctions)
-#         Dtrys.node(OrderedDict{Symbol,Dtry{Junction}}())
-#       else
-#         internal_junctions
-#       end
-#     end
-#   )
+"""
+    identity(x::Interface) -> Pattern{Nothing,Nothing}
 
-#   junctions = merge(r.junctions, newjunctions)
+Return the identity pattern on the given interface.
+"""
+function Base.identity(interface::Interface)
+  junctions = map(interface, Tuple{Junction,Nothing}) do port_type
+    (
+      Junction(true, port_type.quantity, port_type.power),
+      nothing
+    )
+  end
+  boxes = Dtry{Tuple{InnerBox{Nothing},Nothing}}(
+      (
+        InnerBox{Nothing}(
+          mapwithpath(interface, InnerPort) do path, port_type
+            InnerPort(path, port_type.power)
+          end,
+          nothing
+        ),
+        nothing
+      )
+    )
+  Pattern{Nothing,Nothing}(junctions, boxes)
+end
 
-#   Rhizome(boxes, junctions)
-# end
+
+"""
+    compose(pattern::Pattern{Nothing,Nothing}, fillings::Dtry{Pattern{Nothing,Nothing}}) -> Pattern{Nothing,Nothing}
+
+Composition operation for the Dtry-multicategory of patterns.
+"""
+function compose(
+  pattern::Pattern{Nothing,Nothing},
+  fillings::Dtry{Pattern{Nothing,Nothing}}
+)
+  boxes = _boxes(pattern, fillings)
+  junctions = _junctions(pattern, fillings)
+  Pattern{Nothing,Nothing}(junctions, boxes)
+end
+
+
+function _junctions(
+  pattern::Pattern{Nothing,Nothing},
+  fillings::Dtry{Pattern{Nothing,Nothing}}
+)
+  # Merge top-level junctions (from `pattern`)
+  # with those junctions of the subsystems (`fillings`)
+  # that are not exposed
+  merge(
+    pattern.junctions,
+    # Flatten directory of directory of (unexposed) junctions (from `fillings`)
+    map(fillings, Dtry{Tuple{Junction,Nothing}}) do filling
+      filter(filling.junctions) do (junction, _)
+        !(junction.exposed)
+      end
+    end |> flatten
+  )
+end
+
+
+function _boxes(
+  pattern::Pattern{Nothing,Nothing},
+  fillings::Dtry{Pattern{Nothing,Nothing}}
+)
+  # Flatten directory of directories of boxes (from `fillings`)
+  zipmapwithpath(
+    pattern.boxes,
+    fillings,
+    Dtry{Tuple{InnerBox{Nothing},Nothing}}
+  ) do box_path, (box, _), filling
+    # Check if composable
+    interface(pattern, box_path) == interface(filling) ||
+      error("interface for box $(box_path) does not match")
+    # Reassign ports to junctions (endomorphism)
+    map(filling.boxes, Tuple{InnerBox{Nothing},Nothing}) do (inner_box, _)
+      ports = map(inner_box.ports, InnerPort) do port
+        junction_path = port.junction
+        junction, _ = filling.junctions[junction_path]
+        if junction.exposed
+          InnerPort(box.ports[junction_path].junction, port.power)
+        else
+          InnerPort(box_path * junction_path, port.power)
+        end
+      end
+      (InnerBox{Nothing}(ports, nothing), nothing)
+    end
+  end |> flatten
+end

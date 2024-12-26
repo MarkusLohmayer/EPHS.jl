@@ -20,9 +20,10 @@ export AbstractDtry
 export DtryLeaf, DtryNode
 export NonEmptyDtry, Dtry
 export leaf_or_node, nothing_or_nonempty
+export print_dtry
 export DtryAccessError, DtryBranchError, DtryLeafError
 export DtryPath, ■, nothing_or_link
-export filtermap, zipmap, mapwithpath
+export mapwithpath, zipmap, zipmapwithpath, filtermap
 export foreachpath, foreachvalue
 
 import ..MoreBase: flatten

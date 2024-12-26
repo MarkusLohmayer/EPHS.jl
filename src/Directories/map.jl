@@ -143,6 +143,39 @@ Base.zip(dtry1::AbstractDtry{T1}, dtry2::AbstractDtry{T2}) where {T1,T2} =
 
 
 """
+    zipmapwithpath(f, dtry1::Dtry{T1}, dtry2::Dtry{T2}, X::Type) -> Dtry{X}
+
+Given a directory of `T1`s and a directory of `T2`s with the same tree sturcture,
+as well as a function `f : DtryPath × T1 × T2 -> X`,
+produce a new directory of `X`s,
+where the value at path `p` is given by `f(p, dtry1[p], dtry2[p])`.
+"""
+function zipmapwithpath(f, dtry1::AbstractDtry{T1}, dtry2::AbstractDtry{T2}, X::Type; prefix=■) where {T1,T2}
+  isempty(dtry1) && isempty(dtry2) && return Dtry{X}()
+  nonempty1 = nothing_or_nonempty(dtry1)
+  nonempty2 = nothing_or_nonempty(dtry2)
+  if leaf_or_node(nonempty1) isa DtryLeaf && leaf_or_node(nonempty2) isa DtryLeaf
+    leaf1 = leaf_or_node(nonempty1)
+    leaf2 = leaf_or_node(nonempty2)
+    old_value1::T1 = leaf1.value
+    old_value2::T2 = leaf2.value
+    new_value::X = f(prefix, old_value1, old_value2)
+    return Dtry{X}(new_value)
+  else
+    node1 = leaf_or_node(nonempty1)
+    node2 = leaf_or_node(nonempty2)
+    if keys(node1.branches) == keys(node2.branches)
+      return Dtry{X}((
+        name => zipmapwithpath(f, child1, child2, X; prefix=getproperty(prefix, name))
+        for ((name, child1), (_, child2)) in zip(node1.branches, node2.branches)
+      )...)
+    end
+  end
+  error("the two directories have not the same tree structure")
+end
+
+
+"""
     filtermap(f, dtry::AbstractDtry{T}, X::Type) -> Dtry{X}
 
 Make a new directory of `X`s from a (nonempty) directory of `T`s
