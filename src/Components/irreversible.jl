@@ -19,6 +19,6 @@ function Base.get(lf::LinearFriction, flow::FVar)
   elseif port_path == DtryPath(:s)
     return -((d * p₊e * p₊e) / (θ₀ + s₊e))
   else
-    error("Port $(effort.port_path) not found")
+    error("Port $(port_path) not found")
   end
 end

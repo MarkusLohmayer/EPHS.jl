@@ -21,9 +21,9 @@ struct CompositeSystem{P<:Union{Nothing,Position}} <: AbstractSystem
     pattern::Pattern{AbstractSystem,P}
   ) where {P<:Union{Nothing,Position}}
     # Check if interfaces of subsystems match
-    foreach(pattern.boxes) do (name, (box, _))
-      interface(pattern, name) == interface(box.filling)  ||
-        error("Interface of box $string(name) does not match the interface of its filling")
+    foreach(pattern.boxes) do (box_path, (box, _))
+      interface(pattern, box_path) == interface(box.filling)  ||
+        error("Interface of box $box_path does not match the interface of its filling")
     end
     new{P}(pattern)
   end
@@ -36,6 +36,10 @@ function CompositeSystem(
 ) where {P}
   CompositeSystem{P}(Pattern{AbstractSystem,P}(junctions, boxes))
 end
+
+
+AbstractSystems.interface(sys::CompositeSystem) = interface(sys.pattern)
+AbstractSystems.fillcolor(::CompositeSystem) = "#FFE381"
 
 
 function Base.show(io::IO, ::MIME"image/svg+xml", sys::CompositeSystem{Position})

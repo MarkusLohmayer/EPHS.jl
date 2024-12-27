@@ -1,6 +1,6 @@
 # For now, we think about parameters as constants
 
-struct Const <: SymExpr
+struct Const <: SymVar
   x::Float64
 end
 

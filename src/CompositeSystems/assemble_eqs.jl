@@ -15,37 +15,46 @@ struct Connection
 end
 
 
-# Think about integrating connections into CompositeSystem itself
-struct PreparedSystem{P<:Union{Nothing,Position}}
-  sys::CompositeSystem{P}
+function AbstractSystems.FVar(c::Connection)
+  c.power && return FVar(c.box_path, c.port_path)
+  error("connection is not a power port")
+end
+
+
+function AbstractSystems.EVar(c::Connection)
+  c.power && return EVar(c.box_path, c.port_path)
+  error("connection is not a power port")
+end
+
+
+struct PreparedSystem
+  sys::CompositeSystem
   connections::Dtry{Vector{Connection}}
 
+  # TODO Check that system is isolated
   """
-  Check that all subsystems are primitive and
-  identify `Connection`s at each junction.
+  Prepare composite system for assembly of equations
   """
-  function PreparedSystem{P}(sys::CompositeSystem) where {P}
+  function PreparedSystem(sys::CompositeSystem)
     connections = map(_ -> Vector{Connection}(), sys.pattern.junctions)
     foreach(sys.pattern.boxes) do (box_path, (box, _))
+      # Check that all subsystems are primitive
       box.filling isa Component ||
-        error("Subsystem $string(box_path) is not a `Component`")
+        error("Subsystem $(box_path) is not a `Component`")
+      # Identify `Connection`s at each junction
       storage = box.filling isa StorageComponent
       foreach(box.ports) do (port_path, (;junction, power))
         c = Connection(box_path, port_path, power, storage)
         push!(connections[junction], c)
       end
     end
-    # TODO check that there is (at most) one storage component per junction
-    new{P}(sys, connections)
+    # Check that there is at most one storage component per junction
+    foreach(connections) do (path, cs)
+      mapreduce(c -> c.storage, +, cs) ≤ 1 ||
+        error("More than one storage component at junction $path")
+    end
+    new(sys, connections)
   end
-end
-
-
-function PreparedSystem(
-  junctions::Dtry{Tuple{Junction,P}},
-  boxes::Dtry{Tuple{InnerBox{AbstractSystem},P}}
-) where {P}
-  PreparedSystem{P}(CompositeSystem(junctions, boxes))
 end
 
 
@@ -62,8 +71,7 @@ function connected_ports(
   box, _ = sys.pattern.boxes[box_path]
   junction = box.ports[port_path].junction
   Iterators.filter(connections[junction]) do c
-    c.box_path == box_path && c.port_path == port_path && return false
-    true
+    !(c.box_path == box_path && c.port_path == port_path)
   end
 end
 
@@ -81,9 +89,7 @@ function connected_power_ports(
   box, _ = sys.pattern.boxes[box_path]
   junction = box.ports[port_path].junction
   Iterators.filter(connections[junction]) do c
-    c.power || return false
-    c.box_path == box_path && c.port_path == port_path && return false
-    true
+    c.power && !(c.box_path == box_path && c.port_path == port_path)
   end
 end
 
@@ -91,10 +97,7 @@ end
 function Base.get(psys::PreparedSystem, flow::FVar)
   (;box_path, port_path) = flow
   cs = connected_power_ports(psys, box_path, port_path)
-  sum(
-    -(FVar(c.box_path, c.port_path))
-    for c in cs
-  )
+  -(sum(FVar(c) for c in cs))
 end
 
 
@@ -103,15 +106,23 @@ function Base.get(psys::PreparedSystem, effort::EVar)
   cs = connected_power_ports(psys, box_path, port_path)
   for c in cs
     if c.storage
-      return EVar(c.box_path, c.port_path)
+      return EVar(c)
     end
+  end
+  # make transformers work if there are no further connections
+  cs = collect(cs)
+  if length(cs) == 1
+    return EVar(first(cs))
   end
   error(
     "port $(string(port_path)) of box $(string(box_path))" *
-    "is not connected with a storage component"
+    " is not connected with a storage component" *
+    " and there are more than one other connections, leaving me clueless"
   )
 end
 
+# Resolving/eliminating power variables is done in a top-down approach
+# A 'tracing approach' would probably be more efficient
 
 function resolve(psys::PreparedSystem, x::PowerVar)
   while has_power_var(x)
@@ -139,7 +150,7 @@ end
 
 function has_power_var(expr::SymExpr)
   expr isa PowerVar && return true
-  (expr isa XVar || expr isa Const) && return false
+  expr isa SymVar && return false
   if expr isa SymOp
     args = map(name -> getfield(expr, name), fieldnames(typeof(expr)))
     return any(has_power_var(arg) for arg in args)
@@ -157,12 +168,12 @@ has_power_var(ss::Tuple{Vararg{SymExpr}}) = any(has_power_var(s) for s in ss)
 """
 Assemble evolution equations of a composite system
 """
-function assemble(psys::PreparedSystem)
-  sys = psys.sys
+function assemble(sys::CompositeSystem)
+  psys = PreparedSystem(sys)
   eqs = Eq[]
-  foreach(sys.pattern.boxes) do (box_path, (box, _))
+  foreach(psys.sys.pattern.boxes) do (box_path, (box, _))
     if box.filling isa StorageComponent
-      foreach(box.ports) do (port_path, (;junction))
+      foreachpath(box.ports) do port_path
         flow = FVar(box_path, port_path)
         eq = Eq(flow, resolve(psys, flow))
         push!(eqs, eq)

@@ -3,8 +3,9 @@ module Components
 export Component
 export StorageComponent, ReversibleComponent, IrreversibleComponent
 
-export HookeanSpring, PointMass, PKC
-export ThermalCapacity, LinearFriction
+export HookeanSpring, PointMass, ThermalCapacity
+export PKC, Lever
+export LinearFriction
 
 # export energy
 # export flow, effort
@@ -19,7 +20,7 @@ using ..Environment
 # Type hierarchy for components
 abstract type Component <: AbstractSystem end
 abstract type StorageComponent <: Component end
-abstract type ReversibleComponent <: Component end # For now, gyrator only
+abstract type ReversibleComponent <: Component end
 abstract type IrreversibleComponent <: Component end
 
 

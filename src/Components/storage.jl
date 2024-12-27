@@ -20,7 +20,7 @@ function Base.get(spring::HookeanSpring, effort::EVar)
     k = Const(spring.k)
     return k * q
   else
-    error("Port $(effort.port_path) not found")
+    error("Port $(port_path) not found")
   end
 end
 
@@ -46,7 +46,7 @@ function Base.get(mass::PointMass, effort::EVar)
     m = Const(mass.m)
     return p / m
   else
-    error("Port $(effort.port_path) not found")
+    error("Port $(port_path) not found")
   end
 end
 
@@ -76,6 +76,6 @@ function Base.get(tc::ThermalCapacity, effort::EVar)
     θ = c₁ / c₂ * exp(s / c₂)
     return θ - θ₀
   else
-    error("Port $(effort.port_path) not found")
+    error("Port $(port_path) not found")
   end
 end
