@@ -2,11 +2,8 @@
 # For now assume that all ports are state ports and
 # system is isolated (ignore exposed junctions)
 
-export Connection, PreparedSystem
-export connected_ports, connected_power_ports
 
-
-"Data characterizing a port connected to some junction"
+"Connection of a port to a junction"
 struct Connection
   box_path::DtryPath   # box to which the port belongs
   port_path::DtryPath  # name of the port
@@ -120,11 +117,9 @@ end
 
 
 function fromcomponent(psys::PreparedSystem, pvar::PowerVar)
+  resolve = pvar -> frompattern(psys, pvar)
   box, _ = psys.sys.pattern.boxes[pvar.box_path]
-  expr = get(box.filling, pvar)
-  map(expr, PowerVar) do pvar
-    frompattern(psys, pvar)
-  end
+  get(box.filling, pvar; resolve)
 end
 
 

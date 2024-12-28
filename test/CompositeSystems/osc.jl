@@ -58,4 +58,5 @@ osc = CompositeSystem(
 
 # 7.812 μs (205 allocations: 6.52 KiB) top-down approach
 # 6.400 μs (167 allocations: 5.53 KiB hybrid approach
+# 6.008 μs (156 allocations: 5.25 KiB) recursive approach
 # @btime assemble($osc)

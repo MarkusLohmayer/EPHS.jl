@@ -90,4 +90,5 @@ osc_damped_lever = CompositeSystem(
 
 # 32.083 μs (732 allocations: 22.30 KiB) top-down approach
 # 18.833 μs (504 allocations: 15.91 KiB) hybrid approach, 41% less runtime
+# 11.500 μs (345 allocations: 11.69 KiB) recursive approach, 64% less runtime than top-down approach
 # @btime assemble($osc_damped_lever)

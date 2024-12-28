@@ -80,4 +80,5 @@ osc_damped_flat = CompositeSystem(
 
 # 25.458 μs (573 allocations: 17.53 KiB) top-down approach
 # 18.875 μs (480 allocations: 14.70 KiB) hybrid approach, 26% less runtime
+# 12.875 μs (342 allocations: 10.98 KiB) recursive approach, 49% less runtime than top-down approach
 # @btime assemble($osc_damped_flat)

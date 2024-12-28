@@ -6,12 +6,14 @@ AbstractSystems.interface(::PKC) = Interface(
   :p => Interface(PortType(momentum, true))
 )
 
-function Base.get(::PKC, flow::FVar)
+function Base.get(::PKC, flow::FVar; resolve=identity)
   (;box_path, port_path) = flow
   if port_path == DtryPath(:q)
-    return -(EVar(box_path, DtryPath(:p)))
+    p₊e = EVar(box_path, DtryPath(:p)) |> resolve
+    return -p₊e
   elseif port_path == DtryPath(:p)
-    return EVar(box_path, DtryPath(:q))
+    q₊e = EVar(box_path, DtryPath(:q)) |> resolve
+    return q₊e
   else
     error("Port $(port_path) not found")
   end
@@ -27,19 +29,19 @@ AbstractSystems.interface(::Lever) = Interface(
   :q₂ => Interface(PortType(displacement, true))
 )
 
-function Base.get(lever::Lever, flow::FVar)
+function Base.get(lever::Lever, flow::FVar; resolve=identity)
   (;box_path, port_path) = flow
   if port_path == DtryPath(:q₁)
-    return -(Const(lever.c) * FVar(box_path, DtryPath(:q₂)))
+    return -(Const(lever.c) * resolve(FVar(box_path, DtryPath(:q₂))))
   else
     error("Port $(port_path) not found")
   end
 end
 
-function Base.get(lever::Lever, effort::EVar)
+function Base.get(lever::Lever, effort::EVar; resolve=identity)
   (;box_path, port_path) = effort
   if port_path == DtryPath(:q₂)
-    return Const(lever.c) * EVar(box_path, DtryPath(:q₁))
+    return Const(lever.c) * resolve(EVar(box_path, DtryPath(:q₁)))
   else
     error("Port $(port_path) not found")
   end

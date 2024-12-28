@@ -13,7 +13,7 @@ AbstractSystems.interface(::HookeanSpring) = Interface(
 #   Const(0.5) * k * q * q
 # end
 
-function Base.get(spring::HookeanSpring, effort::EVar)
+function Base.get(spring::HookeanSpring, effort::EVar; resolve=identity)
   (;box_path, port_path) = effort
   if port_path == DtryPath(:q)
     q = XVar(box_path, port_path)
@@ -39,7 +39,7 @@ AbstractSystems.interface(::PointMass) = Interface(
 #   Const(0.5) / m * p * p
 # end
 
-function Base.get(mass::PointMass, effort::EVar)
+function Base.get(mass::PointMass, effort::EVar; resolve=identity)
   (;box_path, port_path) = effort
   if port_path == DtryPath(:p)
     p = XVar(box_path, port_path)
@@ -67,7 +67,7 @@ AbstractSystems.interface(::ThermalCapacity) = Interface(
 #   c₁ * exp(s / c₂)
 # end
 
-function Base.get(tc::ThermalCapacity, effort::EVar)
+function Base.get(tc::ThermalCapacity, effort::EVar; resolve=identity)
   (;box_path, port_path) = effort
   if port_path == DtryPath(:s)
     s = XVar(box_path, port_path)
