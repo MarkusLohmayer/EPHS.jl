@@ -42,4 +42,7 @@ osc_damped_nested = CompositeSystem(
   )
 )
 
-# assemble(osc_damped_nested)
+@test assemble(osc_damped_nested) == assemble(osc_damped_flat)
+
+# 50.625 μs (781 allocations: 27.59 KiB)
+# @btime assemble($osc_damped_nested)

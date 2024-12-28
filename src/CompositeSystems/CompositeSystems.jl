@@ -1,8 +1,11 @@
 module CompositeSystems
 
 export CompositeSystem
+export FlatSystem
 export assemble
 
+
+using ..MoreBase
 using ..Directories
 using ..SymbolicExpressions
 using ..AbstractSystems

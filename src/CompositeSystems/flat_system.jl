@@ -9,14 +9,49 @@ end
 
 
 function Pattern{Component,Nothing}(pattern::Pattern{AbstractSystem,P}) where {P}
-  junctions = map(pattern.junctions, Tuple{Junction,Nothing}) do (junction, _)
-    (junction, nothing)
-  end
-  boxes = mapwithpath(pattern.boxes, Tuple{InnerBox{Component},Nothing}) do box_path, (box, _)
-    box.filling isa Component ||
-      error("Subsystem $(box_path) is not a `Component`")
-    (InnerBox{Component}(box.ports, box.filling), nothing)
-  end
+  junctions = merge(
+    map(pattern.junctions, Tuple{Junction,Nothing}) do (junction, _)
+      (junction, nothing)
+    end,
+    map(pattern.boxes, Dtry{Tuple{Junction,Nothing}}) do (box, _)
+      if box.filling isa Component
+        Dtry{Tuple{Junction,Nothing}}()
+      elseif box.filling isa CompositeSystem
+        filling = box.filling.pattern
+        filtermap(filling.junctions, Tuple{Junction,Nothing}) do (junction, _)
+          junction.exposed ? nothing : Some((junction, nothing))
+        end
+      else
+        error("should not reach here")
+      end
+    end |> flatten
+  )
+  boxes = mapwithpath(
+    pattern.boxes,
+    Dtry{Tuple{InnerBox{Component},Nothing}}
+  ) do box_path, (box, _)
+    if box.filling isa Component
+      Dtry{Tuple{InnerBox{Component},Nothing}}(
+        (InnerBox{Component}(box.ports, box.filling), nothing)
+      )
+    elseif box.filling isa CompositeSystem
+      filling = box.filling.pattern
+      map(filling.boxes, Tuple{InnerBox{Component},Nothing}) do (inner_box, _)
+        ports = map(inner_box.ports, InnerPort) do port
+          junction_path = port.junction
+          junction, _ = filling.junctions[junction_path]
+          if junction.exposed
+            InnerPort(box.ports[junction_path].junction, port.power)
+          else
+            InnerPort(box_path * junction_path, port.power)
+          end
+        end
+        (InnerBox{Component}(ports, inner_box.filling), nothing)
+      end
+    else
+      error("should not reach here")
+    end
+  end |> flatten
   Pattern{Component,Nothing}(junctions, boxes)
 end
 
@@ -48,4 +83,20 @@ struct FlatSystem
     end
     new(pattern, connections)
   end
+end
+
+
+function Base.show(io::IO, ::MIME"text/plain", fsys::FlatSystem)
+  println(io, "Junctions:")
+  print_dtry(io, fsys.pattern.junctions; print_value=Patterns.print_junction)
+  println(io, "\nBoxes:")
+  print_dtry(io, fsys.pattern.boxes; print_value=print_box)
+end
+
+
+function print_box(io::IO, t::Tuple{InnerBox{Component},Nothing}, prefix::String)
+  box, _ = t
+  println(io, typeof(box.filling))
+  print(io, prefix)
+  print_dtry(io, box.ports; prefix, print_value=Patterns.print_port)
 end

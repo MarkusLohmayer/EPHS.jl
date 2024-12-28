@@ -88,6 +88,11 @@ Assemble evolution equations of a composite system
 """
 function assemble(sys::CompositeSystem)
   fsys = FlatSystem(sys)
+  assemble(fsys)
+end
+
+
+function assemble(fsys::FlatSystem)
   eqs = Eq[]
   foreach(fsys.pattern.boxes) do (box_path, (box, _))
     if box.filling isa StorageComponent
