@@ -48,7 +48,7 @@ function Base.show(io::IO, ::MIME"image/svg+xml", sys::CompositeSystem{Position}
 end
 
 
+include("flat_system.jl")
 include("assemble_eqs.jl")
-
 
 end

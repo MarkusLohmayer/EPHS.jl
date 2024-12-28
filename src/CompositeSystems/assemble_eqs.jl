@@ -3,15 +3,6 @@
 # system is isolated (ignore exposed junctions)
 
 
-"Connection of a port to a junction"
-struct Connection
-  box_path::DtryPath   # box to which the port belongs
-  port_path::DtryPath  # name of the port
-  power::Bool          # true means port is a power port
-  storage::Bool        # true means box is filled by stroage component
-end
-
-
 function AbstractSystems.FVar(c::Connection)
   c.power && return FVar(c.box_path, c.port_path)
   error("connection is not a power port")
@@ -24,48 +15,17 @@ function AbstractSystems.EVar(c::Connection)
 end
 
 
-struct PreparedSystem
-  sys::CompositeSystem
-  connections::Dtry{Vector{Connection}}
-
-  """
-  Prepare composite system for assembly of equations
-  """
-  function PreparedSystem(sys::CompositeSystem)
-    # TODO Check that system is isolated
-    connections = map(_ -> Vector{Connection}(), sys.pattern.junctions)
-    foreach(sys.pattern.boxes) do (box_path, (box, _))
-      # Check that all subsystems are primitive
-      box.filling isa Component ||
-        error("Subsystem $(box_path) is not a `Component`")
-      # Identify `Connection`s at each junction
-      storage = box.filling isa StorageComponent
-      foreach(box.ports) do (port_path, (;junction, power))
-        c = Connection(box_path, port_path, power, storage)
-        push!(connections[junction], c)
-      end
-    end
-    # Check that there is at most one storage component per junction
-    foreach(connections) do (path, cs)
-      mapreduce(c -> c.storage, +, cs) ≤ 1 ||
-        error("More than one storage component at junction $path")
-    end
-    new(sys, connections)
-  end
-end
-
-
 """
 Other ports connected with the port
 to which the given state variable belongs.
 """
 function connected_ports(
-  psys::PreparedSystem,
+  fsys::FlatSystem,
   xvar::XVar
 )
-  (;sys, connections) = psys
+  (;pattern, connections) = fsys
   (;box_path, port_path) = xvar
-  box, _ = sys.pattern.boxes[box_path]
+  box, _ = pattern.boxes[box_path]
   junction = box.ports[port_path].junction
   Iterators.filter(connections[junction]) do c
     !(c.box_path == box_path && c.port_path == port_path)
@@ -78,12 +38,12 @@ Other power ports connected with the power port
 to which the given power variable belongs.
 """
 function connected_power_ports(
-  psys::PreparedSystem,
+  fsys::FlatSystem,
   pvar::PowerVar
 )
-  (;sys, connections) = psys
+  (;pattern, connections) = fsys
   (;box_path, port_path) = pvar
-  box, _ = sys.pattern.boxes[box_path]
+  box, _ = pattern.boxes[box_path]
   junction = box.ports[port_path].junction
   Iterators.filter(connections[junction]) do c
     c.power && !(c.box_path == box_path && c.port_path == port_path)
@@ -91,22 +51,22 @@ function connected_power_ports(
 end
 
 
-function frompattern(psys::PreparedSystem, flow::FVar)
-  -(sum(fromcomponent(psys, FVar(c)) for c in connected_power_ports(psys, flow)))
+function frompattern(fsys::FlatSystem, flow::FVar)
+  -(sum(fromcomponent(fsys, FVar(c)) for c in connected_power_ports(fsys, flow)))
 end
 
 
-function frompattern(psys::PreparedSystem, effort::EVar)
-  cs = connected_power_ports(psys, effort)
+function frompattern(fsys::FlatSystem, effort::EVar)
+  cs = connected_power_ports(fsys, effort)
   for c in cs
     if c.storage
-      return fromcomponent(psys, EVar(c))
+      return fromcomponent(fsys, EVar(c))
     end
   end
   # make transformers work if there are no further connections
   cs = collect(cs)
   if length(cs) == 1
-    return fromcomponent(psys, EVar(first(cs)))
+    return fromcomponent(fsys, EVar(first(cs)))
   end
   error(
     "port $(effort.port_path)) of box $(effort.box_path))" *
@@ -116,9 +76,9 @@ function frompattern(psys::PreparedSystem, effort::EVar)
 end
 
 
-function fromcomponent(psys::PreparedSystem, pvar::PowerVar)
-  resolve = pvar -> frompattern(psys, pvar)
-  box, _ = psys.sys.pattern.boxes[pvar.box_path]
+function fromcomponent(fsys::FlatSystem, pvar::PowerVar)
+  resolve = pvar -> frompattern(fsys, pvar)
+  box, _ = fsys.pattern.boxes[pvar.box_path]
   get(box.filling, pvar; resolve)
 end
 
@@ -127,13 +87,13 @@ end
 Assemble evolution equations of a composite system
 """
 function assemble(sys::CompositeSystem)
-  psys = PreparedSystem(sys)
+  fsys = FlatSystem(sys)
   eqs = Eq[]
-  foreach(psys.sys.pattern.boxes) do (box_path, (box, _))
+  foreach(fsys.pattern.boxes) do (box_path, (box, _))
     if box.filling isa StorageComponent
       foreachpath(box.ports) do port_path
         flow = FVar(box_path, port_path)
-        eq = Eq(flow, frompattern(psys, flow))
+        eq = Eq(flow, frompattern(fsys, flow))
         push!(eqs, eq)
       end
     end
