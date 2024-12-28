@@ -78,5 +78,6 @@ osc_damped_flat = CompositeSystem(
   Eq(FVar(■.tc, ■.s), Div(Mul((Const(0.02), Div(XVar(■.osc.ke, ■.p), Const(1.0)), Div(XVar(■.osc.ke, ■.p), Const(1.0)))), Mul((Div(Const(1.0), Const(2.5)), Exp(Div(XVar(■.tc, ■.s), Const(2.5)))))))
 ]
 
-# 25.458 μs (573 allocations: 17.53 KiB)
+# 25.458 μs (573 allocations: 17.53 KiB) top-down approach
+# 18.875 μs (480 allocations: 14.70 KiB) hybrid approach, 26% less runtime
 # @btime assemble($osc_damped_flat)

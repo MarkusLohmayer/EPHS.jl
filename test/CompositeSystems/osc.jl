@@ -56,5 +56,6 @@ osc = CompositeSystem(
 # Human-readable display of equations
 # assemble(osc) |> print
 
-# 7.812 μs (205 allocations: 6.52 KiB)
+# 7.812 μs (205 allocations: 6.52 KiB) top-down approach
+# 6.400 μs (167 allocations: 5.53 KiB hybrid approach
 # @btime assemble($osc)

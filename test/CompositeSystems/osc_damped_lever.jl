@@ -88,5 +88,6 @@ osc_damped_lever = CompositeSystem(
   Eq(FVar(■.tc, ■.s), Div(Mul((Const(0.02), Div(XVar(■.ke, ■.p), Const(1.0)), Div(XVar(■.ke, ■.p), Const(1.0)))), Mul((Div(Const(1.0), Const(2.5)), Exp(Div(XVar(■.tc, ■.s), Const(2.5)))))))
 ]
 
-# 32.083 μs (732 allocations: 22.30 KiB)
+# 32.083 μs (732 allocations: 22.30 KiB) top-down approach
+# 18.833 μs (504 allocations: 15.91 KiB) hybrid approach, 41% less runtime
 # @btime assemble($osc_damped_lever)

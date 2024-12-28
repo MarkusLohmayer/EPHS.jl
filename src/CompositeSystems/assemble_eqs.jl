@@ -31,11 +31,11 @@ struct PreparedSystem
   sys::CompositeSystem
   connections::Dtry{Vector{Connection}}
 
-  # TODO Check that system is isolated
   """
   Prepare composite system for assembly of equations
   """
   function PreparedSystem(sys::CompositeSystem)
+    # TODO Check that system is isolated
     connections = map(_ -> Vector{Connection}(), sys.pattern.junctions)
     foreach(sys.pattern.boxes) do (box_path, (box, _))
       # Check that all subsystems are primitive
@@ -59,15 +59,15 @@ end
 
 
 """
-Other ports connected to the given `junction`,
-besides the port identified by `box_path` and `port_path`
+Other ports connected with the port
+to which the given state variable belongs.
 """
 function connected_ports(
   psys::PreparedSystem,
-  box_path::DtryPath,
-  port_path::DtryPath
+  xvar::XVar
 )
   (;sys, connections) = psys
+  (;box_path, port_path) = xvar
   box, _ = sys.pattern.boxes[box_path]
   junction = box.ports[port_path].junction
   Iterators.filter(connections[junction]) do c
@@ -77,15 +77,15 @@ end
 
 
 """
-Other power ports connected to the given `junction`,
-besides the port identified by `box_path` and `port_path`
+Other power ports connected with the power port
+to which the given power variable belongs.
 """
 function connected_power_ports(
   psys::PreparedSystem,
-  box_path::DtryPath,
-  port_path::DtryPath
+  pvar::PowerVar
 )
   (;sys, connections) = psys
+  (;box_path, port_path) = pvar
   box, _ = sys.pattern.boxes[box_path]
   junction = box.ports[port_path].junction
   Iterators.filter(connections[junction]) do c
@@ -94,75 +94,38 @@ function connected_power_ports(
 end
 
 
-function Base.get(psys::PreparedSystem, flow::FVar)
-  (;box_path, port_path) = flow
-  cs = connected_power_ports(psys, box_path, port_path)
-  -(sum(FVar(c) for c in cs))
+function frompattern(psys::PreparedSystem, flow::FVar)
+  -(sum(fromcomponent(psys, FVar(c)) for c in connected_power_ports(psys, flow)))
 end
 
 
-function Base.get(psys::PreparedSystem, effort::EVar)
-  (;box_path, port_path) = effort
-  cs = connected_power_ports(psys, box_path, port_path)
+function frompattern(psys::PreparedSystem, effort::EVar)
+  cs = connected_power_ports(psys, effort)
   for c in cs
     if c.storage
-      return EVar(c)
+      return fromcomponent(psys, EVar(c))
     end
   end
   # make transformers work if there are no further connections
   cs = collect(cs)
   if length(cs) == 1
-    return EVar(first(cs))
+    return fromcomponent(psys, EVar(first(cs)))
   end
   error(
-    "port $(string(port_path)) of box $(string(box_path))" *
+    "port $(effort.port_path)) of box $(effort.box_path))" *
     " is not connected with a storage component" *
     " and there are more than one other connections, leaving me clueless"
   )
 end
 
-# Resolving/eliminating power variables is done in a top-down approach
-# A 'tracing approach' would probably be more efficient
 
-function resolve(psys::PreparedSystem, x::PowerVar)
-  while has_power_var(x)
-    x = resolve_pattern(psys, x)
-    x = resolve_component(psys, x)
-  end
-  x
-end
-
-
-function resolve_pattern(psys::PreparedSystem, expr::SymExpr)
-  map(expr, PowerVar) do power_var
-    get(psys, power_var)
+function fromcomponent(psys::PreparedSystem, pvar::PowerVar)
+  box, _ = psys.sys.pattern.boxes[pvar.box_path]
+  expr = get(box.filling, pvar)
+  map(expr, PowerVar) do pvar
+    frompattern(psys, pvar)
   end
 end
-
-
-function resolve_component(psys::PreparedSystem, expr::SymExpr)
-  map(expr, PowerVar) do power_var
-    box, _ = psys.sys.pattern.boxes[power_var.box_path]
-    get(box.filling, power_var)
-  end
-end
-
-
-function has_power_var(expr::SymExpr)
-  expr isa PowerVar && return true
-  expr isa SymVar && return false
-  if expr isa SymOp
-    args = map(name -> getfield(expr, name), fieldnames(typeof(expr)))
-    return any(has_power_var(arg) for arg in args)
-  else
-    error("shouldn't reach here")
-  end
-end
-
-
-has_power_var(ss::Tuple{Vararg{SymExpr}}) = any(has_power_var(s) for s in ss)
-
-
 
 
 """
@@ -175,7 +138,7 @@ function assemble(sys::CompositeSystem)
     if box.filling isa StorageComponent
       foreachpath(box.ports) do port_path
         flow = FVar(box_path, port_path)
-        eq = Eq(flow, resolve(psys, flow))
+        eq = Eq(flow, frompattern(psys, flow))
         push!(eqs, eq)
       end
     end
