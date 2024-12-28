@@ -72,4 +72,11 @@ osc_damped_flat = CompositeSystem(
   )
 );
 
-assemble(osc_damped_flat)
+@test assemble(osc_damped_flat) == Eq[
+  Eq(FVar(■.osc.pe, ■.q), Div(XVar(■.osc.ke, ■.p), Const(1.0))),
+  Eq(FVar(■.osc.ke, ■.p), Neg(Add((Mul((Const(1.0), XVar(■.osc.pe, ■.q))), Mul((Const(0.02), Div(XVar(■.osc.ke, ■.p), Const(1.0)))))))),
+  Eq(FVar(■.tc, ■.s), Div(Mul((Const(0.02), Div(XVar(■.osc.ke, ■.p), Const(1.0)), Div(XVar(■.osc.ke, ■.p), Const(1.0)))), Mul((Div(Const(1.0), Const(2.5)), Exp(Div(XVar(■.tc, ■.s), Const(2.5)))))))
+]
+
+# 25.458 μs (573 allocations: 17.53 KiB)
+# @btime assemble($osc_damped_flat)

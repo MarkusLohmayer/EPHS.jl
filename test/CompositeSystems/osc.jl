@@ -48,4 +48,13 @@ osc = CompositeSystem(
   )
 )
 
-assemble(osc)
+@test assemble(osc) == Eq[
+  Eq(FVar(■.pe, ■.q), Div(XVar(■.ke, ■.p), Const(1.0))),
+  Eq(FVar(■.ke, ■.p), Neg(Mul((Const(1.0), XVar(■.pe, ■.q)))))
+]
+
+# Human-readable display of equations
+# assemble(osc) |> print
+
+# 7.812 μs (205 allocations: 6.52 KiB)
+# @btime assemble($osc)

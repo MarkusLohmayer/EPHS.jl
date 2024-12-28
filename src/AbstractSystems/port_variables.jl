@@ -7,7 +7,7 @@ SymbolicExpressions.evaluate(::PortVar) =
   error("Cannot evaluate port variable")
 
 
-Base.show(io::IO, var::PortVar) = print(io, string(var))
+Base.show(io::IO, ::MIME"text/plain", var::PortVar) = print(io, string(var))
 
 
 "Flow and effort variables are power variables"
