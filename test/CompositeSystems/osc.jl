@@ -1,8 +1,8 @@
 
 # mechanical oscillator
 
-pe = HookeanSpring(1.)
-ke = PointMass(1.)
+pe = HookeanSpring(Const(1.5))
+ke = PointMass(Const(1.))
 pkc = PKC()
 
 osc = CompositeSystem(
@@ -50,7 +50,7 @@ osc = CompositeSystem(
 
 @test assemble(osc) == Eq[
   Eq(FVar(■.pe, ■.q), Div(XVar(■.ke, ■.p), Const(1.0))),
-  Eq(FVar(■.ke, ■.p), Neg(Mul((Const(1.0), XVar(■.pe, ■.q)))))
+  Eq(FVar(■.ke, ■.p), Neg(Mul((Const(1.5), XVar(■.pe, ■.q)))))
 ]
 
 # Human-readable display of equations

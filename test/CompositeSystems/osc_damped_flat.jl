@@ -1,6 +1,6 @@
 
-tc = ThermalCapacity(1., 2.5)
-mf = LinearFriction(0.02)
+tc = ThermalCapacity(Const(1.), Const(2.5))
+mf = LinearFriction(Const(0.02))
 
 osc_damped_flat = CompositeSystem(
   Dtry{Tuple{Junction,Position}}(
@@ -70,11 +70,11 @@ osc_damped_flat = CompositeSystem(
       Position(2,6)
     )),
   )
-);
+)
 
 @test assemble(osc_damped_flat) == Eq[
   Eq(FVar(■.osc.pe, ■.q), Div(XVar(■.osc.ke, ■.p), Const(1.0))),
-  Eq(FVar(■.osc.ke, ■.p), Neg(Add((Mul((Const(1.0), XVar(■.osc.pe, ■.q))), Mul((Const(0.02), Div(XVar(■.osc.ke, ■.p), Const(1.0)))))))),
+  Eq(FVar(■.osc.ke, ■.p), Neg(Add((Mul((Const(1.5), XVar(■.osc.pe, ■.q))), Mul((Const(0.02), Div(XVar(■.osc.ke, ■.p), Const(1.0)))))))),
   Eq(FVar(■.tc, ■.s), Div(Mul((Const(0.02), Div(XVar(■.osc.ke, ■.p), Const(1.0)), Div(XVar(■.osc.ke, ■.p), Const(1.0)))), Mul((Div(Const(1.0), Const(2.5)), Exp(Div(XVar(■.tc, ■.s), Const(2.5)))))))
 ]
 

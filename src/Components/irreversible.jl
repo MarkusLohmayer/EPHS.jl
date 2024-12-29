@@ -1,7 +1,7 @@
 
 
 struct LinearFriction <: IrreversibleComponent
-  d::Float64
+  d::SymPar
 end
 
 AbstractSystems.interface(::LinearFriction) = Interface(
@@ -11,7 +11,7 @@ AbstractSystems.interface(::LinearFriction) = Interface(
 
 function Base.get(lf::LinearFriction, flow::FVar; resolve=identity)
   (;box_path, port_path) = flow
-  d = Const(lf.d)
+  d = lf.d
   if port_path == DtryPath(:p)
     p₊e = EVar(box_path, DtryPath(:p)) |> resolve
     return d * p₊e

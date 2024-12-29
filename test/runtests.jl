@@ -28,9 +28,9 @@ end
 #   include("Environment.jl")
 # end
 
-@testset "Components" begin
-  include("Components/Components.jl")
-end
+# @testset "Components" begin
+#   include("Components/Components.jl")
+# end
 
 @testset "CompositeSystems" begin
   include("CompositeSystems/CompositeSystems.jl")

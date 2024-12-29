@@ -11,7 +11,7 @@ export Div
 export Add, Mul
 
 # parameters
-export Const
+export SymPar, Const
 
 # code generation
 export buildfn

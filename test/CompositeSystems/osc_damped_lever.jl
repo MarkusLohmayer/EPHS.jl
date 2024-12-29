@@ -1,6 +1,5 @@
 
-
-lever = Lever(2)
+lever = Lever(Const(2.))
 
 osc_damped_lever = CompositeSystem(
   Dtry{Tuple{Junction,Position}}(
@@ -84,7 +83,7 @@ osc_damped_lever = CompositeSystem(
 
 @test assemble(osc_damped_lever) == Eq[
   Eq(FVar(■.pe, ■.q), Mul((Const(2.0), Div(XVar(■.ke, ■.p), Const(1.0))))),
-  Eq(FVar(■.ke, ■.p), Neg(Add((Mul((Const(2.0), Mul((Const(1.0), XVar(■.pe, ■.q))))), Mul((Const(0.02), Div(XVar(■.ke, ■.p), Const(1.0)))))))),
+  Eq(FVar(■.ke, ■.p), Neg(Add((Mul((Const(2.0), Mul((Const(1.5), XVar(■.pe, ■.q))))), Mul((Const(0.02), Div(XVar(■.ke, ■.p), Const(1.0)))))))),
   Eq(FVar(■.tc, ■.s), Div(Mul((Const(0.02), Div(XVar(■.ke, ■.p), Const(1.0)), Div(XVar(■.ke, ■.p), Const(1.0)))), Mul((Div(Const(1.0), Const(2.5)), Exp(Div(XVar(■.tc, ■.s), Const(2.5)))))))
 ]
 

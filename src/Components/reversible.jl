@@ -21,7 +21,7 @@ end
 
 
 struct Lever <: ReversibleComponent
-  c::Float64
+  c::SymPar
 end
 
 AbstractSystems.interface(::Lever) = Interface(
@@ -31,8 +31,10 @@ AbstractSystems.interface(::Lever) = Interface(
 
 function Base.get(lever::Lever, flow::FVar; resolve=identity)
   (;box_path, port_path) = flow
+  c = lever.c
   if port_path == DtryPath(:q₁)
-    return -(Const(lever.c) * resolve(FVar(box_path, DtryPath(:q₂))))
+    q₂₊f = FVar(box_path, DtryPath(:q₂)) |> resolve
+    return -(c * q₂₊f)
   else
     error("Port $(port_path) not found")
   end
@@ -40,8 +42,10 @@ end
 
 function Base.get(lever::Lever, effort::EVar; resolve=identity)
   (;box_path, port_path) = effort
+  c = lever.c
   if port_path == DtryPath(:q₂)
-    return Const(lever.c) * resolve(EVar(box_path, DtryPath(:q₁)))
+    q₁₊e = EVar(box_path, DtryPath(:q₁)) |> resolve
+    return c * q₁₊e
   else
     error("Port $(port_path) not found")
   end
