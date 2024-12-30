@@ -44,7 +44,7 @@ const Interface = Dtry{PortType}
 abstract type AbstractSystem end
 
 
-# API for systems
+# API for `AbstractSystem`s
 interface(::AbstractSystem) = error("not implemented")
 fillcolor(::AbstractSystem) = error("not implemented")
 

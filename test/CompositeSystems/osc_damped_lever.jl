@@ -90,5 +90,6 @@ osc_damped_lever = CompositeSystem(
 # 32.083 μs (732 allocations: 22.30 KiB) top-down approach
 # 18.833 μs (504 allocations: 15.91 KiB) hybrid approach, 41% less runtime
 # 11.500 μs (345 allocations: 11.69 KiB) recursive approach, 64% less runtime than top-down approach
-# 36.125 μs (672 allocations: 26.00 KiB) higher runtime due to reduction of pattern
+# 36.125 μs (672 allocations: 26.00 KiB) two levels of nesting, state ports
+# 42.666 μs (781 allocations: 30.59 KiB) arbitrary nesting of patterns
 # @btime assemble($osc_damped_lever)

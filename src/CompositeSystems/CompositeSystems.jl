@@ -21,12 +21,14 @@ struct CompositeSystem{F<:AbstractSystem,P<:Union{Nothing,Position}} <: Abstract
   pattern::Pattern{F,P}
 
   function CompositeSystem{F,P}(
-    pattern::Pattern{F,P}
+    pattern::Pattern{F,P}; check::Bool=true
   ) where {F<:AbstractSystem,P<:Union{Nothing,Position}}
-    # Check if interfaces of subsystems match
-    foreach(pattern.boxes) do (box_path, (box, _))
-      interface(pattern, box_path) == interface(box.filling) ||
-        error("Interface of box $box_path does not match the interface of its filling")
+    if check
+      # Check if interfaces of subsystems match
+      foreach(pattern.boxes) do (box_path, (box, _))
+        interface(pattern, box_path) == interface(box.filling) ||
+          error("Interface of box $box_path does not match the interface of its filling")
+      end
     end
     new{F,P}(pattern)
   end

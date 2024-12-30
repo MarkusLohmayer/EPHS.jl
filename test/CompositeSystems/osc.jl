@@ -59,5 +59,6 @@ osc = CompositeSystem(
 # 7.812 μs (205 allocations: 6.52 KiB) top-down approach
 # 6.400 μs (167 allocations: 5.53 KiB hybrid approach
 # 6.008 μs (156 allocations: 5.25 KiB) recursive approach
-# 25.166 μs (377 allocations: 13.55 KiB)
+# 25.166 μs (377 allocations: 13.55 KiB) two levels of nesting, state ports
+# 28.750 μs (448 allocations: 16.25 KiB) arbitrary nesting of patterns
 # @btime assemble($osc)

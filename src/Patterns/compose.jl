@@ -20,15 +20,15 @@ function Base.identity(interface::Interface)
   boxes = Dtry{Tuple{InnerBox{Nothing},Nothing}}(
       (
         InnerBox{Nothing}(
-          mapwithpath(interface, InnerPort) do path, port_type
-            InnerPort(path, port_type.power)
+          mapwithpath(interface, InnerPort) do port_path, port_type
+            InnerPort(port_path, port_type.power)
           end,
           nothing
         ),
         nothing
       )
     )
-  Pattern{Nothing,Nothing}(junctions, boxes)
+  Pattern{Nothing,Nothing}(junctions, boxes; check=false)
 end
 
 
@@ -43,7 +43,7 @@ function compose(
 )
   boxes = _boxes(pattern, fillings)
   junctions = _junctions(pattern, fillings)
-  Pattern{Nothing,Nothing}(junctions, boxes)
+  Pattern{Nothing,Nothing}(junctions, boxes; check=false)
 end
 
 
@@ -78,7 +78,7 @@ function _boxes(
   ) do box_path, (box, _), filling
     # Check if composable
     interface(pattern, box_path) == interface(filling) ||
-      error("interface for box $(box_path) does not match")
+      error("interface for box $(string(box_path)) does not match")
     # Reassign ports to junctions (endomorphism)
     map(filling.boxes, Tuple{InnerBox{Nothing},Nothing}) do (inner_box, _)
       ports = map(inner_box.ports, InnerPort) do port

@@ -1,10 +1,25 @@
 
 function Pattern{Component,Nothing}(pattern::Pattern{AbstractSystem,P}) where {P}
+  # pattern.junctions::Dtry{Tuple{Junction,P}}
+  # pattern.boxes::Dtry{Tuple{InnerBox{AbstractSystem},P}}
+
+  # Recursively flatten subsystems
+  boxes_flat = map(pattern.boxes, Tuple{InnerBox{AbstractSystem},Nothing}) do (box, _)
+    filling = box.filling
+    if filling isa CompositeSystem
+      filling = CompositeSystem{Component,Nothing}(
+        Pattern{Component,Nothing}(box.filling.pattern);
+        check=false # easy to see that flattening preserves outer interface
+      )
+    end
+    (InnerBox{AbstractSystem}(box.ports, filling), nothing)
+  end
+  # Flatten top level
   junctions = merge(
     map(pattern.junctions, Tuple{Junction,Nothing}) do (junction, _)
       (junction, nothing)
     end,
-    map(pattern.boxes, Dtry{Tuple{Junction,Nothing}}) do (box, _)
+    map(boxes_flat, Dtry{Tuple{Junction,Nothing}}) do (box, _)
       if box.filling isa Component
         Dtry{Tuple{Junction,Nothing}}()
       elseif box.filling isa CompositeSystem
@@ -18,7 +33,7 @@ function Pattern{Component,Nothing}(pattern::Pattern{AbstractSystem,P}) where {P
     end |> flatten
   )
   boxes = mapwithpath(
-    pattern.boxes,
+    boxes_flat,
     Dtry{Tuple{InnerBox{Component},Nothing}}
   ) do box_path, (box, _)
     if box.filling isa Component
@@ -43,7 +58,7 @@ function Pattern{Component,Nothing}(pattern::Pattern{AbstractSystem,P}) where {P
       error("should not reach here")
     end
   end |> flatten
-  Pattern{Component,Nothing}(junctions, boxes)
+  Pattern{Component,Nothing}(junctions, boxes; check=false)
 end
 
 

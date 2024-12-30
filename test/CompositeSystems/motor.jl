@@ -229,3 +229,88 @@ motor = CompositeSystem(
 
 
 ## system with motor
+
+# TODO add flywheel and extend assembly to DAE case
+# TODO connect piston with crank mechanism?
+
+load = CompositeSystem(
+  Dtry{Tuple{Junction,Position}}(
+    :p => Dtry{Tuple{Junction,Position}}((
+      Junction(true, angular_momentum, true),
+      Position(1,1)
+    )),
+    :s => Dtry{Tuple{Junction,Position}}((
+      Junction(false, entropy, true),
+      Position(1,3)
+    )),
+  ),
+  Dtry{Tuple{InnerBox{AbstractSystem},Position}}(
+    :res => Dtry{Tuple{InnerBox{AbstractSystem},Position}}((
+      InnerBox{AbstractSystem}(
+        Dtry{InnerPort}(
+          :p => Dtry{InnerPort}(InnerPort(■.p, true)),
+          :s => Dtry{InnerPort}(InnerPort(■.s, true)),
+        ),
+        LinearRotationalFriction(Const(0.5))
+      ),
+      Position(1,2)
+    )),
+    :tc => Dtry{Tuple{InnerBox{AbstractSystem},Position}}((
+      InnerBox{AbstractSystem}(
+        Dtry{InnerPort}(
+          :s => Dtry{InnerPort}(InnerPort(■.s, true)),
+        ),
+        tc
+      ),
+      Position(1,4)
+    )),
+  )
+);
+
+
+motor_rig = CompositeSystem(
+  Dtry{Tuple{Junction,Position}}(
+    :q => Dtry{Tuple{Junction,Position}}((
+      Junction(true, charge, true),
+      Position(1,1)
+    )),
+    :p => Dtry{Tuple{Junction,Position}}((
+      Junction(false, angular_momentum, true),
+      Position(1,3)
+    )),
+  ),
+  Dtry{Tuple{InnerBox{AbstractSystem},Position}}(
+    :motor => Dtry{Tuple{InnerBox{AbstractSystem},Position}}((
+      InnerBox{AbstractSystem}(
+        Dtry{InnerPort}(
+          :q => Dtry{InnerPort}(InnerPort(■.q, true)),
+          :p => Dtry{InnerPort}(InnerPort(■.p, true)),
+        ),
+        motor
+      ),
+      Position(1,2)
+    )),
+    :load => Dtry{Tuple{InnerBox{AbstractSystem},Position}}((
+      InnerBox{AbstractSystem}(
+        Dtry{InnerPort}(
+          :p => Dtry{InnerPort}(InnerPort(■.p, true)),
+        ),
+        load
+      ),
+      Position(1,4)
+    )),
+  )
+);
+
+@test assemble(motor_rig) == Eq[
+  Eq(FVar(■.motor.stator.coil, ■.b), Neg(Add((Neg(EVar(■, ■.q)), Mul((Const(0.01), Div(XVar(■.motor.stator.coil, ■.b), Const(1.0))))))))
+  Eq(FVar(■.motor.stator.tc, ■.s), Div(Mul((Const(0.01), Div(XVar(■.motor.stator.coil, ■.b), Const(1.0)), Div(XVar(■.motor.stator.coil, ■.b), Const(1.0)))), Mul((Div(Const(1.0), Const(2.5)), Exp(Div(XVar(■.motor.stator.tc, ■.s), Const(2.5)))))))
+  Eq(FVar(■.motor.rotor.coil, ■.b), Neg(Add((Neg(EVar(■, ■.q)), Mul((XVar(■.motor.stator.coil, ■.b), Div(XVar(■.motor.rotor.mass, ■.p), Const(1.0)))), Mul((Const(0.01), Div(XVar(■.motor.rotor.coil, ■.b), Const(1.0))))))))
+  Eq(FVar(■.motor.rotor.mass, ■.p), Neg(Add((Neg(Mul((XVar(■.motor.stator.coil, ■.b), Div(XVar(■.motor.rotor.coil, ■.b), Const(1.0))))), Mul((Const(0.01), Div(XVar(■.motor.rotor.mass, ■.p), Const(1.0)))), Mul((Const(0.5), Div(XVar(■.motor.rotor.mass, ■.p), Const(1.0))))))))
+  Eq(FVar(■.motor.rotor.tc, ■.s), Neg(Add((Neg(Div(Mul((Const(0.01), Div(XVar(■.motor.rotor.coil, ■.b), Const(1.0)), Div(XVar(■.motor.rotor.coil, ■.b), Const(1.0)))), Mul((Div(Const(1.0), Const(2.5)), Exp(Div(XVar(■.motor.rotor.tc, ■.s), Const(2.5))))))), Neg(Div(Mul((Const(0.01), Div(XVar(■.motor.rotor.mass, ■.p), Const(1.0)), Div(XVar(■.motor.rotor.mass, ■.p), Const(1.0)))), Mul((Div(Const(1.0), Const(2.5)), Exp(Div(XVar(■.motor.rotor.tc, ■.s), Const(2.5)))))))))))
+  Eq(FVar(■.load.tc, ■.s), Div(Mul((Const(0.5), Div(XVar(■.motor.rotor.mass, ■.p), Const(1.0)), Div(XVar(■.motor.rotor.mass, ■.p), Const(1.0)))), Mul((Div(Const(1.0), Const(2.5)), Exp(Div(XVar(■.load.tc, ■.s), Const(2.5)))))))
+]
+
+# 377.000 μs (5460 allocations: 199.62 KiB) arbitrary nesting of patterns
+# 318.042 μs (4633 allocations: 172.94 KiB) check=false
+# @btime assemble($motor_rig)

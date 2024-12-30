@@ -27,6 +27,10 @@ AbstractSystems.fillcolor(::ReversibleComponent) = "#3DB57B"
 AbstractSystems.fillcolor(::IrreversibleComponent) = "#FF7F80"
 
 
+"""
+Get value of port variable, as determined by the component.
+If the port does not determine the variable, `nothing` is returned.
+"""
 Base.get(::Component, ::PortVar; resolve=identity) = nothing
 
 

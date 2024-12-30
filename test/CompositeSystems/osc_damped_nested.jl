@@ -44,5 +44,6 @@ osc_damped_nested = CompositeSystem(
 
 @test assemble(osc_damped_nested) == assemble(osc_damped_flat)
 
-# 50.625 μs (781 allocations: 27.59 KiB)
+# 50.625 μs (781 allocations: 27.59 KiB) two levels of nesting
+# 85.041 μs (1265 allocations: 45.20 KiB) arbitrary nesting of patterns
 # @btime assemble($osc_damped_nested)

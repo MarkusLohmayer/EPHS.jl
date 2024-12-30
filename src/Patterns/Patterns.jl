@@ -40,11 +40,18 @@ struct Pattern{F<:Union{Nothing,AbstractSystem},P<:Union{Nothing,Position}}
   junctions::Dtry{Tuple{Junction,P}}
   boxes::Dtry{Tuple{InnerBox{F},P}}
 
-  function Pattern{F,P}(junctions, boxes) where {F,P}
-    foreachvalue(boxes) do (box, _)
-      foreachvalue(box.ports) do port
-        haskey(junctions, port.junction) ||
-          error("junction $(string(port.junction)) not found")
+  function Pattern{F,P}(
+    junctions::Dtry{Tuple{Junction,P}},
+    boxes::Dtry{Tuple{InnerBox{F},P}};
+    check::Bool=true
+  ) where {F<:Union{Nothing,AbstractSystem},P<:Union{Nothing,Position}}
+    if check
+      # Check if ports are assigned to junctions that exist
+      foreachvalue(boxes) do (box, _)
+        foreachvalue(box.ports) do port
+          haskey(junctions, port.junction) ||
+            error("junction $(string(port.junction)) not found")
+        end
       end
     end
     new{F,P}(junctions, boxes)
@@ -63,7 +70,7 @@ function Pattern{Nothing,Nothing}(pattern::Pattern{F,P}) where {F,P}
   boxes = map(pattern.boxes, Tuple{InnerBox{Nothing},Nothing}) do (box, _)
     (InnerBox{Nothing}(box.ports, nothing), nothing)
   end
-  Pattern{Nothing,Nothing}(junctions, boxes)
+  Pattern{Nothing,Nothing}(junctions, boxes; check=false)
 end
 
 
