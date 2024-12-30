@@ -127,6 +127,7 @@ function Base.get(coil::Coil, effort::EVar; resolve=identity)
   nothing
 end
 
+# TODO in principle, all `StorageComponent`s have to provide their state variable
 function Base.get(::Coil, state::XVar; resolve=identity)
   if state.port_path == DtryPath(:b)
     return state

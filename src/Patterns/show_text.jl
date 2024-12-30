@@ -1,5 +1,9 @@
 
-function Base.show(io::IO, ::MIME"text/plain", pattern::Pattern{Nothing,Nothing})
+Base.show(io::IO, ::MIME"text/plain", pattern::Pattern{Nothing,Nothing}) =
+  print(io, pattern)
+
+
+function Base.print(io::IO, pattern::Pattern{F,P}) where {F,P}
   println(io, "Junctions:")
   print_dtry(io, pattern.junctions; print_value=print_junction)
   println(io, "\nBoxes:")
@@ -7,7 +11,7 @@ function Base.show(io::IO, ::MIME"text/plain", pattern::Pattern{Nothing,Nothing}
 end
 
 
-function print_junction(io::IO, t::Tuple{Junction,Nothing}, _::String)
+function print_junction(io::IO, t::Tuple{Junction,P}, _::String) where {P}
   junction, _ = t
   print(io,
     "(" *
@@ -26,9 +30,12 @@ function print_junction(io::IO, t::Tuple{Junction,Nothing}, _::String)
 end
 
 
-function print_box(io::IO, t::Tuple{InnerBox{Nothing},Nothing}, prefix::String)
-  box, _ = t
-  print_dtry(io, box.ports; prefix, print_value=print_port)
+function print_box(io::IO, (box, _)::Tuple{InnerBox{F},P}, prefix::String) where {F,P}
+  if !isnothing(box)
+    println(io, typeof(box.filling))
+    print(io, prefix)
+  end
+  print_dtry(io, box.ports; print_value=print_port, prefix)
 end
 
 

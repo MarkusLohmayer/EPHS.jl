@@ -5,9 +5,6 @@ export Pattern
 export compose
 export print_svg
 
-# macro
-# export @pattern
-
 
 using ..MoreBase
 using ..Directories
@@ -44,16 +41,10 @@ struct Pattern{F<:Union{Nothing,AbstractSystem},P<:Union{Nothing,Position}}
   boxes::Dtry{Tuple{InnerBox{F},P}}
 
   function Pattern{F,P}(junctions, boxes) where {F,P}
-    if !isempty(boxes)
-      nonempty_boxes = nothing_or_nonempty(boxes)
-      foreachvalue(nonempty_boxes) do (box, _)
-        if !isempty(box.ports)
-          ports = nothing_or_nonempty(box.ports)
-          foreachvalue(ports) do port
-            haskey(junctions, port.junction) ||
-              error("junction $(string(port.junction)) not found")
-          end
-        end
+    foreachvalue(boxes) do (box, _)
+      foreachvalue(box.ports) do port
+        haskey(junctions, port.junction) ||
+          error("junction $(string(port.junction)) not found")
       end
     end
     new{F,P}(junctions, boxes)
@@ -75,8 +66,6 @@ function Pattern{Nothing,Nothing}(pattern::Pattern{F,P}) where {F,P}
   Pattern{Nothing,Nothing}(junctions, boxes)
 end
 
-
-# include("access.jl")
 
 # get interfaces of outer box and inner boxes
 include("interfaces.jl")

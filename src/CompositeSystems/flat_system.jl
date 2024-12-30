@@ -96,17 +96,8 @@ struct FlatSystem
 end
 
 
-function Base.show(io::IO, ::MIME"text/plain", fsys::FlatSystem)
-  println(io, "Junctions:")
-  print_dtry(io, fsys.pattern.junctions; print_value=Patterns.print_junction)
-  println(io, "\nBoxes:")
-  print_dtry(io, fsys.pattern.boxes; print_value=print_box)
-end
+Base.show(io::IO, ::MIME"text/plain", fsys::FlatSystem) =
+  print(io, fsys.pattern)
 
-
-function print_box(io::IO, t::Tuple{InnerBox{Component},Nothing}, prefix::String)
-  box, _ = t
-  println(io, typeof(box.filling))
-  print(io, prefix)
-  print_dtry(io, box.ports; prefix, print_value=Patterns.print_port)
-end
+Base.print(io::IO, fsys::FlatSystem) =
+  print(io, fsys.pattern)

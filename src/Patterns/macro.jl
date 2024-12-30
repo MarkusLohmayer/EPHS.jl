@@ -1,5 +1,3 @@
-# Spend time on important stuff!
-# Leave this for later, or directly work on web frontend instead
 
 # function parse_var(e::Union{Expr,Symbol})
 #   @match e begin
