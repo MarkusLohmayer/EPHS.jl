@@ -5,6 +5,7 @@ function frompattern(fsys::FlatSystem, flow::FVar)
   junction_path = box.ports[port_path].junction
   junction, _ = fsys.pattern.junctions[junction_path]
   cs = fsys.connections[junction_path]
+  # TODO Error if fromcomponent(...) returns nothing
   internal = -(sum(
     fromcomponent(fsys, FVar(c.box_path, c.port_path))
     for c in cs
@@ -24,11 +25,8 @@ function frompattern(fsys::FlatSystem, effort::EVar)
   junction_path = box.ports[port_path].junction
   cs = fsys.connections[junction_path]
   for c in cs
-    if c.power && (c.box_path != box_path || c.port_path != port_path)
-      x = fromcomponent(fsys, EVar(c.box_path, c.port_path))
-      if !isnothing(x)
-        return x
-      end
+    if c.effort_provider
+      return fromcomponent(fsys, EVar(c.box_path, c.port_path))
     end
   end
   junction, _ = fsys.pattern.junctions[junction_path]
@@ -49,11 +47,8 @@ function frompattern(fsys::FlatSystem, state::XVar)
   junction_path = box.ports[port_path].junction
   cs = fsys.connections[junction_path]
   for c in cs
-    if c.box_path != box_path || c.port_path != port_path
-      x = fromcomponent(fsys, XVar(c.box_path, c.port_path))
-      if !isnothing(x)
-        return x
-      end
+    if c.state_provider
+      return fromcomponent(fsys, XVar(c.box_path, c.port_path))
     end
   end
   junction, _ = fsys.pattern.junctions[junction_path]

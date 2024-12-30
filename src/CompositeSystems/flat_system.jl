@@ -49,10 +49,11 @@ end
 
 "Connection of an `InnerPort` to a `Junction`"
 struct Connection
-  box_path::DtryPath   # box to which the port belongs
-  port_path::DtryPath  # name of the port
-  power::Bool          # true means port is a power port
-  storage::Bool        # true means box is filled  by a storage component
+  box_path::DtryPath      # box to which the port belongs
+  port_path::DtryPath     # name of the port
+  power::Bool             # true means port is a power port
+  effort_provider::Bool   # true means port provides effort variable
+  state_provider::Bool    # true means port provides state variable
 end
 
 
@@ -66,21 +67,29 @@ struct FlatSystem
   function FlatSystem(sys::CompositeSystem)
     # Reduce pattern
     pattern = Pattern{Component,Nothing}(sys.pattern)
-    # TODO Check that system is isolated
     # Identify `Connection`s at each junction
     connections = map(_ -> Vector{Connection}(), pattern.junctions)
     foreach(pattern.boxes) do (box_path, (box, _))
       storage = box.filling isa StorageComponent
       foreach(box.ports) do (port_path, (;junction, power))
-        c = Connection(box_path, port_path, power, storage)
+        effort_provider = storage || !isnothing(get(box.filling, EVar(DtryPath(), port_path)))
+        state_provider = storage || !isnothing(get(box.filling, XVar(DtryPath(), port_path)))
+        c = Connection(box_path, port_path, power, effort_provider, state_provider)
         push!(connections[junction], c)
       end
     end
-    # Check that there is at most one storage component per junction
-    # TODO Better check if there is at most one component providing an effort variable; remove storage::Bool
-    foreach(connections) do (path, cs)
-      mapreduce(c -> c.storage, +, cs) ≤ 1 ||
-        error("More than one storage component at junction $path")
+    # Check that there is at most one effort and state provider per junction
+    foreach(connections) do (junction_path, cs)
+      effort_providers::Int = mapreduce(c -> c.effort_provider, +, cs)
+      effort_providers ≤ 1 || error(
+        "At junction $(string(junction_path)) there are" *
+        " $(effort_providers) connections that provide an effort variable"
+      )
+      state_providers::Int = mapreduce(c -> c.state_provider, +, cs)
+      state_providers ≤ 1 || error(
+        "At junction $(string(junction_path)) there are" *
+        " $(state_providers) connections that provide a state variable"
+      )
     end
     new(pattern, connections)
   end
