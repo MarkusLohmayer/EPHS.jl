@@ -1,9 +1,9 @@
 
 # mechanical oscillator
 
-pe = HookeanSpring(Const(1.5))
-ke = PointMass(Const(1.))
-pkc = PKC()
+pe = HookeanSpring(Const(1.5));
+ke = PointMass(Const(1.));
+pkc = PKC();
 
 osc = CompositeSystem(
   Dtry{Tuple{Junction,Position}}(
@@ -46,11 +46,11 @@ osc = CompositeSystem(
       Position(1,3)
     )),
   )
-)
+);
 
 @test assemble(osc) == Eq[
   Eq(FVar(■.pe, ■.q), Div(XVar(■.ke, ■.p), Const(1.0))),
-  Eq(FVar(■.ke, ■.p), Neg(Mul((Const(1.5), XVar(■.pe, ■.q)))))
+  Eq(FVar(■.ke, ■.p), Add((Neg(Mul((Const(1.5), XVar(■.pe, ■.q)))), FVar(■, ■.p))))
 ]
 
 # Human-readable display of equations
@@ -59,4 +59,5 @@ osc = CompositeSystem(
 # 7.812 μs (205 allocations: 6.52 KiB) top-down approach
 # 6.400 μs (167 allocations: 5.53 KiB hybrid approach
 # 6.008 μs (156 allocations: 5.25 KiB) recursive approach
+# 25.166 μs (377 allocations: 13.55 KiB)
 # @btime assemble($osc)

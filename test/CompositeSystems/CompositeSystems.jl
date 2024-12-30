@@ -7,4 +7,6 @@ include("osc_damped_flat.jl") # add mechanical friction and thermal capacity
 include("osc_damped_lever.jl") # damped oscillator with displacement transformer (lever)
 include("osc_damped_nested.jl") # damped oscillator with undamped oscillator as subsystem
 
+include("motor.jl") # DC shunt motor
+
 end

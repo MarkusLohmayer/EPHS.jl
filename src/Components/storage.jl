@@ -19,9 +19,8 @@ function Base.get(spring::HookeanSpring, effort::EVar; resolve=identity)
     q = XVar(box_path, port_path)
     k = spring.k
     return k * q
-  else
-    error("Port $(port_path) not found")
   end
+  nothing
 end
 
 
@@ -45,9 +44,33 @@ function Base.get(mass::PointMass, effort::EVar; resolve=identity)
     p = XVar(box_path, port_path)
     m = mass.m
     return p / m
-  else
-    error("Port $(port_path) not found")
   end
+  nothing
+end
+
+
+struct AngularMass <: StorageComponent
+  m::SymPar
+end
+
+AbstractSystems.interface(::AngularMass) = Interface(
+  :p => Interface(PortType(angular_momentum, true))
+)
+
+# function energy(mass::AngularMass)
+#   p = XVar(:p)
+#   m = mass.m
+#   Const(0.5) / m * p * p
+# end
+
+function Base.get(mass::AngularMass, effort::EVar; resolve=identity)
+  (;box_path, port_path) = effort
+  if port_path == DtryPath(:p)
+    p = XVar(box_path, port_path)
+    m = mass.m
+    return p / m
+  end
+  nothing
 end
 
 
@@ -75,7 +98,38 @@ function Base.get(tc::ThermalCapacity, effort::EVar; resolve=identity)
     c₂ = tc.c₂
     θ = c₁ / c₂ * exp(s / c₂)
     return θ - θ₀
-  else
-    error("Port $(port_path) not found")
   end
+  nothing
+end
+
+
+struct Coil <: StorageComponent
+  l::SymPar # inductance
+end
+
+AbstractSystems.interface(::Coil) = Interface(
+  :b => Interface(PortType(magnetic_flux, true))
+)
+
+# function energy(coil::Coil)
+#   b = XVar(:b)
+#   l = coil.l
+#   Const(0.5) / l * b * b
+# end
+
+function Base.get(coil::Coil, effort::EVar; resolve=identity)
+  (;box_path, port_path) = effort
+  if port_path == DtryPath(:b)
+    b = XVar(box_path, port_path)
+    l = coil.l
+    return b / l
+  end
+  nothing
+end
+
+function Base.get(::Coil, state::XVar; resolve=identity)
+  if state.port_path == DtryPath(:b)
+    return state
+  end
+  nothing
 end

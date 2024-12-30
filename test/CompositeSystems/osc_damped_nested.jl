@@ -40,7 +40,7 @@ osc_damped_nested = CompositeSystem(
       Position(1,5)
     )),
   )
-)
+);
 
 @test assemble(osc_damped_nested) == assemble(osc_damped_flat)
 

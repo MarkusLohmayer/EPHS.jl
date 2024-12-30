@@ -23,8 +23,7 @@ function print_svg(io::IO, pattern::Pattern{F,Position}) where {F}
     """
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="$(width)px"
-      height="$(height)px"
+      width="$(width)px" height="$(height)px"
       viewBox="$(x_min-margin) $(y_min-margin) $(width+2*margin) $(height+2*margin)"
     >
     """
@@ -73,12 +72,9 @@ end
 function draw_outer_box(io, x_min, y_min, width, height)
   print(io,
     """
-    <rect
-      x="$x_min"
-      y="$y_min"
-      width="$width"
-      height="$height"
-      style="fill: white; stroke: black; stroke-width: 2;"
+    <rect x="$x_min" y="$y_min" width="$width" height="$height"
+      stroke="black" stroke-width="2"
+      fill="white"
     />
     """
   )
@@ -93,12 +89,9 @@ function draw_ports(io, pattern, scale)
       (x1, y1, x2, y2) = scale .* (bpos.c, bpos.r, jpos.c, jpos.r)
       print(io,
         """
-        <line
-          x1="$x1"
-          y1="$y1"
-          x2="$x2"
-          y2="$y2"
-          style="stroke: black; stroke-width: 2;"
+        <line x1="$x1" y1="$y1" x2="$x2" y2="$y2"
+          stroke="black" stroke-width="2"
+          stroke-dasharray="$(port.power ? "none" : "8.0,8.0")"
         />
         """
       )
@@ -117,7 +110,7 @@ function draw_external_ports(io, pattern, scale, grid_dims, dims)
       dist_c_max = c_max - jpos.c
       dist_r_min = jpos.r - r_min
       dist_r_max = r_max - jpos.r
-      # TODO looks ugly
+      # TODO improve readability of code
       shortest = min(dist_c_min, dist_c_max, dist_r_min, dist_r_max)
       (x1, y1) =
         shortest == dist_c_min ? (x_min, y2) :
@@ -125,12 +118,9 @@ function draw_external_ports(io, pattern, scale, grid_dims, dims)
         shortest == dist_r_min ? (x2, y_min) : (x2, y_max)
       print(io,
         """
-        <line
-          x1="$x1"
-          y1="$y1"
-          x2="$x2"
-          y2="$y2"
-          style="stroke: black; stroke-width: 2;"
+        <line x1="$x1" y1="$y1" x2="$x2" y2="$y2"
+          stroke="black" stroke-width="2"
+          stroke-dasharray="$(junction.power ? "none" : "8.0,8.0")"
         />
         """
       )
@@ -146,12 +136,7 @@ function draw_boxes(io, pattern, scale)
     print(io,
       """
       <g transform="translate($x, $y)">
-        <circle
-          r="75"
-          stroke="black"
-          stroke-width="2"
-          fill="$color"
-        />
+        <circle r="75" stroke="black" stroke-width="2" fill="$color" />
       """
     )
     draw_box_name(io, path)
@@ -209,7 +194,8 @@ function draw_box_name(io, path)
             text-anchor="middle"
             dominant-baseline="middle"
             dy="$(dy[n_line][i])"
-            style="font-family: JuliaMono; font-size: 22;"
+            font-family="JuliaMono"
+            font-size="22"
             >$(join(line, ' '))</text>
         """
     )

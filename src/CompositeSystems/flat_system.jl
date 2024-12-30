@@ -1,13 +1,4 @@
 
-"Connection of a port to a junction"
-struct Connection
-  box_path::DtryPath   # box to which the port belongs
-  port_path::DtryPath  # name of the port
-  power::Bool          # true means port is a power port
-  storage::Bool        # true means box is filled by stroage component
-end
-
-
 function Pattern{Component,Nothing}(pattern::Pattern{AbstractSystem,P}) where {P}
   junctions = merge(
     map(pattern.junctions, Tuple{Junction,Nothing}) do (junction, _)
@@ -56,6 +47,15 @@ function Pattern{Component,Nothing}(pattern::Pattern{AbstractSystem,P}) where {P
 end
 
 
+"Connection of an `InnerPort` to a `Junction`"
+struct Connection
+  box_path::DtryPath   # box to which the port belongs
+  port_path::DtryPath  # name of the port
+  power::Bool          # true means port is a power port
+  storage::Bool        # true means box is filled  by a storage component
+end
+
+
 struct FlatSystem
   pattern::Pattern{Component,Nothing}
   connections::Dtry{Vector{Connection}}
@@ -77,6 +77,7 @@ struct FlatSystem
       end
     end
     # Check that there is at most one storage component per junction
+    # TODO Better check if there is at most one component providing an effort variable; remove storage::Bool
     foreach(connections) do (path, cs)
       mapreduce(c -> c.storage, +, cs) ≤ 1 ||
         error("More than one storage component at junction $path")

@@ -3,12 +3,9 @@ module Components
 export Component
 export StorageComponent, ReversibleComponent, IrreversibleComponent
 
-export HookeanSpring, PointMass, ThermalCapacity
-export PKC, Lever
-export LinearFriction
-
-# export energy
-# export flow, effort
+export HookeanSpring, PointMass, AngularMass, ThermalCapacity, Coil
+export PKC, Lever, EMC, MKC
+export LinearFriction, LinearRotationalFriction, LinearResistance
 
 
 using ..Directories
@@ -24,17 +21,13 @@ abstract type ReversibleComponent <: Component end
 abstract type IrreversibleComponent <: Component end
 
 
-# # API for components
-# energy(::StorageComponent) = error("Not implemented")
-# effort(::StorageComponent) = error("Not implemented")
-# flow(::ReversibleComponent) = error("Not implemented")
-# flow(::IrreversibleComponent) = error("Not implemented")
-
-
 # Colors for visualization of patterns
 AbstractSystems.fillcolor(::StorageComponent) = "#5082B0"
 AbstractSystems.fillcolor(::ReversibleComponent) = "#3DB57B"
 AbstractSystems.fillcolor(::IrreversibleComponent) = "#FF7F80"
+
+
+Base.get(::Component, ::PortVar; resolve=identity) = nothing
 
 
 # Pre-defined components

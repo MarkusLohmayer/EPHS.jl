@@ -1,82 +1,74 @@
 
-# For now assume that all ports are state ports and
-# system is isolated (ignore exposed junctions)
-
-
-function AbstractSystems.FVar(c::Connection)
-  c.power && return FVar(c.box_path, c.port_path)
-  error("connection is not a power port")
-end
-
-
-function AbstractSystems.EVar(c::Connection)
-  c.power && return EVar(c.box_path, c.port_path)
-  error("connection is not a power port")
-end
-
-
-"""
-Other ports connected with the port
-to which the given state variable belongs.
-"""
-function connected_ports(
-  fsys::FlatSystem,
-  xvar::XVar
-)
-  (;pattern, connections) = fsys
-  (;box_path, port_path) = xvar
-  box, _ = pattern.boxes[box_path]
-  junction = box.ports[port_path].junction
-  Iterators.filter(connections[junction]) do c
-    !(c.box_path == box_path && c.port_path == port_path)
-  end
-end
-
-
-"""
-Other power ports connected with the power port
-to which the given power variable belongs.
-"""
-function connected_power_ports(
-  fsys::FlatSystem,
-  pvar::PowerVar
-)
-  (;pattern, connections) = fsys
-  (;box_path, port_path) = pvar
-  box, _ = pattern.boxes[box_path]
-  junction = box.ports[port_path].junction
-  Iterators.filter(connections[junction]) do c
-    c.power && !(c.box_path == box_path && c.port_path == port_path)
-  end
-end
-
-
 function frompattern(fsys::FlatSystem, flow::FVar)
-  -(sum(fromcomponent(fsys, FVar(c)) for c in connected_power_ports(fsys, flow)))
+  (;box_path, port_path) = flow
+  box, _ = fsys.pattern.boxes[box_path]
+  junction_path = box.ports[port_path].junction
+  junction, _ = fsys.pattern.junctions[junction_path]
+  cs = fsys.connections[junction_path]
+  internal = -(sum(
+    fromcomponent(fsys, FVar(c.box_path, c.port_path))
+    for c in cs
+    if c.power && (c.box_path != box_path || c.port_path != port_path)
+  ))
+  if junction.exposed && junction.power
+    return internal + FVar(■, junction_path)
+  else
+    return internal
+  end
 end
 
 
 function frompattern(fsys::FlatSystem, effort::EVar)
-  cs = connected_power_ports(fsys, effort)
+  (;box_path, port_path) = effort
+  box, _ = fsys.pattern.boxes[box_path]
+  junction_path = box.ports[port_path].junction
+  cs = fsys.connections[junction_path]
   for c in cs
-    if c.storage
-      return fromcomponent(fsys, EVar(c))
+    if c.power && (c.box_path != box_path || c.port_path != port_path)
+      x = fromcomponent(fsys, EVar(c.box_path, c.port_path))
+      if !isnothing(x)
+        return x
+      end
     end
   end
-  # make transformers work if there are no further connections
-  cs = collect(cs)
-  if length(cs) == 1
-    return fromcomponent(fsys, EVar(first(cs)))
+  junction, _ = fsys.pattern.junctions[junction_path]
+  if junction.exposed && junction.power
+    return EVar(■, junction_path)
   end
   error(
-    "port $(effort.port_path)) of box $(effort.box_path))" *
-    " is not connected with a storage component" *
-    " and there are more than one other connections, leaving me clueless"
+    "port $(string(effort.port_path)) of box $(string(effort.box_path))" *
+    " is not connected with a component providing an effort variable" *
+    " and junction $(string(junction_path)) is also not exposed"
   )
 end
 
 
-function fromcomponent(fsys::FlatSystem, pvar::PowerVar)
+function frompattern(fsys::FlatSystem, state::XVar)
+  (;box_path, port_path) = state
+  box, _ = fsys.pattern.boxes[box_path]
+  junction_path = box.ports[port_path].junction
+  cs = fsys.connections[junction_path]
+  for c in cs
+    if c.box_path != box_path || c.port_path != port_path
+      x = fromcomponent(fsys, XVar(c.box_path, c.port_path))
+      if !isnothing(x)
+        return x
+      end
+    end
+  end
+  junction, _ = fsys.pattern.junctions[junction_path]
+  if junction.exposed
+    return XVar(■, junction_path)
+  end
+  error(
+    "port $(string(state.port_path)) of box $(string(state.box_path))" *
+    " is not connected with a component providing a state variable" *
+    " and junction $(string(junction_path)) is also not exposed"
+  )
+end
+
+
+function fromcomponent(fsys::FlatSystem, pvar::PortVar)
   resolve = pvar -> frompattern(fsys, pvar)
   box, _ = fsys.pattern.boxes[pvar.box_path]
   get(box.filling, pvar; resolve)

@@ -10,7 +10,7 @@ export AbstractSystem
 export interface, fillcolor
 
 # Pre-defined quantities
-export displacement, momentum
+export displacement, momentum, angular_momentum
 export entropy
 export charge, magnetic_flux
 

@@ -1,6 +1,6 @@
 
-tc = ThermalCapacity(Const(1.), Const(2.5))
-mf = LinearFriction(Const(0.02))
+tc = ThermalCapacity(Const(1.), Const(2.5));
+mf = LinearFriction(Const(0.02));
 
 osc_damped_flat = CompositeSystem(
   Dtry{Tuple{Junction,Position}}(
@@ -70,7 +70,7 @@ osc_damped_flat = CompositeSystem(
       Position(2,6)
     )),
   )
-)
+);
 
 @test assemble(osc_damped_flat) == Eq[
   Eq(FVar(■.osc.pe, ■.q), Div(XVar(■.osc.ke, ■.p), Const(1.0))),
@@ -81,4 +81,5 @@ osc_damped_flat = CompositeSystem(
 # 25.458 μs (573 allocations: 17.53 KiB) top-down approach
 # 18.875 μs (480 allocations: 14.70 KiB) hybrid approach, 26% less runtime
 # 12.875 μs (342 allocations: 10.98 KiB) recursive approach, 49% less runtime than top-down approach
+# 44.750 μs (728 allocations: 25.83 KiB)
 # @btime assemble($osc_damped_flat)
