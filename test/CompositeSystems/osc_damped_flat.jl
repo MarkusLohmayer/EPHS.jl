@@ -72,6 +72,8 @@ osc_damped_flat = CompositeSystem(
   )
 );
 
+@test osc_damped_flat.isflat == true
+
 @test assemble(osc_damped_flat) == Eq[
   Eq(FVar(■.osc.pe, ■.q), Div(XVar(■.osc.ke, ■.p), Const(1.0))),
   Eq(FVar(■.osc.ke, ■.p), Neg(Add((Mul((Const(1.5), XVar(■.osc.pe, ■.q))), Mul((Const(0.02), Div(XVar(■.osc.ke, ■.p), Const(1.0)))))))),

@@ -5,6 +5,7 @@
 emc = EMC();
 coil = Coil(Const(1.));
 res = LinearResistance(Const(0.01));
+tc = ThermalCapacity(Const(1.), Const(2.5));
 
 stator = CompositeSystem(
   Dtry{Tuple{Junction,Position}}(
@@ -313,4 +314,5 @@ motor_rig = CompositeSystem(
 
 # 377.000 μs (5460 allocations: 199.62 KiB) arbitrary nesting of patterns
 # 318.042 μs (4633 allocations: 172.94 KiB) check=false
+# 236.334 μs (3609 allocations: 129.45 KiB) isflat
 # @btime assemble($motor_rig)

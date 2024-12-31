@@ -1,22 +1,17 @@
 
-function Pattern{Component,Nothing}(pattern::Pattern{AbstractSystem,P}) where {P}
-  # pattern.junctions::Dtry{Tuple{Junction,P}}
-  # pattern.boxes::Dtry{Tuple{InnerBox{AbstractSystem},P}}
-
+function MoreBase.flatten(sys::CompositeSystem{F,P}) where {F,P}
+  sys.isflat && return sys
   # Recursively flatten subsystems
-  boxes_flat = map(pattern.boxes, Tuple{InnerBox{AbstractSystem},Nothing}) do (box, _)
+  boxes_flat = map(sys.pattern.boxes, Tuple{InnerBox{F},Nothing}) do (box, _)
     filling = box.filling
     if filling isa CompositeSystem
-      filling = CompositeSystem{Component,Nothing}(
-        Pattern{Component,Nothing}(box.filling.pattern);
-        check=false # easy to see that flattening preserves outer interface
-      )
+      filling = flatten(box.filling)
     end
-    (InnerBox{AbstractSystem}(box.ports, filling), nothing)
+    (InnerBox{F}(box.ports, filling), nothing)
   end
   # Flatten top level
   junctions = merge(
-    map(pattern.junctions, Tuple{Junction,Nothing}) do (junction, _)
+    map(sys.pattern.junctions, Tuple{Junction,Nothing}) do (junction, _)
       (junction, nothing)
     end,
     map(boxes_flat, Dtry{Tuple{Junction,Nothing}}) do (box, _)
@@ -34,15 +29,15 @@ function Pattern{Component,Nothing}(pattern::Pattern{AbstractSystem,P}) where {P
   )
   boxes = mapwithpath(
     boxes_flat,
-    Dtry{Tuple{InnerBox{Component},Nothing}}
+    Dtry{Tuple{InnerBox{F},Nothing}}
   ) do box_path, (box, _)
     if box.filling isa Component
-      Dtry{Tuple{InnerBox{Component},Nothing}}(
-        (InnerBox{Component}(box.ports, box.filling), nothing)
+      Dtry{Tuple{InnerBox{F},Nothing}}(
+        (InnerBox{F}(box.ports, box.filling), nothing)
       )
     elseif box.filling isa CompositeSystem
       filling = box.filling.pattern
-      map(filling.boxes, Tuple{InnerBox{Component},Nothing}) do (inner_box, _)
+      map(filling.boxes, Tuple{InnerBox{F},Nothing}) do (inner_box, _)
         ports = map(inner_box.ports, InnerPort) do port
           junction_path = port.junction
           junction, _ = filling.junctions[junction_path]
@@ -52,13 +47,16 @@ function Pattern{Component,Nothing}(pattern::Pattern{AbstractSystem,P}) where {P
             InnerPort(box_path * junction_path, port.power)
           end
         end
-        (InnerBox{Component}(ports, inner_box.filling), nothing)
+        (InnerBox{F}(ports, inner_box.filling), nothing)
       end
     else
       error("should not reach here")
     end
   end |> flatten
-  Pattern{Component,Nothing}(junctions, boxes; check=false)
+  CompositeSystem{F,Nothing}(
+    Pattern{F,Nothing}(junctions, boxes; check=false);
+    check=false
+  )
 end
 
 
@@ -72,21 +70,23 @@ struct Connection
 end
 
 
-struct FlatSystem
-  pattern::Pattern{Component,Nothing}
+struct FlatSystem{F<:AbstractSystem}
+  pattern::Pattern{F,P} where {P}
   connections::Dtry{Vector{Connection}}
 
   """
-  Prepare composite system for assembly of equations
+  Prepare `CompositeSystem` for assembly of equations
   """
-  function FlatSystem(sys::CompositeSystem)
-    # Reduce pattern
-    pattern = Pattern{Component,Nothing}(sys.pattern)
+  function FlatSystem(
+    sys::CompositeSystem{F,P}
+  ) where {F<:AbstractSystem,P<:Union{Nothing,Position}}
+    # Flatten system
+    sys_flat = flatten(sys)
     # Identify `Connection`s at each junction
-    connections = map(_ -> Vector{Connection}(), pattern.junctions)
-    foreach(pattern.boxes) do (box_path, (box, _))
+    connections = map(_ -> Vector{Connection}(), sys_flat.pattern.junctions)
+    foreach(sys_flat.pattern.boxes) do (box_path, (box, _))
       storage = box.filling isa StorageComponent
-      foreach(box.ports) do (port_path, (;junction, power))
+      foreach(box.ports) do (port_path, (; junction, power))
         effort_provider = storage || !isnothing(get(box.filling, EVar(DtryPath(), port_path)))
         state_provider = storage || !isnothing(get(box.filling, XVar(DtryPath(), port_path)))
         c = Connection(box_path, port_path, power, effort_provider, state_provider)
@@ -106,7 +106,7 @@ struct FlatSystem
         " $(state_providers) connections that provide a state variable"
       )
     end
-    new(pattern, connections)
+    new{F}(sys_flat.pattern, connections)
   end
 end
 

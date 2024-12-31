@@ -42,8 +42,11 @@ osc_damped_nested = CompositeSystem(
   )
 );
 
+@test osc_damped_nested.isflat == false
+
 @test assemble(osc_damped_nested) == assemble(osc_damped_flat)
 
 # 50.625 μs (781 allocations: 27.59 KiB) two levels of nesting
 # 85.041 μs (1265 allocations: 45.20 KiB) arbitrary nesting of patterns
+# 59.625 μs (949 allocations: 33.41 KiB) isflat
 # @btime assemble($osc_damped_nested)

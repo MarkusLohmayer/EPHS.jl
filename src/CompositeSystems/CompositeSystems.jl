@@ -19,6 +19,7 @@ where each inner box is filled by a subsystem.
 """
 struct CompositeSystem{F<:AbstractSystem,P<:Union{Nothing,Position}} <: AbstractSystem
   pattern::Pattern{F,P}
+  isflat::Bool
 
   function CompositeSystem{F,P}(
     pattern::Pattern{F,P}; check::Bool=true
@@ -30,7 +31,10 @@ struct CompositeSystem{F<:AbstractSystem,P<:Union{Nothing,Position}} <: Abstract
           error("Interface of box $box_path does not match the interface of its filling")
       end
     end
-    new{F,P}(pattern)
+    isflat = all(pattern.boxes) do (box, _)
+      box.filling isa Component
+    end
+    new{F,P}(pattern, isflat)
   end
 end
 

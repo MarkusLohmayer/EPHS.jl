@@ -1,6 +1,6 @@
 
 """
-    foreach(f, dtry::NonEmptyDtry{T}) where {T} -> Nothing
+    foreach(f, dtry::NonEmptyDtry{T}) -> Nothing
 
 Call function `f` on each `Pair{DtryPath,T}`.
 """
@@ -19,7 +19,7 @@ end
 
 
 """
-    foreach(f, dtry::Dtry{T}) where {T} -> Nothing
+    foreach(f, dtry::Dtry{T}) -> Nothing
 
 Call function `f` on each `Pair{DtryPath,T}`.
 """
@@ -33,7 +33,7 @@ end
 
 
 """
-    foreachpath(f, dtry::NonEmptyDtry{T}) where {T} -> Nothing
+    foreachpath(f, dtry::NonEmptyDtry) -> Nothing
 
 Call function `f` on each `path::DtryPath`.
 """
@@ -51,7 +51,7 @@ end
 
 
 """
-    foreachpath(f, dtry::Dtry{T}) where {T} -> Nothing
+    foreachpath(f, dtry::Dtry) -> Nothing
 
 Call function `f` on each `path::DtryPath`.
 """
@@ -65,7 +65,7 @@ end
 
 
 """
-    foreachvalue(f, dtry::NonEmptyDtry{T}) where {T} -> Nothing
+    foreachvalue(f, dtry::NonEmptyDtry{T}) -> Nothing
 
 Call function `f` on each `value::T`.
 """
@@ -84,7 +84,7 @@ end
 
 
 """
-    foreachvalue(f, dtry::Dtry{T}) where {T} -> Nothing
+    foreachvalue(f, dtry::Dtry{T}) -> Nothing
 
 Call function `f` on each `value::T`.
 """
@@ -126,3 +126,39 @@ Base.eltype(::Type{<:AbstractDtry{T}}) where {T} = T
 #     values(nonempty)
 #   end
 # end
+
+
+"""
+    all(p, dtry::NonEmptyDtry{T}) -> Bool
+
+Returns `true` if predicate `p : T -> Bool` returns `true`
+for all values of the directory.
+"""
+function Base.all(p, dtry::NonEmptyDtry)
+  if leaf_or_node(dtry) isa DtryLeaf
+    leaf = leaf_or_node(dtry)
+    return p(leaf.value)
+  else
+    node = leaf_or_node(dtry)
+    for branch in values(node.branches)
+      all(p, branch) || return false
+    end
+    return true
+  end
+end
+
+
+"""
+    all(p, dtry::Dtry{T}) -> Bool
+
+Returns `true` if predicate `p : T -> Bool` returns `true`
+for all values of the directory.
+"""
+function Base.all(p, dtry::Dtry)
+  if isempty(dtry)
+    return true
+  else
+    nonempty = nothing_or_nonempty(dtry)
+    return all(p, nonempty)
+  end
+end
