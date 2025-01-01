@@ -11,8 +11,7 @@ function Base.print(io::IO, pattern::Pattern{F,P}) where {F,P}
 end
 
 
-function print_junction(io::IO, t::Tuple{Junction,P}, _::String) where {P}
-  junction, _ = t
+function print_junction(io::IO, junction::Junction, _::String)
   print(io,
     "(" *
     string(junction.quantity.quantity) *
@@ -30,8 +29,8 @@ function print_junction(io::IO, t::Tuple{Junction,P}, _::String) where {P}
 end
 
 
-function print_box(io::IO, (box, _)::Tuple{InnerBox{F},P}, prefix::String) where {F,P}
-  if !isnothing(box)
+function print_box(io::IO, box::InnerBox, prefix::String)
+  if !isnothing(box.filling)
     println(io, typeof(box.filling))
     print(io, prefix)
   end

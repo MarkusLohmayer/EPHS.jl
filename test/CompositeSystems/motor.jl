@@ -8,59 +8,50 @@ res = LinearResistance(Const(0.01));
 tc = ThermalCapacity(Const(1.), Const(2.5));
 
 stator = CompositeSystem(
-  Dtry{Tuple{Junction,Position}}(
-    :q => Dtry{Tuple{Junction,Position}}((
-      Junction(true, charge, true),
-      Position(2,1)
-    )),
-    :b => Dtry{Tuple{Junction,Position}}((
-      Junction(true, magnetic_flux, false),
-      Position(2,3)
-    )),
-    :s => Dtry{Tuple{Junction,Position}}((
-      Junction(false, entropy, true),
-      Position(2,5)
-    )),
+  Dtry(
+    :q => Dtry(Junction(true, charge, true, Position(2,1))),
+    :b => Dtry(Junction(true, magnetic_flux, false, Position(2,3))),
+    :s => Dtry(Junction(false, entropy, true, Position(2,5))),
   ),
-  Dtry{Tuple{InnerBox{AbstractSystem},Position}}(
-    :emc => Dtry{Tuple{InnerBox{AbstractSystem},Position}}((
-      InnerBox{AbstractSystem}(
-        Dtry{InnerPort}(
-          :q => Dtry{InnerPort}(InnerPort(■.q, true)),
-          :b => Dtry{InnerPort}(InnerPort(■.b, true)),
+  Dtry(
+    :emc => Dtry(
+      InnerBox(
+        Dtry(
+          :q => Dtry(InnerPort(■.q, true)),
+          :b => Dtry(InnerPort(■.b, true)),
         ),
-        emc
+        emc,
+        Position(2,2)
       ),
-      Position(2,2)
-    )),
-    :coil => Dtry{Tuple{InnerBox{AbstractSystem},Position}}((
-      InnerBox{AbstractSystem}(
-        Dtry{InnerPort}(
-          :b => Dtry{InnerPort}(InnerPort(■.b, true)),
+    ),
+    :coil => Dtry(
+      InnerBox(
+        Dtry(
+          :b => Dtry(InnerPort(■.b, true)),
         ),
-        coil
+        coil,
+        Position(1,3)
       ),
-      Position(1,3)
-    )),
-    :res => Dtry{Tuple{InnerBox{AbstractSystem},Position}}((
-      InnerBox{AbstractSystem}(
-        Dtry{InnerPort}(
-          :b => Dtry{InnerPort}(InnerPort(■.b, true)),
-          :s => Dtry{InnerPort}(InnerPort(■.s, true))
+    ),
+    :res => Dtry(
+      InnerBox(
+        Dtry(
+          :b => Dtry(InnerPort(■.b, true)),
+          :s => Dtry(InnerPort(■.s, true))
         ),
-        res
+        res,
+        Position(2,4)
       ),
-      Position(2,4)
-    )),
-    :tc => Dtry{Tuple{InnerBox{AbstractSystem},Position}}((
-      InnerBox{AbstractSystem}(
-        Dtry{InnerPort}(
-          :s => Dtry{InnerPort}(InnerPort(■.s, true))
+    ),
+    :tc => Dtry(
+      InnerBox(
+        Dtry(
+          :s => Dtry(InnerPort(■.s, true))
         ),
-        tc
+        tc,
+        Position(1,5)
       ),
-      Position(1,5)
-    )),
+    ),
   )
 );
 
@@ -77,97 +68,82 @@ angular_mass = AngularMass(Const(1.));
 rotational_friction = LinearRotationalFriction(Const(0.01));
 
 rotor = CompositeSystem(
-  Dtry{Tuple{Junction,Position}}(
-    :q => Dtry{Tuple{Junction,Position}}((
-      Junction(true, charge, true),
-      Position(1,2)
-    )),
-    :b => Dtry{Tuple{Junction,Position}}((
-      Junction(false, magnetic_flux, false),
-      Position(2,3)
-    )),
-    :bₛ => Dtry{Tuple{Junction,Position}}((
-      Junction(true, magnetic_flux, false),
-      Position(1,4)
-    )),
-    :p => Dtry{Tuple{Junction,Position}}((
-      Junction(true, angular_momentum, true),
-      Position(2,5)
-    )),
-    :s => Dtry{Tuple{Junction,Position}}((
-      Junction(false, entropy, true),
-      Position(3,4)
-    )),
+  Dtry(
+    :q => Dtry(Junction(true, charge, true, Position(1,2))),
+    :b => Dtry(Junction(false, magnetic_flux, false, Position(2,3))),
+    :bₛ => Dtry(Junction(true, magnetic_flux, false, Position(1,4))),
+    :p => Dtry(Junction(true, angular_momentum, true, Position(2,5))),
+    :s => Dtry(Junction(false, entropy, true, Position(3,4))),
   ),
-  Dtry{Tuple{InnerBox{AbstractSystem},Position}}(
-    :emc => Dtry{Tuple{InnerBox{AbstractSystem},Position}}((
-      InnerBox{AbstractSystem}(
-        Dtry{InnerPort}(
-          :q => Dtry{InnerPort}(InnerPort(■.q, true)),
-          :b => Dtry{InnerPort}(InnerPort(■.b, true)),
+  Dtry(
+    :emc => Dtry(
+      InnerBox(
+        Dtry(
+          :q => Dtry(InnerPort(■.q, true)),
+          :b => Dtry(InnerPort(■.b, true)),
         ),
-        emc
+        emc,
+        Position(2,2)
       ),
-      Position(2,2)
-    )),
-    :coil => Dtry{Tuple{InnerBox{AbstractSystem},Position}}((
-      InnerBox{AbstractSystem}(
-        Dtry{InnerPort}(
-          :b => Dtry{InnerPort}(InnerPort(■.b, true)),
+    ),
+    :coil => Dtry(
+      InnerBox(
+        Dtry(
+          :b => Dtry(InnerPort(■.b, true)),
         ),
-        coil
+        coil,
+        Position(1,3)
       ),
-      Position(1,3)
-    )),
-    :mkc => Dtry{Tuple{InnerBox{AbstractSystem},Position}}((
-      InnerBox{AbstractSystem}(
-        Dtry{InnerPort}(
-          :b => Dtry{InnerPort}(InnerPort(■.b, true)),
-          :p => Dtry{InnerPort}(InnerPort(■.p, true)),
-          :bₛ => Dtry{InnerPort}(InnerPort(■.bₛ, false)),
+    ),
+    :mkc => Dtry(
+      InnerBox(
+        Dtry(
+          :b => Dtry(InnerPort(■.b, true)),
+          :p => Dtry(InnerPort(■.p, true)),
+          :bₛ => Dtry(InnerPort(■.bₛ, false)),
         ),
-        mkc
+        mkc,
+        Position(2,4)
       ),
-      Position(2,4)
-    )),
-    :mass => Dtry{Tuple{InnerBox{AbstractSystem},Position}}((
-      InnerBox{AbstractSystem}(
-        Dtry{InnerPort}(
-          :p => Dtry{InnerPort}(InnerPort(■.p, true)),
+    ),
+    :mass => Dtry(
+      InnerBox(
+        Dtry(
+          :p => Dtry(InnerPort(■.p, true)),
         ),
-        angular_mass
+        angular_mass,
+        Position(1,5)
       ),
-      Position(1,5)
-    )),
-    :res => Dtry{Tuple{InnerBox{AbstractSystem},Position}}((
-      InnerBox{AbstractSystem}(
-        Dtry{InnerPort}(
-          :b => Dtry{InnerPort}(InnerPort(■.b, true)),
-          :s => Dtry{InnerPort}(InnerPort(■.s, true))
+    ),
+    :res => Dtry(
+      InnerBox(
+        Dtry(
+          :b => Dtry(InnerPort(■.b, true)),
+          :s => Dtry(InnerPort(■.s, true))
         ),
-        res
+        res,
+        Position(3,3)
       ),
-      Position(3,3)
-    )),
-    :mf => Dtry{Tuple{InnerBox{AbstractSystem},Position}}((
-      InnerBox{AbstractSystem}(
-        Dtry{InnerPort}(
-          :p => Dtry{InnerPort}(InnerPort(■.p, true)),
-          :s => Dtry{InnerPort}(InnerPort(■.s, true))
+    ),
+    :mf => Dtry(
+      InnerBox(
+        Dtry(
+          :p => Dtry(InnerPort(■.p, true)),
+          :s => Dtry(InnerPort(■.s, true))
         ),
-        rotational_friction
+        rotational_friction,
+        Position(3,5)
       ),
-      Position(3,5)
-    )),
-    :tc => Dtry{Tuple{InnerBox{AbstractSystem},Position}}((
-      InnerBox{AbstractSystem}(
-        Dtry{InnerPort}(
-          :s => Dtry{InnerPort}(InnerPort(■.s, true))
+    ),
+    :tc => Dtry(
+      InnerBox(
+        Dtry(
+          :s => Dtry(InnerPort(■.s, true))
         ),
-        tc
+        tc,
+        Position(4,4)
       ),
-      Position(4,4)
-    )),
+    ),
   )
 );
 
@@ -181,42 +157,33 @@ rotor = CompositeSystem(
 ## motor
 
 motor = CompositeSystem(
-  Dtry{Tuple{Junction,Position}}(
-    :q => Dtry{Tuple{Junction,Position}}((
-      Junction(true, charge, true),
-      Position(2,1)
-    )),
-    :bₛ => Dtry{Tuple{Junction,Position}}((
-      Junction(false, magnetic_flux, false),
-      Position(2,2)
-    )),
-    :p => Dtry{Tuple{Junction,Position}}((
-      Junction(true, angular_momentum, true),
-      Position(3,3)
-    )),
+  Dtry(
+    :q => Dtry(Junction(true, charge, true, Position(2,1))),
+    :bₛ => Dtry(Junction(false, magnetic_flux, false, Position(2,2))),
+    :p => Dtry(Junction(true, angular_momentum, true, Position(3,3))),
   ),
-  Dtry{Tuple{InnerBox{AbstractSystem},Position}}(
-    :stator => Dtry{Tuple{InnerBox{AbstractSystem},Position}}((
-      InnerBox{AbstractSystem}(
-        Dtry{InnerPort}(
-          :q => Dtry{InnerPort}(InnerPort(■.q, true)),
-          :b => Dtry{InnerPort}(InnerPort(■.bₛ, false)),
+  Dtry(
+    :stator => Dtry(
+      InnerBox(
+        Dtry(
+          :q => Dtry(InnerPort(■.q, true)),
+          :b => Dtry(InnerPort(■.bₛ, false)),
         ),
-        stator
+        stator,
+        Position(1,2)
       ),
-      Position(1,2)
-    )),
-    :rotor => Dtry{Tuple{InnerBox{AbstractSystem},Position}}((
-      InnerBox{AbstractSystem}(
-        Dtry{InnerPort}(
-          :q => Dtry{InnerPort}(InnerPort(■.q, true)),
-          :bₛ => Dtry{InnerPort}(InnerPort(■.bₛ, false)),
-          :p => Dtry{InnerPort}(InnerPort(■.p, true)),
+    ),
+    :rotor => Dtry(
+      InnerBox(
+        Dtry(
+          :q => Dtry(InnerPort(■.q, true)),
+          :bₛ => Dtry(InnerPort(■.bₛ, false)),
+          :p => Dtry(InnerPort(■.p, true)),
         ),
-        rotor
+        rotor,
+        Position(3,2)
       ),
-      Position(3,2)
-    )),
+    ),
   )
 );
 
@@ -235,71 +202,59 @@ motor = CompositeSystem(
 # TODO connect piston with crank mechanism?
 
 load = CompositeSystem(
-  Dtry{Tuple{Junction,Position}}(
-    :p => Dtry{Tuple{Junction,Position}}((
-      Junction(true, angular_momentum, true),
-      Position(1,1)
-    )),
-    :s => Dtry{Tuple{Junction,Position}}((
-      Junction(false, entropy, true),
-      Position(1,3)
-    )),
+  Dtry(
+    :p => Dtry(Junction(true, angular_momentum, true, Position(1,1))),
+    :s => Dtry(Junction(false, entropy, true, Position(1,3))),
   ),
-  Dtry{Tuple{InnerBox{AbstractSystem},Position}}(
-    :res => Dtry{Tuple{InnerBox{AbstractSystem},Position}}((
-      InnerBox{AbstractSystem}(
-        Dtry{InnerPort}(
-          :p => Dtry{InnerPort}(InnerPort(■.p, true)),
-          :s => Dtry{InnerPort}(InnerPort(■.s, true)),
+  Dtry(
+    :res => Dtry(
+      InnerBox(
+        Dtry(
+          :p => Dtry(InnerPort(■.p, true)),
+          :s => Dtry(InnerPort(■.s, true)),
         ),
-        LinearRotationalFriction(Const(0.5))
+        LinearRotationalFriction(Const(0.5)),
+        Position(1,2)
       ),
-      Position(1,2)
-    )),
-    :tc => Dtry{Tuple{InnerBox{AbstractSystem},Position}}((
-      InnerBox{AbstractSystem}(
-        Dtry{InnerPort}(
-          :s => Dtry{InnerPort}(InnerPort(■.s, true)),
+    ),
+    :tc => Dtry(
+      InnerBox(
+        Dtry(
+          :s => Dtry(InnerPort(■.s, true)),
         ),
-        tc
+        tc,
+        Position(1,4)
       ),
-      Position(1,4)
-    )),
+    ),
   )
 );
 
 
 motor_rig = CompositeSystem(
-  Dtry{Tuple{Junction,Position}}(
-    :q => Dtry{Tuple{Junction,Position}}((
-      Junction(true, charge, true),
-      Position(1,1)
-    )),
-    :p => Dtry{Tuple{Junction,Position}}((
-      Junction(false, angular_momentum, true),
-      Position(1,3)
-    )),
+  Dtry(
+    :q => Dtry(Junction(true, charge, true, Position(1,1))),
+    :p => Dtry(Junction(false, angular_momentum, true, Position(1,3))),
   ),
-  Dtry{Tuple{InnerBox{AbstractSystem},Position}}(
-    :motor => Dtry{Tuple{InnerBox{AbstractSystem},Position}}((
-      InnerBox{AbstractSystem}(
-        Dtry{InnerPort}(
-          :q => Dtry{InnerPort}(InnerPort(■.q, true)),
-          :p => Dtry{InnerPort}(InnerPort(■.p, true)),
+  Dtry(
+    :motor => Dtry(
+      InnerBox(
+        Dtry(
+          :q => Dtry(InnerPort(■.q, true)),
+          :p => Dtry(InnerPort(■.p, true)),
         ),
-        motor
+        motor,
+        Position(1,2)
       ),
-      Position(1,2)
-    )),
-    :load => Dtry{Tuple{InnerBox{AbstractSystem},Position}}((
-      InnerBox{AbstractSystem}(
-        Dtry{InnerPort}(
-          :p => Dtry{InnerPort}(InnerPort(■.p, true)),
+    ),
+    :load => Dtry(
+      InnerBox(
+        Dtry(
+          :p => Dtry(InnerPort(■.p, true)),
         ),
-        load
+        load,
+        Position(1,4)
       ),
-      Position(1,4)
-    )),
+    ),
   )
 );
 
@@ -315,4 +270,5 @@ motor_rig = CompositeSystem(
 # 377.000 μs (5460 allocations: 199.62 KiB) arbitrary nesting of patterns
 # 318.042 μs (4633 allocations: 172.94 KiB) check=false
 # 236.334 μs (3609 allocations: 129.45 KiB) isflat
+# 216.250 μs (3320 allocations: 119.23 KiB) refactor Position, convenience constructors
 # @btime assemble($motor_rig)

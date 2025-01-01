@@ -99,6 +99,18 @@ struct Dtry{T} <: AbstractDtry{T}
 end
 
 
+NonEmptyDtry(value::T) where {T} = NonEmptyDtry{T}(value)
+
+
+NonEmptyDtry(pairs::Vararg{Pair{Symbol,NonEmptyDtry{T}}}) where {T} = NonEmptyDtry{T}(pairs...)
+
+
+Dtry(value::T) where {T} = Dtry{T}(value)
+
+
+Dtry(pairs::Vararg{Pair{Symbol,<:AbstractDtry{T}}}) where {T} = Dtry{T}(pairs...)
+
+
 # Needed to have custom `getproperty(::AbstractDtry)` for accessing subdirectories
 leaf_or_node(dtry::NonEmptyDtry) = getfield(dtry, :leaf_or_node)
 nothing_or_nonempty(dtry::Dtry) = getfield(dtry, :nothing_or_nonempty)

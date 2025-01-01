@@ -1,6 +1,6 @@
 module Patterns
 
-export Junction, InnerPort, InnerBox, Position
+export Position, Junction, InnerPort, InnerBox
 export Pattern
 export compose
 export print_svg
@@ -11,10 +11,17 @@ using ..Directories
 using ..AbstractSystems
 
 
-struct Junction
+struct Position
+  r::Int
+  c::Int
+end
+
+
+struct Junction{P<:Union{Nothing,Position}}
   exposed::Bool
   quantity::Quantity
   power::Bool # relevant only if exposed == true
+  position::P
 end
 
 
@@ -24,30 +31,25 @@ struct InnerPort
 end
 
 
-struct InnerBox{F<:Union{Nothing,AbstractSystem}}
+struct InnerBox{F<:Union{Nothing,AbstractSystem},P<:Union{Nothing,Position}}
   ports::Dtry{InnerPort}
   filling::F
-end
-
-
-struct Position
-  r::Int
-  c::Int
+  position::P
 end
 
 
 struct Pattern{F<:Union{Nothing,AbstractSystem},P<:Union{Nothing,Position}}
-  junctions::Dtry{Tuple{Junction,P}}
-  boxes::Dtry{Tuple{InnerBox{F},P}}
+  junctions::Dtry{Junction{P}}
+  boxes::Dtry{InnerBox{F,P}}
 
   function Pattern{F,P}(
-    junctions::Dtry{Tuple{Junction,P}},
-    boxes::Dtry{Tuple{InnerBox{F},P}};
+    junctions::Dtry{Junction{P}},
+    boxes::Dtry{InnerBox{F,P}};
     check::Bool=true
   ) where {F<:Union{Nothing,AbstractSystem},P<:Union{Nothing,Position}}
     if check
       # Check if ports are assigned to junctions that exist
-      foreachvalue(boxes) do (box, _)
+      foreachvalue(boxes) do box
         foreachvalue(box.ports) do port
           haskey(junctions, port.junction) ||
             error("junction $(string(port.junction)) not found")
@@ -59,16 +61,48 @@ struct Pattern{F<:Union{Nothing,AbstractSystem},P<:Union{Nothing,Position}}
 end
 
 
+Junction(exposed::Bool, quantity::Quantity, power::Bool) =
+  Junction{Nothing}(exposed, quantity, power, nothing)
+
+
+Junction(exposed::Bool, quantity::Quantity, power::Bool, position::Position) =
+  Junction{Position}(exposed, quantity, power, position)
+
+
+InnerBox(ports::Dtry{InnerPort}) =
+  InnerBox{Nothing,Nothing}(ports, nothing, nothing)
+
+
+InnerBox(ports::Dtry{InnerPort}, filling::AbstractSystem) =
+  InnerBox{AbstractSystem,Nothing}(ports, filling, nothing)
+
+
+InnerBox(ports::Dtry{InnerPort}, position::Position) =
+  InnerBox{Nothing,Position}(ports, nothing, position)
+
+
+InnerBox(ports::Dtry{InnerPort}, filling::AbstractSystem, position::Position) =
+  InnerBox{AbstractSystem,Position}(ports, filling, position)
+
+
+Pattern(
+  junctions::Dtry{Junction{P}},
+  boxes::Dtry{InnerBox{F,P}};
+  check::Bool=true
+) where {F<:Union{Nothing,AbstractSystem},P<:Union{Nothing,Position}} =
+  Pattern{F,P}(junctions, boxes; check)
+
+
 """
 Reduce a `Pattern{F,P}` to a `Pattern{Nothing,Nothing}` by forgetting
 the filling of boxes as well as the positions of junctions and boxes
 """
 function Pattern{Nothing,Nothing}(pattern::Pattern{F,P}) where {F,P}
-  junctions = map(pattern.junctions, Tuple{Junction,Nothing}) do (junction, _)
-    (junction, nothing)
+  junctions = map(pattern.junctions, Junction{Nothing}) do junction
+    Junction{Nothing}(junction.exposed, junction.quantity, junction.power, nothing)
   end
-  boxes = map(pattern.boxes, Tuple{InnerBox{Nothing},Nothing}) do (box, _)
-    (InnerBox{Nothing}(box.ports, nothing), nothing)
+  boxes = map(pattern.boxes, InnerBox{Nothing,Nothing}) do box
+    InnerBox{Nothing,Nothing}(box.ports, nothing, nothing)
   end
   Pattern{Nothing,Nothing}(junctions, boxes; check=false)
 end

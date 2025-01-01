@@ -29,7 +29,7 @@ function print_dtry(
     if isnothing(print_value)
       show(io, leaf.value)
     else
-      # `prefix::String` argument is relevant only if output has multiple lines
+      # `prefix::String` argument is relevant only if output of `print_value` has multiple lines
       print_value(io, leaf.value, prefix * "     ")
     end
   else

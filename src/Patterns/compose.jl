@@ -11,23 +11,18 @@
 Return the identity pattern on the given interface.
 """
 function Base.identity(interface::Interface)
-  junctions = map(interface, Tuple{Junction,Nothing}) do port_type
-    (
-      Junction(true, port_type.quantity, port_type.power),
+  junctions = map(interface, Junction{Nothing}) do port_type
+    Junction{Nothing}(true, port_type.quantity, port_type.power, nothing)
+  end
+  boxes = Dtry{InnerBox{Nothing,Nothing}}(
+    InnerBox{Nothing,Nothing}(
+      mapwithpath(interface, InnerPort) do port_path, port_type
+        InnerPort(port_path, port_type.power)
+      end,
+      nothing,
       nothing
     )
-  end
-  boxes = Dtry{Tuple{InnerBox{Nothing},Nothing}}(
-      (
-        InnerBox{Nothing}(
-          mapwithpath(interface, InnerPort) do port_path, port_type
-            InnerPort(port_path, port_type.power)
-          end,
-          nothing
-        ),
-        nothing
-      )
-    )
+  )
   Pattern{Nothing,Nothing}(junctions, boxes; check=false)
 end
 
@@ -57,8 +52,8 @@ function _junctions(
   merge(
     pattern.junctions,
     # Flatten directory of directory of (unexposed) junctions (from `fillings`)
-    map(fillings, Dtry{Tuple{Junction,Nothing}}) do filling
-      filter(filling.junctions) do (junction, _)
+    map(fillings, Dtry{Junction{Nothing}}) do filling
+      filter(filling.junctions) do junction
         !(junction.exposed)
       end
     end |> flatten
@@ -74,23 +69,23 @@ function _boxes(
   zipmapwithpath(
     pattern.boxes,
     fillings,
-    Dtry{Tuple{InnerBox{Nothing},Nothing}}
-  ) do box_path, (box, _), filling
+    Dtry{InnerBox{Nothing,Nothing}}
+  ) do box_path, box, filling
     # Check if composable
     interface(pattern, box_path) == interface(filling) ||
       error("interface for box $(string(box_path)) does not match")
     # Reassign ports to junctions (endomorphism)
-    map(filling.boxes, Tuple{InnerBox{Nothing},Nothing}) do (inner_box, _)
+    map(filling.boxes, InnerBox{Nothing,Nothing}) do inner_box
       ports = map(inner_box.ports, InnerPort) do port
         junction_path = port.junction
-        junction, _ = filling.junctions[junction_path]
+        junction = filling.junctions[junction_path]
         if junction.exposed
           InnerPort(box.ports[junction_path].junction, port.power)
         else
           InnerPort(box_path * junction_path, port.power)
         end
       end
-      (InnerBox{Nothing}(ports, nothing), nothing)
+      InnerBox{Nothing,Nothing}(ports, nothing, nothing)
     end
   end |> flatten
 end

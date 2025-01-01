@@ -1,53 +1,51 @@
 
+MoreBase.flatten(component::Component) = component
+
+
 function MoreBase.flatten(sys::CompositeSystem{F,P}) where {F,P}
   sys.isflat && return sys
   # Recursively flatten subsystems
-  boxes_flat = map(sys.pattern.boxes, Tuple{InnerBox{F},Nothing}) do (box, _)
-    filling = box.filling
-    if filling isa CompositeSystem
-      filling = flatten(box.filling)
-    end
-    (InnerBox{F}(box.ports, filling), nothing)
+  boxes_flat = map(sys.pattern.boxes, InnerBox{F,Nothing}) do box
+    InnerBox{F,Nothing}(box.ports, flatten(box.filling), nothing)
   end
   # Flatten top level
   junctions = merge(
-    map(sys.pattern.junctions, Tuple{Junction,Nothing}) do (junction, _)
-      (junction, nothing)
+    map(sys.pattern.junctions, Junction{Nothing}) do junction
+      Junction{Nothing}(junction.exposed, junction.quantity, junction.power, nothing)
     end,
-    map(boxes_flat, Dtry{Tuple{Junction,Nothing}}) do (box, _)
+    map(boxes_flat, Dtry{Junction{Nothing}}) do box
       if box.filling isa Component
-        Dtry{Tuple{Junction,Nothing}}()
+        Dtry{Junction{Nothing}}()
       elseif box.filling isa CompositeSystem
         filling = box.filling.pattern
-        filtermap(filling.junctions, Tuple{Junction,Nothing}) do (junction, _)
-          junction.exposed ? nothing : Some((junction, nothing))
+        filtermap(filling.junctions, Junction{Nothing}) do junction
+          junction.exposed ? nothing : Some(
+            Junction{Nothing}(false, junction.quantity, junction.power, nothing)
+          )
         end
       else
         error("should not reach here")
       end
     end |> flatten
   )
-  boxes = mapwithpath(
-    boxes_flat,
-    Dtry{Tuple{InnerBox{F},Nothing}}
-  ) do box_path, (box, _)
+  boxes = mapwithpath(boxes_flat, Dtry{InnerBox{F,Nothing}}) do box_path, box
     if box.filling isa Component
-      Dtry{Tuple{InnerBox{F},Nothing}}(
-        (InnerBox{F}(box.ports, box.filling), nothing)
+      Dtry{InnerBox{F,Nothing}}(
+        InnerBox{F,Nothing}(box.ports, box.filling, nothing)
       )
     elseif box.filling isa CompositeSystem
       filling = box.filling.pattern
-      map(filling.boxes, Tuple{InnerBox{F},Nothing}) do (inner_box, _)
+      map(filling.boxes, InnerBox{F,Nothing}) do inner_box
         ports = map(inner_box.ports, InnerPort) do port
           junction_path = port.junction
-          junction, _ = filling.junctions[junction_path]
+          junction = filling.junctions[junction_path]
           if junction.exposed
             InnerPort(box.ports[junction_path].junction, port.power)
           else
             InnerPort(box_path * junction_path, port.power)
           end
         end
-        (InnerBox{F}(ports, inner_box.filling), nothing)
+        InnerBox{F,Nothing}(ports, inner_box.filling, nothing)
       end
     else
       error("should not reach here")
@@ -84,7 +82,7 @@ struct FlatSystem{F<:AbstractSystem}
     sys_flat = flatten(sys)
     # Identify `Connection`s at each junction
     connections = map(_ -> Vector{Connection}(), sys_flat.pattern.junctions)
-    foreach(sys_flat.pattern.boxes) do (box_path, (box, _))
+    foreach(sys_flat.pattern.boxes) do (box_path, box)
       storage = box.filling isa StorageComponent
       foreach(box.ports) do (port_path, (; junction, power))
         effort_provider = storage || !isnothing(get(box.filling, EVar(DtryPath(), port_path)))

@@ -1,4 +1,3 @@
-
 # mechanical oscillator
 
 pe = HookeanSpring(Const(1.5));
@@ -6,45 +5,39 @@ ke = PointMass(Const(1.));
 pkc = PKC();
 
 osc = CompositeSystem(
-  Dtry{Tuple{Junction,Position}}(
-    :q => Dtry{Tuple{Junction,Position}}((
-      Junction(false, displacement, true),
-      Position(1,2)
-    )),
-    :p => Dtry{Tuple{Junction,Position}}((
-      Junction(true, momentum, true),
-      Position(1,4)
-    )),
+  Dtry(
+    :q => Dtry(Junction(false, displacement, true, Position(1,2))),
+    :p => Dtry(Junction(true, momentum, true, Position(1,4))),
   ),
-  Dtry{Tuple{InnerBox{AbstractSystem},Position}}(
-    :pe => Dtry{Tuple{InnerBox{AbstractSystem},Position}}((
-      InnerBox{AbstractSystem}(
-        Dtry{InnerPort}(
-          :q => Dtry{InnerPort}(InnerPort(■.q, true)),
+  Dtry(
+    :pe => Dtry(
+      InnerBox(
+        Dtry(
+          :q => Dtry(InnerPort(■.q, true)),
         ),
-        pe
+        pe,
+        Position(1,1)
       ),
-      Position(1,1)
-    )),
-    :ke => Dtry{Tuple{InnerBox{AbstractSystem},Position}}((
-      InnerBox{AbstractSystem}(
-        Dtry{InnerPort}(
-          :p => Dtry{InnerPort}(InnerPort(■.p, true)),
+    ),
+    :ke => Dtry(
+      InnerBox(
+        Dtry(
+          :p => Dtry(InnerPort(■.p, true)),
         ),
-        ke
+        ke,
+        Position(1,5)
       ),
-      Position(1,5)
-    )),
-    :pkc => Dtry{Tuple{InnerBox{AbstractSystem},Position}}((
-      InnerBox{AbstractSystem}(
-        Dtry{InnerPort}(
-          :q => Dtry{InnerPort}(InnerPort(■.q, true)),
-          :p => Dtry{InnerPort}(InnerPort(■.p, true))
+    ),
+    :pkc => Dtry(
+      InnerBox(
+        Dtry(
+          :q => Dtry(InnerPort(■.q, true)),
+          :p => Dtry(InnerPort(■.p, true))
         ),
-        pkc
+        pkc,
+        Position(1,3)
       ),
-      Position(1,3)
-    )),
+    ),
   )
 );
 
@@ -63,4 +56,5 @@ osc = CompositeSystem(
 # 28.750 μs (448 allocations: 16.25 KiB) arbitrary nesting of patterns
 # 28.334 μs (431 allocations: 15.89 KiB)
 # 7.021 μs (173 allocations: 5.95 KiB) isflat
+# 7.052 μs (167 allocations: 5.78 KiB) refactor Position, convenience constructors
 # @btime assemble($osc)

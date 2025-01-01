@@ -2,82 +2,70 @@
 lever = Lever(Const(2.));
 
 osc_damped_lever = CompositeSystem(
-  Dtry{Tuple{Junction,Position}}(
-    :q₁ => Dtry{Tuple{Junction,Position}}((
-      Junction(false, displacement, true),
-      Position(1,2)
-    )),
-    :q₂ => Dtry{Tuple{Junction,Position}}((
-      Junction(false, displacement, true),
-      Position(1,4)
-    )),
-    :p => Dtry{Tuple{Junction,Position}}((
-      Junction(false, momentum, true),
-      Position(1,6)
-    )),
-    :s => Dtry{Tuple{Junction,Position}}((
-      Junction(false, entropy, true),
-      Position(2,7)
-    )),
+  Dtry(
+    :q₁ => Dtry(Junction(false, displacement, true, Position(1,2))),
+    :q₂ => Dtry(Junction(false, displacement, true, Position(1,4))),
+    :p => Dtry(Junction(false, momentum, true, Position(1,6))),
+    :s => Dtry(Junction(false, entropy, true, Position(2,7))),
   ),
-  Dtry{Tuple{InnerBox{AbstractSystem},Position}}(
-    :pe => Dtry{Tuple{InnerBox{AbstractSystem},Position}}((
-      InnerBox{AbstractSystem}(
-        Dtry{InnerPort}(
-          :q => Dtry{InnerPort}(InnerPort(■.q₁, true)),
+  Dtry(
+    :pe => Dtry(
+      InnerBox(
+        Dtry(
+          :q => Dtry(InnerPort(■.q₁, true)),
         ),
-        pe
+        pe,
+        Position(1,1)
       ),
-      Position(1,1)
-    )),
-    :lever => Dtry{Tuple{InnerBox{AbstractSystem},Position}}((
-      InnerBox{AbstractSystem}(
-        Dtry{InnerPort}(
-          :q₁ => Dtry{InnerPort}(InnerPort(■.q₁, true)),
-          :q₂ => Dtry{InnerPort}(InnerPort(■.q₂, true))
+    ),
+    :lever => Dtry(
+      InnerBox(
+        Dtry(
+          :q₁ => Dtry(InnerPort(■.q₁, true)),
+          :q₂ => Dtry(InnerPort(■.q₂, true))
         ),
-        lever
+        lever,
+        Position(1,3)
       ),
-      Position(1,3)
-    )),
-    :pkc => Dtry{Tuple{InnerBox{AbstractSystem},Position}}((
-      InnerBox{AbstractSystem}(
-        Dtry{InnerPort}(
-          :q => Dtry{InnerPort}(InnerPort(■.q₂, true)),
-          :p => Dtry{InnerPort}(InnerPort(■.p, true))
+    ),
+    :pkc => Dtry(
+      InnerBox(
+        Dtry(
+          :q => Dtry(InnerPort(■.q₂, true)),
+          :p => Dtry(InnerPort(■.p, true))
         ),
-        pkc
+        pkc,
+        Position(1,5)
       ),
-      Position(1,5)
-    )),
-    :ke => Dtry{Tuple{InnerBox{AbstractSystem},Position}}((
-      InnerBox{AbstractSystem}(
-        Dtry{InnerPort}(
-          :p => Dtry{InnerPort}(InnerPort(■.p, true)),
+    ),
+    :ke => Dtry(
+      InnerBox(
+        Dtry(
+          :p => Dtry(InnerPort(■.p, true)),
         ),
-        ke
+        ke,
+        Position(1,7)
       ),
-      Position(1,7)
-    )),
-    :mf => Dtry{Tuple{InnerBox{AbstractSystem},Position}}((
-      InnerBox{AbstractSystem}(
-        Dtry{InnerPort}(
-          :p => Dtry{InnerPort}(InnerPort(■.p, true)),
-          :s => Dtry{InnerPort}(InnerPort(■.s, true)),
+    ),
+    :mf => Dtry(
+      InnerBox(
+        Dtry(
+          :p => Dtry(InnerPort(■.p, true)),
+          :s => Dtry(InnerPort(■.s, true)),
         ),
-        mf
+        mf,
+        Position(2,6)
       ),
-      Position(2,6)
-    )),
-    :tc => Dtry{Tuple{InnerBox{AbstractSystem},Position}}((
-      InnerBox{AbstractSystem}(
-        Dtry{InnerPort}(
-          :s => Dtry{InnerPort}(InnerPort(■.s, true)),
+    ),
+    :tc => Dtry(
+      InnerBox(
+        Dtry(
+          :s => Dtry(InnerPort(■.s, true)),
         ),
-        tc
+        tc,
+        Position(2,8)
       ),
-      Position(2,8)
-    )),
+    ),
   )
 );
 
@@ -92,4 +80,5 @@ osc_damped_lever = CompositeSystem(
 # 11.500 μs (345 allocations: 11.69 KiB) recursive approach, 64% less runtime than top-down approach
 # 36.125 μs (672 allocations: 26.00 KiB) two levels of nesting, state ports
 # 42.666 μs (781 allocations: 30.59 KiB) arbitrary nesting of patterns
+# 13.208 μs (332 allocations: 11.56 KiB) refactor Position, convenience constructors
 # @btime assemble($osc_damped_lever)

@@ -1,9 +1,9 @@
 
 function frompattern(fsys::FlatSystem, flow::FVar)
   (;box_path, port_path) = flow
-  box, _ = fsys.pattern.boxes[box_path]
+  box = fsys.pattern.boxes[box_path]
   junction_path = box.ports[port_path].junction
-  junction, _ = fsys.pattern.junctions[junction_path]
+  junction = fsys.pattern.junctions[junction_path]
   cs = fsys.connections[junction_path]
   # TODO Error if fromcomponent(...) returns nothing
   internal = -(sum(
@@ -21,7 +21,7 @@ end
 
 function frompattern(fsys::FlatSystem, effort::EVar)
   (;box_path, port_path) = effort
-  box, _ = fsys.pattern.boxes[box_path]
+  box = fsys.pattern.boxes[box_path]
   junction_path = box.ports[port_path].junction
   cs = fsys.connections[junction_path]
   for c in cs
@@ -29,7 +29,7 @@ function frompattern(fsys::FlatSystem, effort::EVar)
       return fromcomponent(fsys, EVar(c.box_path, c.port_path))
     end
   end
-  junction, _ = fsys.pattern.junctions[junction_path]
+  junction = fsys.pattern.junctions[junction_path]
   if junction.exposed && junction.power
     return EVar(■, junction_path)
   end
@@ -43,7 +43,7 @@ end
 
 function frompattern(fsys::FlatSystem, state::XVar)
   (;box_path, port_path) = state
-  box, _ = fsys.pattern.boxes[box_path]
+  box = fsys.pattern.boxes[box_path]
   junction_path = box.ports[port_path].junction
   cs = fsys.connections[junction_path]
   for c in cs
@@ -51,7 +51,7 @@ function frompattern(fsys::FlatSystem, state::XVar)
       return fromcomponent(fsys, XVar(c.box_path, c.port_path))
     end
   end
-  junction, _ = fsys.pattern.junctions[junction_path]
+  junction = fsys.pattern.junctions[junction_path]
   if junction.exposed
     return XVar(■, junction_path)
   end
@@ -65,7 +65,7 @@ end
 
 function fromcomponent(fsys::FlatSystem, pvar::PortVar)
   resolve = pvar -> frompattern(fsys, pvar)
-  box, _ = fsys.pattern.boxes[pvar.box_path]
+  box = fsys.pattern.boxes[pvar.box_path]
   get(box.filling, pvar; resolve)
 end
 
@@ -81,7 +81,7 @@ end
 
 function assemble(fsys::FlatSystem)
   eqs = Eq[]
-  foreach(fsys.pattern.boxes) do (box_path, (box, _))
+  foreach(fsys.pattern.boxes) do (box_path, box)
     if box.filling isa StorageComponent
       foreachpath(box.ports) do port_path
         flow = FVar(box_path, port_path)

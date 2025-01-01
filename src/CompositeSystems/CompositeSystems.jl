@@ -26,22 +26,20 @@ struct CompositeSystem{F<:AbstractSystem,P<:Union{Nothing,Position}} <: Abstract
   ) where {F<:AbstractSystem,P<:Union{Nothing,Position}}
     if check
       # Check if interfaces of subsystems match
-      foreach(pattern.boxes) do (box_path, (box, _))
+      foreach(pattern.boxes) do (box_path, box)
         interface(pattern, box_path) == interface(box.filling) ||
-          error("Interface of box $box_path does not match the interface of its filling")
+          error("Interface of box $(string(box_path)) does not match the interface of its filling")
       end
     end
-    isflat = all(pattern.boxes) do (box, _)
-      box.filling isa Component
-    end
+    isflat = all(box -> box.filling isa Component, pattern.boxes)
     new{F,P}(pattern, isflat)
   end
 end
 
 
 function CompositeSystem(
-  junctions::Dtry{Tuple{Junction,P}},
-  boxes::Dtry{Tuple{InnerBox{F},P}}
+  junctions::Dtry{Junction{P}},
+  boxes::Dtry{InnerBox{F,P}}
 ) where {F<:AbstractSystem,P<:Union{Nothing,Position}}
   CompositeSystem{F,P}(Pattern{F,P}(junctions, boxes))
 end
