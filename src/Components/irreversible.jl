@@ -1,78 +1,34 @@
 
-
-struct LinearFriction <: IrreversibleComponent
-  d::SymPar
-end
-
-AbstractSystems.interface(::LinearFriction) = Interface(
-  :p => Interface(PortType(momentum, true)),
-  :s => Interface(PortType(entropy, true))
-)
-
-function Base.get(lf::LinearFriction, flow::FVar; resolve=identity)
-  (;box_path, port_path) = flow
-  if port_path == DtryPath(:p)
-    d = lf.d
-    p₊e = EVar(box_path, DtryPath(:p)) |> resolve
-    return d * p₊e
-  end
-  if port_path == DtryPath(:s)
-    d = lf.d
-    p₊e = EVar(box_path, DtryPath(:p)) |> resolve
-    s₊e = EVar(box_path, DtryPath(:s)) |> resolve
-    return -((d * p₊e * p₊e) / (θ₀ + s₊e))
-  end
-  nothing
+"A port of an `IrreversibleComponent` provides the flow variable"
+struct IrreversiblePort
+  quantity::Quantity
+  flow::SymExpr
 end
 
 
-struct LinearRotationalFriction <: IrreversibleComponent
-  d::SymPar
-end
-
-AbstractSystems.interface(::LinearRotationalFriction) = Interface(
-  :p => Interface(PortType(angular_momentum, true)),
-  :s => Interface(PortType(entropy, true))
-)
-
-function Base.get(lrf::LinearRotationalFriction, flow::FVar; resolve=identity)
-  (;box_path, port_path) = flow
-  if port_path == DtryPath(:p)
-    d = lrf.d
-    p₊e = EVar(box_path, DtryPath(:p)) |> resolve
-    return d * p₊e
-  end
-  if port_path == DtryPath(:s)
-    d = lrf.d
-    p₊e = EVar(box_path, DtryPath(:p)) |> resolve
-    s₊e = EVar(box_path, DtryPath(:s)) |> resolve
-    return -((d * p₊e * p₊e) / (θ₀ + s₊e))
-  end
-  nothing
+struct IrreversibleComponent <: Component
+  ports::Dtry{IrreversiblePort}
 end
 
 
-struct LinearResistance <: IrreversibleComponent
-  r::SymPar
+function AbstractSystems.interface(ic::IrreversibleComponent)
+  map(ic.ports, PortType) do irreversible_port
+    PortType(irreversible_port.quantity, true)
+  end
 end
 
-AbstractSystems.interface(::LinearResistance) = Interface(
-  :b => Interface(PortType(magnetic_flux, true)),
-  :s => Interface(PortType(entropy, true))
-)
 
-function Base.get(lr::LinearResistance, flow::FVar; resolve=identity)
-  (;box_path, port_path) = flow
-  if port_path == DtryPath(:b)
-    r = lr.r
-    b₊e = EVar(box_path, DtryPath(:b)) |> resolve
-    return r * b₊e
+AbstractSystems.fillcolor(::IrreversibleComponent) = "#FF7F80"
+
+
+provides(ic::IrreversibleComponent, fvar::FVar) =
+  haskey(ic.ports, fvar.port_path)
+
+
+function provide(ic::IrreversibleComponent, fvar::FVar)
+  x = get(ic.ports, fvar.port_path, nothing)
+  if !isnothing(x)
+    return x.flow
   end
-  if port_path == DtryPath(:s)
-    r = lr.r
-    b₊e = EVar(box_path, DtryPath(:b)) |> resolve
-    s₊e = EVar(box_path, DtryPath(:s)) |> resolve
-    return -((r * b₊e * b₊e) / (θ₀ + s₊e))
-  end
-  nothing
+  error("$(string(fvar)) not found")
 end

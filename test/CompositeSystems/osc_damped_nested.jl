@@ -44,4 +44,5 @@ osc_damped_nested = CompositeSystem(
 # 85.041 μs (1265 allocations: 45.20 KiB) arbitrary nesting of patterns
 # 59.625 μs (949 allocations: 33.41 KiB) isflat
 # 57.958 μs (891 allocations: 31.30 KiB) refactor Position, convenience constructors
-# @btime assemble($osc_damped_nested)
+# 67.375 μs (1050 allocations: 35.80 KiB) components as values, dtry
+# @btime assemble($osc_damped_nested);

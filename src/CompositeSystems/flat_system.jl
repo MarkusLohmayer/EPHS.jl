@@ -85,8 +85,8 @@ struct FlatSystem{F<:AbstractSystem}
     foreach(sys_flat.pattern.boxes) do (box_path, box)
       storage = box.filling isa StorageComponent
       foreach(box.ports) do (port_path, (; junction, power))
-        effort_provider = storage || !isnothing(get(box.filling, EVar(DtryPath(), port_path)))
-        state_provider = storage || !isnothing(get(box.filling, XVar(DtryPath(), port_path)))
+        effort_provider = storage || provides(box.filling, EVar(DtryPath(), port_path))
+        state_provider = storage || provides(box.filling, XVar(DtryPath(), port_path))
         c = Connection(box_path, port_path, power, effort_provider, state_provider)
         push!(connections[junction], c)
       end

@@ -1,5 +1,10 @@
 
-lever = Lever(Const(2.));
+lever = ReversibleComponent(
+  Dtry(
+    :q₁ => Dtry(ReversiblePort(FlowPort(displacement, -(Const(2.) * FVar(:q₂))))),
+    :q₂ => Dtry(ReversiblePort(EffortPort(displacement, Const(2.) * EVar(:q₁))))
+  )
+)
 
 osc_damped_lever = CompositeSystem(
   Dtry(
@@ -81,4 +86,5 @@ osc_damped_lever = CompositeSystem(
 # 36.125 μs (672 allocations: 26.00 KiB) two levels of nesting, state ports
 # 42.666 μs (781 allocations: 30.59 KiB) arbitrary nesting of patterns
 # 13.208 μs (332 allocations: 11.56 KiB) refactor Position, convenience constructors
-# @btime assemble($osc_damped_lever)
+# 22.958 μs (506 allocations: 16.66 KiB) components as values, dtry
+# @btime assemble($osc_damped_lever);

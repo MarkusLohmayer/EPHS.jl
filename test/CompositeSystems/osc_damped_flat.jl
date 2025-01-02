@@ -1,6 +1,17 @@
 
-tc = ThermalCapacity(Const(1.), Const(2.5));
-mf = LinearFriction(Const(0.02));
+tc = StorageComponent(
+  Dtry(
+    :s => Dtry(StoragePort(entropy, Const(1.) / Const(2.5) * exp(XVar(:s) / Const(2.5)) - θ₀))
+  )
+)
+
+mf = IrreversibleComponent(
+  Dtry(
+    :p => Dtry(IrreversiblePort(momentum, Const(0.02) * EVar(:p))),
+    :s => Dtry(IrreversiblePort(entropy, -((Const(0.02) * EVar(:p) * EVar(:p)) / (θ₀ + EVar(:s)))))
+  )
+)
+
 
 osc_damped_flat = CompositeSystem(
   Dtry(
@@ -77,4 +88,5 @@ osc_damped_flat = CompositeSystem(
 # 44.750 μs (728 allocations: 25.83 KiB) two levels of nesting, state ports
 # 54.333 μs (852 allocations: 30.59 KiB) arbitrary nesting of patterns
 # 13.541 μs (328 allocations: 10.92 KiB) refactor Position, convenience constructors
-# @btime assemble($osc_damped_flat)
+# 23.708 μs (487 allocations: 15.66 KiB) components as values, dtry
+# @btime assemble($osc_damped_flat);

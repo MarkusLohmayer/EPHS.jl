@@ -2,10 +2,25 @@
 
 ## stator
 
-emc = EMC();
-coil = Coil(Const(1.));
-res = LinearResistance(Const(0.01));
-tc = ThermalCapacity(Const(1.), Const(2.5));
+coil = StorageComponent(
+  Dtry(
+    :b => Dtry(StoragePort(magnetic_flux, XVar(:b) / Const(1.)))
+  )
+)
+
+emc = ReversibleComponent(
+  Dtry(
+    :q => Dtry(ReversiblePort(FlowPort(charge, EVar(:b)))),
+    :b => Dtry(ReversiblePort(FlowPort(magnetic_flux, -EVar(:q))))
+  )
+)
+
+res = IrreversibleComponent(
+  Dtry(
+    :b => Dtry(IrreversiblePort(magnetic_flux, Const(0.01) * EVar(:b))),
+    :s => Dtry(IrreversiblePort(entropy, -((Const(0.01) * EVar(:b) * EVar(:b)) / (θ₀ + EVar(:s)))))
+  )
+)
 
 stator = CompositeSystem(
   Dtry(
@@ -63,9 +78,26 @@ stator = CompositeSystem(
 
 ## rotor
 
-mkc = MKC();
-angular_mass = AngularMass(Const(1.));
-rotational_friction = LinearRotationalFriction(Const(0.01));
+angular_mass = StorageComponent(
+  Dtry(
+    :p => Dtry(StoragePort(angular_momentum, XVar(:p) / Const(1.)))
+  )
+)
+
+mkc = ReversibleComponent(
+  Dtry(
+    :b => Dtry(ReversiblePort(FlowPort(magnetic_flux, XVar(:bₛ) * EVar(:p)))),
+    :p => Dtry(ReversiblePort(FlowPort(angular_momentum, -(XVar(:bₛ) * EVar(:b))))),
+    :bₛ => Dtry(ReversiblePort(StatePort(magnetic_flux)))
+  )
+)
+
+rotational_friction = IrreversibleComponent(
+  Dtry(
+    :p => Dtry(IrreversiblePort(angular_momentum, Const(0.01) * EVar(:p))),
+    :s => Dtry(IrreversiblePort(entropy, -((Const(0.01) * EVar(:p) * EVar(:p)) / (θ₀ + EVar(:s)))))
+  )
+)
 
 rotor = CompositeSystem(
   Dtry(
@@ -201,6 +233,13 @@ motor = CompositeSystem(
 # TODO add flywheel and extend assembly to DAE case
 # TODO connect piston with crank mechanism?
 
+load_res = IrreversibleComponent(
+  Dtry(
+    :p => Dtry(IrreversiblePort(angular_momentum, Const(0.5) * EVar(:p))),
+    :s => Dtry(IrreversiblePort(entropy, -((Const(0.5) * EVar(:p) * EVar(:p)) / (θ₀ + EVar(:s)))))
+  )
+)
+
 load = CompositeSystem(
   Dtry(
     :p => Dtry(Junction(true, angular_momentum, true, Position(1,1))),
@@ -213,7 +252,7 @@ load = CompositeSystem(
           :p => Dtry(InnerPort(■.p, true)),
           :s => Dtry(InnerPort(■.s, true)),
         ),
-        LinearRotationalFriction(Const(0.5)),
+        load_res,
         Position(1,2)
       ),
     ),
@@ -271,4 +310,5 @@ motor_rig = CompositeSystem(
 # 318.042 μs (4633 allocations: 172.94 KiB) check=false
 # 236.334 μs (3609 allocations: 129.45 KiB) isflat
 # 216.250 μs (3320 allocations: 119.23 KiB) refactor Position, convenience constructors
-# @btime assemble($motor_rig)
+# 249.166 μs (3885 allocations: 135.36 KiB) components as values, dtry
+# @btime assemble($motor_rig);

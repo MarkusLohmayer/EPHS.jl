@@ -1,136 +1,46 @@
 
-struct HookeanSpring <: StorageComponent
-  k::SymPar
+"A port of a `StorageComponent` provides the effort variable"
+struct StoragePort
+  quantity::Quantity
+  effort::SymExpr
 end
 
-AbstractSystems.interface(::HookeanSpring) = Interface(
-  :q => Interface(PortType(displacement, true))
-)
 
-# function energy(spring::HookeanSpring)
-#   q = XVar(:q)
-#   k = spring.k
-#   Const(0.5) * k * q * q
-# end
+struct StorageComponent <: Component
+  ports::Dtry{StoragePort}
+end
 
-function Base.get(spring::HookeanSpring, effort::EVar; resolve=identity)
-  (;box_path, port_path) = effort
-  if port_path == DtryPath(:q)
-    q = XVar(box_path, port_path)
-    k = spring.k
-    return k * q
+
+function AbstractSystems.interface(sc::StorageComponent)
+  map(sc.ports, PortType) do storage_port
+    PortType(storage_port.quantity, true)
   end
-  nothing
 end
 
 
-struct PointMass <: StorageComponent
-  m::SymPar
-end
+AbstractSystems.fillcolor(::StorageComponent) = "#5082B0"
 
-AbstractSystems.interface(::PointMass) = Interface(
-  :p => Interface(PortType(momentum, true))
-)
 
-# function energy(mass::PointMass)
-#   p = XVar(:p)
-#   m = mass.m
-#   Const(0.5) / m * p * p
-# end
+provides(sc::StorageComponent, xvar::XVar) =
+  haskey(sc.ports, xvar.port_path)
 
-function Base.get(mass::PointMass, effort::EVar; resolve=identity)
-  (;box_path, port_path) = effort
-  if port_path == DtryPath(:p)
-    p = XVar(box_path, port_path)
-    m = mass.m
-    return p / m
+
+provides(sc::StorageComponent, evar::EVar) =
+  haskey(sc.ports, evar.port_path)
+
+
+function provide(sc::StorageComponent, xvar::XVar)
+  if haskey(sc.ports, xvar.port_path)
+    return xvar
   end
-  nothing
+  error("$(string(xvar)) not found")
 end
 
 
-struct AngularMass <: StorageComponent
-  m::SymPar
-end
-
-AbstractSystems.interface(::AngularMass) = Interface(
-  :p => Interface(PortType(angular_momentum, true))
-)
-
-# function energy(mass::AngularMass)
-#   p = XVar(:p)
-#   m = mass.m
-#   Const(0.5) / m * p * p
-# end
-
-function Base.get(mass::AngularMass, effort::EVar; resolve=identity)
-  (;box_path, port_path) = effort
-  if port_path == DtryPath(:p)
-    p = XVar(box_path, port_path)
-    m = mass.m
-    return p / m
+function provide(sc::StorageComponent, evar::EVar)
+  x = get(sc.ports, evar.port_path, nothing)
+  if !isnothing(x)
+    return x.effort
   end
-  nothing
-end
-
-
-struct ThermalCapacity <: StorageComponent
-  c₁::SymPar
-  c₂::SymPar
-end
-
-AbstractSystems.interface(::ThermalCapacity) = Interface(
-  :s => Interface(PortType(entropy, true))
-)
-
-# function energy(tc::ThermalCapacity)
-#   s = XVar(:s)
-#   c₁ = tc.c₁
-#   c₂ = tc.c₂
-#   c₁ * exp(s / c₂)
-# end
-
-function Base.get(tc::ThermalCapacity, effort::EVar; resolve=identity)
-  (;box_path, port_path) = effort
-  if port_path == DtryPath(:s)
-    s = XVar(box_path, port_path)
-    c₁ = tc.c₁
-    c₂ = tc.c₂
-    θ = c₁ / c₂ * exp(s / c₂)
-    return θ - θ₀
-  end
-  nothing
-end
-
-
-struct Coil <: StorageComponent
-  l::SymPar # inductance
-end
-
-AbstractSystems.interface(::Coil) = Interface(
-  :b => Interface(PortType(magnetic_flux, true))
-)
-
-# function energy(coil::Coil)
-#   b = XVar(:b)
-#   l = coil.l
-#   Const(0.5) / l * b * b
-# end
-
-function Base.get(coil::Coil, effort::EVar; resolve=identity)
-  (;box_path, port_path) = effort
-  if port_path == DtryPath(:b)
-    b = XVar(box_path, port_path)
-    l = coil.l
-    return b / l
-  end
-  nothing
-end
-
-# TODO in principle, all `StorageComponent`s have to provide their state variable
-function Base.get(::Coil, state::XVar; resolve=identity)
-  if state.port_path == DtryPath(:b)
-    return state
-  end
-  nothing
+  error("$(string(evar)) not found")
 end

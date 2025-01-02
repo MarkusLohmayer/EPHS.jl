@@ -88,6 +88,18 @@ function Base.show(io::IO, path::DtryPath)
 end
 
 
+# function Base.Symbol(path::DtryPath)
+#   if !isempty(path)
+#     link = nothing_or_link(path)
+#     name, rest = link
+#     if rest == DtryPath()
+#       return name
+#     end
+#   end
+#   error("The given path $(string(path)) does not consist of a single name")
+# end
+
+
 # Access directories using a path
 
 function Base.getindex(dtry::NonEmptyDtry, path::DtryPath)
@@ -143,4 +155,31 @@ function Base.haskey(dtry::Dtry, path::DtryPath)
     nonempty = nothing_or_nonempty(dtry)
     return haskey(nonempty, path)
   end
+end
+
+
+function Base.get(dtry::NonEmptyDtry, path::DtryPath, default)
+  if isempty(path)
+    if leaf_or_node(dtry) isa DtryLeaf
+      leaf = leaf_or_node(dtry)
+      return leaf.value
+    end
+    return default
+  else
+    link = nothing_or_link(path)
+    name, path = link
+    if hasproperty(dtry, name)
+      return getproperty(dtry, name)[path]
+    end
+    return default
+  end
+end
+
+
+function Base.get(dtry::Dtry, path::DtryPath, default)
+  if !isempty(dtry)
+    nonempty = nothing_or_nonempty(dtry)
+    return get(nonempty, path, default)
+  end
+  return default
 end

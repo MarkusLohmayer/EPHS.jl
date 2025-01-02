@@ -64,10 +64,19 @@ end
 
 
 function fromcomponent(fsys::FlatSystem, pvar::PortVar)
-  resolve = pvar -> frompattern(fsys, pvar)
   box = fsys.pattern.boxes[pvar.box_path]
-  get(box.filling, pvar; resolve)
+  fromcomponent(fsys, pvar, box.filling)
 end
+
+
+fromcomponent(fsys::FlatSystem, pvar::PowerVar, c::Component) =
+  return map(provide(c, pvar), PortVar) do rhs_pvar
+    frompattern(fsys, typeof(rhs_pvar)(pvar.box_path, rhs_pvar.port_path))
+  end
+
+
+fromcomponent(::FlatSystem, xvar::XVar, sc::StorageComponent) =
+  provide(sc, xvar)
 
 
 """

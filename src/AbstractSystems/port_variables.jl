@@ -37,3 +37,8 @@ Base.string(e::EVar) = string(e.box_path * e.port_path) * ".e"
 
 
 SymbolicExpressions.ast(x::PortVar) = Symbol(replace(string(x), '.' => '₊'))
+
+
+XVar(port_name::Symbol) = XVar(DtryPath(), DtryPath(port_name))
+FVar(port_name::Symbol) = FVar(DtryPath(), DtryPath(port_name))
+EVar(port_name::Symbol) = EVar(DtryPath(), DtryPath(port_name))

@@ -1,8 +1,23 @@
 # mechanical oscillator
 
-pe = HookeanSpring(Const(1.5));
-ke = PointMass(Const(1.));
-pkc = PKC();
+pe = StorageComponent(
+  Dtry(
+    :q => Dtry(StoragePort(displacement, Const(1.5) * XVar(:q)))
+  )
+)
+
+ke = StorageComponent(
+  Dtry(
+    :p => Dtry(StoragePort(momentum, XVar(:p) / Const(1.)))
+  )
+)
+
+pkc = ReversibleComponent(
+  Dtry(
+    :q => Dtry(ReversiblePort(FlowPort(displacement, -EVar(:p)))),
+    :p => Dtry(ReversiblePort(FlowPort(momentum, EVar(:q))))
+  )
+)
 
 osc = CompositeSystem(
   Dtry(
@@ -57,4 +72,5 @@ osc = CompositeSystem(
 # 28.334 μs (431 allocations: 15.89 KiB)
 # 7.021 μs (173 allocations: 5.95 KiB) isflat
 # 7.052 μs (167 allocations: 5.78 KiB) refactor Position, convenience constructors
+# 9.709 μs (196 allocations: 6.66 KiB) components as values, dtry
 # @btime assemble($osc)
