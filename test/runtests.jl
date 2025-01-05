@@ -35,3 +35,7 @@ end
 @testset "CompositeSystems" begin
   include("CompositeSystems/CompositeSystems.jl")
 end
+
+@testset "Simulations" begin
+  include("Simulations/Simulations.jl")
+end

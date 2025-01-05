@@ -29,6 +29,9 @@ include("Components/Components.jl")
 # Composite systems
 include("CompositeSystems/CompositeSystems.jl")
 
+# Numerical integration
+include("Simulations/Simulations.jl")
+
 
 @reexport using .MoreBase
 @reexport using .TupleDicts
@@ -44,5 +47,7 @@ include("CompositeSystems/CompositeSystems.jl")
 @reexport using .Components
 
 @reexport using .CompositeSystems
+
+@reexport using .Simulations
 
 end
