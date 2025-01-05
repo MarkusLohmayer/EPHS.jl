@@ -118,7 +118,4 @@ include("compose.jl")
 include("show_svg.jl")
 include("show_text.jl")
 
-# macro to define patterns in a more concise manner
-# include("macro.jl")
-
 end

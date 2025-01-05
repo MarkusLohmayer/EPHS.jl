@@ -2,11 +2,11 @@
 MoreBase.flatten(component::Component) = component
 
 
-function MoreBase.flatten(sys::CompositeSystem{F,P}) where {F,P}
+function MoreBase.flatten(sys::CompositeSystem{P}) where {P}
   sys.isflat && return sys
   # Recursively flatten subsystems
-  boxes_flat = map(sys.pattern.boxes, InnerBox{F,Nothing}) do box
-    InnerBox{F,Nothing}(box.ports, flatten(box.filling), nothing)
+  boxes_flat = map(sys.pattern.boxes, InnerBox{AbstractSystem,Nothing}) do box
+    InnerBox{AbstractSystem,Nothing}(box.ports, flatten(box.filling), nothing)
   end
   # Flatten top level
   junctions = merge(
@@ -28,14 +28,14 @@ function MoreBase.flatten(sys::CompositeSystem{F,P}) where {F,P}
       end
     end |> flatten
   )
-  boxes = mapwithpath(boxes_flat, Dtry{InnerBox{F,Nothing}}) do box_path, box
+  boxes = mapwithpath(boxes_flat, Dtry{InnerBox{AbstractSystem,Nothing}}) do box_path, box
     if box.filling isa Component
-      Dtry{InnerBox{F,Nothing}}(
-        InnerBox{F,Nothing}(box.ports, box.filling, nothing)
+      Dtry{InnerBox{AbstractSystem,Nothing}}(
+        InnerBox{AbstractSystem,Nothing}(box.ports, box.filling, nothing)
       )
     elseif box.filling isa CompositeSystem
       filling = box.filling.pattern
-      map(filling.boxes, InnerBox{F,Nothing}) do inner_box
+      map(filling.boxes, InnerBox{AbstractSystem,Nothing}) do inner_box
         ports = map(inner_box.ports, InnerPort) do port
           junction_path = port.junction
           junction = filling.junctions[junction_path]
@@ -45,14 +45,14 @@ function MoreBase.flatten(sys::CompositeSystem{F,P}) where {F,P}
             InnerPort(box_path * junction_path, port.power)
           end
         end
-        InnerBox{F,Nothing}(ports, inner_box.filling, nothing)
+        InnerBox{AbstractSystem,Nothing}(ports, inner_box.filling, nothing)
       end
     else
       error("should not reach here")
     end
   end |> flatten
-  CompositeSystem{F,Nothing}(
-    Pattern{F,Nothing}(junctions, boxes; check=false);
+  CompositeSystem{Nothing}(
+    Pattern{AbstractSystem,Nothing}(junctions, boxes; check=false);
     check=false
   )
 end
@@ -68,16 +68,16 @@ struct Connection
 end
 
 
-struct FlatSystem{F<:AbstractSystem}
-  pattern::Pattern{F,P} where {P}
+struct FlatSystem
+  pattern::Pattern{AbstractSystem,P} where {P}
   connections::Dtry{Vector{Connection}}
 
   """
   Prepare `CompositeSystem` for assembly of equations
   """
   function FlatSystem(
-    sys::CompositeSystem{F,P}
-  ) where {F<:AbstractSystem,P<:Union{Nothing,Position}}
+    sys::CompositeSystem{P}
+  ) where {P<:Union{Nothing,Position}}
     # Flatten system
     sys_flat = flatten(sys)
     # Identify `Connection`s at each junction
@@ -104,7 +104,7 @@ struct FlatSystem{F<:AbstractSystem}
         " $(state_providers) connections that provide a state variable"
       )
     end
-    new{F}(sys_flat.pattern, connections)
+    new(sys_flat.pattern, connections)
   end
 end
 
