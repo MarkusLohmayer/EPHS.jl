@@ -1,8 +1,4 @@
 
-# TODO draw port/junction names (hover text?)
-# Or perhaps keep this minimal and later spend available time on a web frontend
-
-
 function Base.show(io::IO, ::MIME"image/svg+xml", pattern::Pattern{F,Position}) where {F}
   print(io, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
   print_svg(io, pattern)
@@ -10,8 +6,8 @@ end
 
 
 function print_svg(io::IO, pattern::Pattern{F,Position}) where {F}
-  scale = 200 # grid to canvas
-  padding = 100 # between inner boxes and outer box
+  scale = 200 # canvas distance between adjacent grid positions
+  padding = 100 # canvas distance between outer box and contained box positions (center)
   margin = 5 # around outer box
 
   grid_dims = grid_dimensions(pattern)
@@ -29,9 +25,8 @@ function print_svg(io::IO, pattern::Pattern{F,Position}) where {F}
     """
   )
   draw_outer_box(io, x_min, y_min, width, height)
-  draw_ports(io, pattern, scale)
-  draw_external_ports(io, pattern, scale, grid_dims, dims)
-  draw_boxes(io, pattern, scale)
+  draw_outer_ports(io, pattern, scale, grid_dims, dims)
+  draw_inner_ports_and_boxes(io, pattern, scale)
   draw_junctions(io, pattern, scale)
   print(io,
     """
@@ -83,29 +78,7 @@ function draw_outer_box(io, x_min, y_min, width, height)
 end
 
 
-function draw_ports(io, pattern, scale)
-  # TODO Could integrate this into `draw_boxes!`
-  foreachvalue(pattern.boxes) do box
-    foreach(box.ports) do (port_path, port)
-      junction = pattern.junctions[port.junction]
-      (x1, y1, x2, y2) = scale .* (box.position.c, box.position.r, junction.position.c, junction.position.r)
-      print(io,
-        """
-        <line x1="$x1" y1="$y1" x2="$x2" y2="$y2"
-          stroke="black" stroke-width="2"
-          stroke-dasharray="$(port.power ? "none" : "8.0,8.0")"
-        />
-        <line x1="$x1" y1="$y1" x2="$x2" y2="$y2" stroke="transparent" stroke-width="10">
-          <title>$(string(port_path))</title>
-        </line>
-        """
-      )
-    end
-  end
-end
-
-
-function draw_external_ports(io, pattern, scale, grid_dims, dims)
+function draw_outer_ports(io, pattern, scale, grid_dims, dims)
   r_min, r_max, c_min, c_max = grid_dims
   y_min, y_max, x_min, x_max = dims
   foreach(pattern.junctions) do (junction_path, junction)
@@ -137,8 +110,25 @@ function draw_external_ports(io, pattern, scale, grid_dims, dims)
 end
 
 
-function draw_boxes(io, pattern, scale)
+function draw_inner_ports_and_boxes(io, pattern, scale)
   foreach(pattern.boxes) do (box_path, box)
+    # Draw ports
+    foreach(box.ports) do (port_path, port)
+      junction = pattern.junctions[port.junction]
+      (x1, y1, x2, y2) = scale .* (box.position.c, box.position.r, junction.position.c, junction.position.r)
+      print(io,
+        """
+        <line x1="$x1" y1="$y1" x2="$x2" y2="$y2"
+          stroke="black" stroke-width="2"
+          stroke-dasharray="$(port.power ? "none" : "8.0,8.0")"
+        />
+        <line x1="$x1" y1="$y1" x2="$x2" y2="$y2" stroke="transparent" stroke-width="10">
+          <title>$(string(port_path))</title>
+        </line>
+        """
+      )
+    end
+    # Draw box
     (x, y) = scale .* (box.position.c, box.position.r)
     color = isnothing(box.filling) ? "white" : fillcolor(box.filling)
     print(io,
@@ -148,7 +138,7 @@ function draw_boxes(io, pattern, scale)
       """
     )
     draw_box_name(io, box_path)
-    write(io,
+    print(io,
       """
       </g>
       """
@@ -163,7 +153,7 @@ function draw_junctions(io, pattern, scale)
     print(io,
       """
       <circle cx="$x" cy="$y" r="8" fill="black">
-        <title>$(string(junction_path)) : $(string(junction.quantity))</title></line>
+        <title>$(string(junction_path)) : $(string(junction.quantity))</title>
       </circle>
       """
     )

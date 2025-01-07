@@ -34,9 +34,16 @@ d6 = D(:i => d5, :j => d5)
 @test d6.i.u.x.a[] == 10
 @test d6[■.i.u.x.a] == 10
 
-@test haskey(d6, ■.i.u.x.a)
-@test haskey(d6, ■.j.u.z)
-@test !haskey(d6, ■.i.u.z.a)
+@test haspath(d6, ■.i.u.x.a)
+@test haspath(d6, ■.j.u.z)
+@test !haspath(d6, ■.i.u.z.a)
+
+@test hasprefix(d6, ■.i.u.x.a)
+@test hasprefix(d6, ■.i.u.x)
+@test hasprefix(d6, ■.i.u)
+@test hasprefix(d6, ■.i)
+@test hasprefix(d6, ■)
+@test !haspath(d6, ■.k)
 
 
 @test flatten(DD()) == D()

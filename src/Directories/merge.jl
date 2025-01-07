@@ -4,11 +4,16 @@ isleaf(dtry::AbstractDtry) =
 
 
 """
-Merge two directories, given that the union of their paths is prefix-free.
+    merge(dtry1::NonEmptyDtry{T}, dtry2::NonEmptyDtry{T}) -> NonEmptyDtry{T}
+    merge(dtry1::Dtry{T}, dtry2::Dtry{T}) -> Dtry{T}
+
+Merge two directories,
+given that their namespaces are disjoint,
+i.e. the union of their namespaces is prefix-free.
 """
 function Base.merge(dtry1::T, dtry2::T) where {T<:AbstractDtry}
   if isleaf(dtry1) || isleaf(dtry2)
-    error("merge conflict")
+    error("merge conflict: the directories do not have disjoint namespaces")
   end
   isempty(dtry1) && return dtry2
   isempty(dtry2) && return dtry1

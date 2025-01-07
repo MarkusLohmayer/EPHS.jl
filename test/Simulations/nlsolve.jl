@@ -7,4 +7,4 @@ function residual(x)
   ]
 end
 
-@assert nlsolve(residual, SA[0., 0.]) ≈ SA[-1., 1.]
+@test nlsolve(residual, SA[0., 0.]) ≈ SA[-1., 1.]

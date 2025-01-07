@@ -9,7 +9,11 @@ struct Connection
   state_provider::Bool    # true means port provides state variable
 end
 
-
+"""
+    FlatSystem(pattern::Pattern, connections::Dtry(Vector(Connection)))
+A flat system is a composite system without any hierarchical nesting of (sub-)systems.
+This struct also controls if each junction has only one provider of effort and state.
+"""
 struct FlatSystem
   pattern::Pattern{AbstractSystem,P} where {P}
   connections::Dtry{Vector{Connection}}

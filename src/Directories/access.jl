@@ -1,7 +1,18 @@
-
+"""
+Abstract supertype for exceptions
+that may be thrown when accessing directories.
+Concrete subtypes are
+[`DtryBranchError`](@ref) (branch with a given name does not exist) and
+[`DtryLeafError`](@ref) (given directory is not a leaf).
+"""
 abstract type DtryAccessError <: Exception end
 
 
+"""
+    DtryBranchError(dtry::AbstractDtry, name::Symbol)
+
+The given directory has no direct subdirectory with the given name.
+"""
 struct DtryBranchError <: DtryAccessError
   dtry::AbstractDtry
   name::Symbol
@@ -13,12 +24,17 @@ function Base.showerror(io::IO, e::DtryBranchError)
 end
 
 
+"""
+    DtryLeafError(dtry::AbstractDtry)
+
+The given directory is not a leaf holding a value.
+"""
 struct DtryLeafError <: DtryAccessError
   dtry::AbstractDtry
 end
 
 
-function Base.showerror(io::IO, e::DtryLeafError)
+function Base.showerror(io::IO, ::DtryLeafError)
   print(io, "DtryLeafError: Tried to access value, but directory is not a leaf")
 end
 
@@ -83,6 +99,12 @@ function Base.propertynames(dtry::Dtry)
 end
 
 
+"""
+    getindex(dtry::NonEmptyDtry{T}) -> T
+
+If `dtry` isa leaf, `dtry[]` returns its value.
+Otherwise, throws a [`DtryLeafError`](@ref)
+"""
 function Base.getindex(dtry::NonEmptyDtry{T})::T where {T}
   if leaf_or_node(dtry) isa DtryLeaf
     leaf = leaf_or_node(dtry)
@@ -92,6 +114,12 @@ function Base.getindex(dtry::NonEmptyDtry{T})::T where {T}
 end
 
 
+"""
+    getindex(dtry::Dtry{T}) -> T
+
+If `dtry` isa leaf, `dtry[]` returns its value.
+Otherwise, throws a [`DtryLeafError`](@ref)
+"""
 function Base.getindex(dtry::Dtry{T})::T where {T}
   if !isempty(dtry)
     nonempty = nothing_or_nonempty(dtry)

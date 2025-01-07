@@ -1,14 +1,14 @@
 
 osc_damped_nested = CompositeSystem(
   Dtry(
-    :p => Dtry(Junction(false, momentum, true, Position(1,2))),
-    :s => Dtry(Junction(false, entropy, true, Position(1,4))),
+    :p => Dtry(Junction(momentum, Position(1,2))),
+    :s => Dtry(Junction(entropy, Position(1,4))),
   ),
   Dtry(
     :osc => Dtry(
       InnerBox(
         Dtry(
-          :p => Dtry(InnerPort(■.p, true)),
+          :p => Dtry(InnerPort(■.p)),
         ),
         osc,
         Position(1,1)
@@ -17,8 +17,8 @@ osc_damped_nested = CompositeSystem(
     :mf => Dtry(
       InnerBox(
         Dtry(
-          :p => Dtry(InnerPort(■.p, true)),
-          :s => Dtry(InnerPort(■.s, true)),
+          :p => Dtry(InnerPort(■.p)),
+          :s => Dtry(InnerPort(■.s)),
         ),
         mf,
         Position(1,3)
@@ -27,7 +27,7 @@ osc_damped_nested = CompositeSystem(
     :tc => Dtry(
       InnerBox(
         Dtry(
-          :s => Dtry(InnerPort(■.s, true)),
+          :s => Dtry(InnerPort(■.s)),
         ),
         tc,
         Position(1,5)
@@ -46,4 +46,5 @@ osc_damped_nested = CompositeSystem(
 # 57.958 μs (891 allocations: 31.30 KiB) refactor Position, convenience constructors
 # 67.375 μs (1050 allocations: 35.80 KiB) components as values, dtry
 # 68.041 μs (1018 allocations: 35.72 KiB) DAESystem
+# 137.625 μs (1973 allocations: 70.14 KiB) Symbolic differentiation (with simplification/normalization)
 # @btime assemble($osc_damped_nested);

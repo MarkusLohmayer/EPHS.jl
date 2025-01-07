@@ -1,5 +1,9 @@
 
-"Linked list of symbols represening a directory path"
+"""
+A `DtryPath` is a linked list of `Symbol`s
+representing a path in a directory,
+see also [`■`](@ref).
+"""
 struct DtryPath
   nothing_or_link::Union{
     Nothing,
@@ -8,14 +12,30 @@ struct DtryPath
 end
 
 
-"Path representing the root directory"
+"""
+[`DtryPath`](@ref) representing
+the root node of a directory.
+With that, `■.foo` represents
+the path to a subdirectory named `foo`.
+"""
 const ■ = DtryPath(nothing)
 
 
-function DtryPath(symbols::Vararg{Symbol})
+"""
+    DtryPath(names::Vararg{Symbol})
+
+Construct a `DtryPath` from a series of names.
+
+# Example
+```jldoctest
+julia> DtryPath(:foo, :bar) == ■.foo.bar
+true
+```
+"""
+function DtryPath(names::Vararg{Symbol})
   path = ■
-  for i in length(symbols):-1:1
-    path = DtryPath((symbols[i], path))
+  for i in length(names):-1:1
+    path = DtryPath((names[i], path))
   end
   path
 end
@@ -42,6 +62,17 @@ function Base.getproperty(path::DtryPath, name::Symbol)
 end
 
 
+"""
+    *(p1::DtryPath, p2::DtryPath) -> DtryPath
+
+Concatenate two [`DtryPath`](@ref)s.
+
+# Example
+```jldoctest
+julia> ■.foo * ■.bar == ■.foo.bar
+true
+```
+"""
 function Base.:(*)(p1::DtryPath, p2::DtryPath)
   if isempty(p1)
     p2
@@ -53,7 +84,18 @@ function Base.:(*)(p1::DtryPath, p2::DtryPath)
 end
 
 
-function Base.length(path::DtryPath)
+"""
+    length(path::DtryPath) -> Int
+
+Returns the length of the [`DtryPath`](@ref) (linked list of `Symbols`).
+
+# Example
+```jldoctest
+julia> length(■.foo.bar) == 2
+true
+```
+"""
+function Base.length(path::DtryPath)::Int
   len = 0
   while !isempty(path)
     len += 1
@@ -88,21 +130,15 @@ function Base.show(io::IO, path::DtryPath)
 end
 
 
-# function Base.Symbol(path::DtryPath)
-#   if !isempty(path)
-#     link = nothing_or_link(path)
-#     name, rest = link
-#     if rest == DtryPath()
-#       return name
-#     end
-#   end
-#   error("The given path $(string(path)) does not consist of a single name")
-# end
-
-
 # Access directories using a path
 
-function Base.getindex(dtry::NonEmptyDtry, path::DtryPath)
+"""
+    getindex(dtry::NonEmptyDtry{T}, path::DtryPath) -> T
+
+If `path` refers to a value within `dtry`, returns the value.
+Otherwise, throws a [`DtryAccessError`](@ref).
+"""
+function Base.getindex(dtry::NonEmptyDtry{T}, path::DtryPath)::T where {T}
   if isempty(path)
     if leaf_or_node(dtry) isa DtryLeaf
       leaf = leaf_or_node(dtry)
@@ -117,6 +153,12 @@ function Base.getindex(dtry::NonEmptyDtry, path::DtryPath)
 end
 
 
+"""
+    getindex(dtry::Dtry{T}, path::DtryPath) -> T
+
+If `path` refers to a value within `dtry`, returns the value.
+Otherwise, throws a [`DtryAccessError`](@ref).
+"""
 function Base.getindex(dtry::Dtry, path::DtryPath)
   if !isempty(dtry)
     nonempty = nothing_or_nonempty(dtry)
@@ -132,32 +174,78 @@ function Base.getindex(dtry::Dtry, path::DtryPath)
 end
 
 
-function Base.haskey(dtry::NonEmptyDtry, path::DtryPath)
-  if isempty(path)
-    if leaf_or_node(dtry) isa DtryLeaf
-      return true
-    end
+"""
+    hasprefix(dtry::NonEmptyDtry, prefix::DtryPath) -> Bool
+
+Returns `true` if the given directory has a (complete) path (to a leaf/value),
+which starts with the given prefix (or incomplete path).
+"""
+function hasprefix(dtry::NonEmptyDtry, prefix::DtryPath)::Bool
+  if isempty(prefix)
+    return true
   else
-    link = nothing_or_link(path)
-    name, path = link
-    if hasproperty(dtry, name) && haskey(getproperty(dtry, name), path)
-      return true
-    end
+    link = nothing_or_link(prefix)
+    name, prefix = link
+    return hasproperty(dtry, name) && hasprefix(getproperty(dtry, name), prefix)
   end
-  false
 end
 
 
-function Base.haskey(dtry::Dtry, path::DtryPath)
+"""
+    hasprefix(dtry::Dtry, prefix::DtryPath) -> Bool
+
+Returns `true` if the given directory has a (complete) path (to a leaf/value),
+which starts with the given prefix (or incomplete path).
+"""
+function hasprefix(dtry::Dtry, prefix::DtryPath)::Bool
   if isempty(dtry)
     return false
   else
     nonempty = nothing_or_nonempty(dtry)
-    return haskey(nonempty, path)
+    return hasprefix(nonempty, prefix)
   end
 end
 
 
+"""
+    haspath(dtry::NonEmptyDtry, path::DtryPath) -> Bool
+
+Returns `true` if the given directory contains
+a leaf/value at the given path.
+"""
+function haspath(dtry::NonEmptyDtry, path::DtryPath)
+  if isempty(path)
+    return leaf_or_node(dtry) isa DtryLeaf
+  else
+    link = nothing_or_link(path)
+    name, path = link
+    return hasproperty(dtry, name) && haspath(getproperty(dtry, name), path)
+  end
+end
+
+
+"""
+    haspath(dtry::Dtry, path::DtryPath) -> Bool
+
+Returns `true` if the given directory contains
+a leaf/value at the given path.
+"""
+function haspath(dtry::Dtry, path::DtryPath)::Bool
+  if isempty(dtry)
+    return false
+  else
+    nonempty = nothing_or_nonempty(dtry)
+    return haspath(nonempty, path)
+  end
+end
+
+
+"""
+    get(dtry::NonEmptyDtry, path::DtryPath, default)
+
+If `path` refers to a value within `dtry`, returns the value.
+Otherwise, returns `default`.
+"""
 function Base.get(dtry::NonEmptyDtry, path::DtryPath, default)
   if isempty(path)
     if leaf_or_node(dtry) isa DtryLeaf
@@ -169,13 +257,20 @@ function Base.get(dtry::NonEmptyDtry, path::DtryPath, default)
     link = nothing_or_link(path)
     name, path = link
     if hasproperty(dtry, name)
-      return getproperty(dtry, name)[path]
+      sub_dtry = getproperty(dtry, name)
+      return get(sub_dtry, path, default)
     end
     return default
   end
 end
 
 
+"""
+    get(dtry::Dtry, path::DtryPath, default)
+
+If `path` refers to a value within `dtry`, returns the value.
+Otherwise, returns `default`.
+"""
 function Base.get(dtry::Dtry, path::DtryPath, default)
   if !isempty(dtry)
     nonempty = nothing_or_nonempty(dtry)

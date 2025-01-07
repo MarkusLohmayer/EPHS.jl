@@ -1,49 +1,48 @@
+@doc read(joinpath(dirname(@__DIR__), "README.md"), String)
 module EPHS
 
 using Reexport
 
-# Things that we miss in Base
+# Things that would be nice to have in Base
 include("MoreBase.jl")
 
 # Tuple-backed dictionaries
 include("TupleDicts.jl")
 
-# Directories with separate index (tree) and data (stored in a flat tuple)
+# Directories - the monadic data structure behind EPHS.jl
 include("Directories/Directories.jl")
 
-# Mathematical expressions used to define semantics
+# Mathematical syntax for expressing equations/relations that define the semantics
 include("SymbolicExpressions/SymbolicExpressions.jl")
 
-# Quantities, interfaces, and abstract system type
+# Quantities, interfaces, abstract system type, and port variables
 include("AbstractSystems/AbstractSystems.jl")
 
-# Graphical syntax
+# Compositional, graphical syntax
 include("Patterns/Patterns.jl")
 
-# Exergy reference environment
-include("Environment.jl")
-
-# Primitive systems
+# Primitive systems (storage/reversible/irreversible)
 include("Components/Components.jl")
 
-# Composite systems
+# Composite systems (filled patterns, assembly of systems of equations)
 include("CompositeSystems/CompositeSystems.jl")
 
-# Numerical integration
+# Numerical integration, post processing
 include("Simulations/Simulations.jl")
 
 
 @reexport using .MoreBase
+
 @reexport using .TupleDicts
 
 @reexport using .Directories
+
 @reexport using .SymbolicExpressions
 
 @reexport using .AbstractSystems
 
 @reexport using .Patterns
 
-@reexport using .Environment
 @reexport using .Components
 
 @reexport using .CompositeSystems

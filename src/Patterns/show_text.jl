@@ -20,8 +20,10 @@ function print_junction(io::IO, junction::Junction, _::String)
     ")"
   )
   if junction.exposed
-    if !junction.power
-      print(io, " (state)")
+    if junction.power
+      print(io, " power")
+    else
+      print(io, " state")
     end
   end
 end

@@ -1,10 +1,17 @@
+"""
+The `CompositeSystems` module defines
+[`CompositeSystem`](@ref)s
+and provides the means to assemble them into
+systems of differential(-algebraic) equations,
+see [`DAESystem`](@ref) and [`assemble`](@ref).
+"""
 module CompositeSystems
 
 export CompositeSystem
-export FlatSystem
 export DAESystem
 export equations
 export assemble
+export update_parameters
 
 
 using ..MoreBase
@@ -15,10 +22,6 @@ using ..Patterns
 using ..Components
 
 
-"""
-A composite system is a pattern,
-where each inner box is filled by a subsystem.
-"""
 struct CompositeSystem{P<:Union{Nothing,Position}} <: AbstractSystem
   pattern::Pattern{AbstractSystem,P}
   isflat::Bool
@@ -40,6 +43,13 @@ struct CompositeSystem{P<:Union{Nothing,Position}} <: AbstractSystem
 end
 
 
+"""
+    CompositeSystem(junctions::Dtry{Junction{P}}, boxes::Dtry{InnerBox{AbstractSystem,P}}) where {P<:Union{Nothing,Position}}
+
+A `CompositeSystem` is given by a [`Pattern`](@ref),
+where each [`InnerBox`](@ref) is filled by
+a system whose interface matches that of the box.
+"""
 function CompositeSystem(
   junctions::Dtry{Junction{P}},
   boxes::Dtry{InnerBox{AbstractSystem,P}}
@@ -64,12 +74,32 @@ Base.print(io::IO, sys::CompositeSystem) =
   print(io, sys.pattern)
 
 
+function AbstractSystems.total_energy(sys::CompositeSystem; box_path::DtryPath=■)
+  expr = Const(0)
+  foreach(sys.pattern.boxes) do (inner_box_path, box)
+    expr = expr + total_energy(box.filling; box_path=box_path * inner_box_path)
+  end
+  expr
+end
+
+
+function AbstractSystems.total_entropy(sys::CompositeSystem; box_path::DtryPath=■)
+  expr = Const(0)
+  foreach(sys.pattern.boxes) do (inner_box_path, box)
+    expr = expr + total_entropy(box.filling; box_path=box_path * inner_box_path)
+  end
+  expr
+end
+
+
 # Flatten hierarchically nested composite systems
 include("flatten.jl")
 
 # Assembly of equations
 include("flat_system.jl")
+include("frompattern.jl")
+include("fromcomponent.jl")
 include("dae_system.jl")
-include("assemble_eqs.jl")
+include("assemble.jl")
 
 end

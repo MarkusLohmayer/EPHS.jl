@@ -1,11 +1,28 @@
 
-"A port of an `IrreversibleComponent` provides the flow variable"
+"""
+    IrreversiblePort(quantity::Quantity, flow::SymExpr)
+
+A port of an [`IrreversibleComponent`](@ref) provides the flow variable.
+
+# Fields
+- `quantity`: [`EPHS.AbstractSystems.Quantity`](@ref) of the port
+- `flow`: [`EPHS.SymbolicExpressions.SymExpr`](@ref) defining the flow variable
+"""
 struct IrreversiblePort
   quantity::Quantity
   flow::SymExpr
 end
 
 
+"""
+    IrreversibleComponent(ports::Dtry{IrreversiblePort})
+
+An `IrreversibleComponent` is a primitive system
+representing irreversible processes.
+
+# Fields
+- `ports`: directory of [`IrreversiblePort`](@ref)s
+"""
 struct IrreversibleComponent <: Component
   ports::Dtry{IrreversiblePort}
 end
@@ -22,7 +39,7 @@ AbstractSystems.fillcolor(::IrreversibleComponent) = "#FF7F80"
 
 
 provides(ic::IrreversibleComponent, fvar::FVar) =
-  haskey(ic.ports, fvar.port_path)
+  haspath(ic.ports, fvar.port_path)
 
 
 function provide(ic::IrreversibleComponent, fvar::FVar)

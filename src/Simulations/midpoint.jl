@@ -1,15 +1,28 @@
 
-function midpoint_rule(sys::CompositeSystem)
-  dae = assemble(sys)
+# Simple hack to make simulation work for systems with external ports
+_isolate(flow::SymExpr) =
+  map(flow, FVar) do fvar
+    fvar.box_path == ■ ? Const(0.0) : fvar
+  end
 
-  isempty(dae.constraints) ||
-    error("`midpoint_rule` does not work with constrained systems")
+
+"""
+    midpoint_rule(dae::DAESystem)
+
+Generate a Julia function that performs a state update `x₀ ↦ x₁`
+based on the implicit midpoint discretization.
+This is a symplectic, second-order Gauss method.
+For constrained systems, the state is augmented with
+the constraint variables.
+"""
+function midpoint_rule(dae::DAESystem)
 
   expr_unpack_x₀ = Expr(
     :(=),
     Expr(
       :tuple,
-      (ast0(xvar) for (; xvar) in dae.storages)...
+      (ast(xvar, "₀") for (; xvar) in dae.storage)...,
+      (ast(cvar) for (; cvar) in dae.constraints)... # not needed
     ),
     :x₀
   )
@@ -18,7 +31,8 @@ function midpoint_rule(sys::CompositeSystem)
     :(=),
     Expr(
       :tuple,
-      (ast1(xvar) for (; xvar) in dae.storages)...
+      (ast(xvar, "₁") for (; xvar) in dae.storage)...,
+      (ast(cvar) for (; cvar) in dae.constraints)...
     ),
     :x₁
   )
@@ -27,9 +41,9 @@ function midpoint_rule(sys::CompositeSystem)
     Expr(
       :(=),
       ast(xvar),
-      :( ($(ast0(xvar)) + $(ast1(xvar))) / 2 )
+      :(($(ast(xvar, "₀")) + $(ast(xvar, "₁"))) / 2)
     )
-    for (; xvar) in dae.storages
+    for (; xvar) in dae.storage
   ]
 
   expr_efforts = Expr[
@@ -38,13 +52,15 @@ function midpoint_rule(sys::CompositeSystem)
       ast(EVar(xvar)),
       ast(effort)
     )
-    for (; xvar, effort) in dae.storages
+    for (; xvar, effort) in dae.storage
   ]
 
-  expr_residual = Expr[
-    :(($(ast1(xvar)) - $(ast0(xvar))) - h * ($(ast(flow))))
-    for (; xvar, flow) in dae.storages
-  ]
+  expr_residual_vect = Expr(
+    :ref,
+    :SA,
+    (:($(ast(xvar, "₁")) - $(ast(xvar, "₀")) - h * ($(ast(_isolate(flow))))) for (; xvar, flow) in dae.storage)...,
+    (ast(residual) for (; residual) in dae.constraints)...
+  )
 
   expr_solve_x₁ = :(x₁ = nlsolve(residual, x₀))
 
@@ -62,11 +78,7 @@ function midpoint_rule(sys::CompositeSystem)
           expr_unpack_x₁,
           expr_midpoint...,
           expr_efforts...,
-          Expr(
-            :ref,
-            :SA,
-            expr_residual...
-          )
+          expr_residual_vect
         )
       ),
       expr_solve_x₁

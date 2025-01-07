@@ -3,16 +3,17 @@
 """
     map(f, expr::SymExpr, T::Type{<:SymExpr}) -> SymExpr
 
-Transform a symbolic expression using a function `f : T -> SymExpr`.
-When descending from the root into the expression tree,
-whenever a `node` of type `T` comes up,
-it is replaced by the node `f(node)`
+Transforms a [`SymExpr`](@ref) using a function
+`f : T -> SymExpr`, where `T <: SymExpr`.
+Descends from the root into the expression tree
+and whenever a `node::T` is encountered,
+it is replaced by the new node `f(node)`.
 """
 function Base.map(f::Function, expr::SymExpr, T::Type{<:SymExpr})::SymExpr
   if expr isa T
     return f(expr)
   elseif expr isa SymOp
-    # By default, the transform is applied to all arguments of an operation
+    # by default, the transform is applied to all arguments of an operation
     args = map(name -> getfield(expr, name), fieldnames(typeof(expr)))
     transformed_args = map(args) do argument
       if argument isa SymExpr # for operations with fixed arity
@@ -30,4 +31,25 @@ function Base.map(f::Function, expr::SymExpr, T::Type{<:SymExpr})::SymExpr
     # identity transform as fallback case
     return expr
   end
+end
+
+
+function Base.foreach(f::Function, expr::SymExpr, T::Type{<:SymExpr})
+  if expr isa T
+    f(expr)
+  elseif expr isa SymOp
+    args = map(name -> getfield(expr, name), fieldnames(typeof(expr)))
+    foreach(args) do argument
+      if argument isa SymExpr
+        foreach(f, argument, T)
+      elseif argument isa Tuple{Vararg{SymExpr}}
+        foreach(argument) do tuple_element
+          foreach(f, tuple_element, T)
+        end
+      else
+        error("should not reach here")
+      end
+    end
+  end
+  nothing
 end

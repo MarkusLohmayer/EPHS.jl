@@ -5,14 +5,14 @@ using Test, EPHS.Patterns, EPHS.AbstractSystems, EPHS.Directories
 
 osc = Pattern(
   Dtry(
-    :q => Dtry(Junction(false, displacement, true, Position(1,2))),
-    :p => Dtry(Junction(true, momentum, true, Position(1,4))),
+    :q => Dtry(Junction(displacement, Position(1,2))),
+    :p => Dtry(Junction(momentum, Position(1,4), exposed=true)),
   ),
   Dtry(
     :pe => Dtry(
       InnerBox(
         Dtry(
-          :q => Dtry(InnerPort(■.q, true)),
+          :q => Dtry(InnerPort(■.q)),
         ),
         Position(1,1)
       ),
@@ -20,7 +20,7 @@ osc = Pattern(
     :ke => Dtry(
       InnerBox(
         Dtry(
-          :p => Dtry(InnerPort(■.p, true)),
+          :p => Dtry(InnerPort(■.p)),
         ),
         Position(1,5)
       ),
@@ -28,8 +28,8 @@ osc = Pattern(
     :pkc => Dtry(
       InnerBox(
         Dtry(
-          :q => Dtry(InnerPort(■.q, true)),
-          :p => Dtry(InnerPort(■.p, true))
+          :q => Dtry(InnerPort(■.q)),
+          :p => Dtry(InnerPort(■.p))
         ),
         Position(1,3)
       ),
@@ -40,14 +40,14 @@ osc = Pattern(
 
 damped_osc = Pattern(
   Dtry(
-    :p => Dtry(Junction(false, momentum, true, Position(1,2))),
-    :s => Dtry(Junction(false, entropy, true, Position(1,4))),
+    :p => Dtry(Junction(momentum, Position(1,2))),
+    :s => Dtry(Junction(entropy, Position(1,4))),
   ),
   Dtry(
     :osc => Dtry(
       InnerBox(
         Dtry(
-          :p => Dtry(InnerPort(■.p, true)),
+          :p => Dtry(InnerPort(■.p)),
         ),
         Position(1,1)
       ),
@@ -55,8 +55,8 @@ damped_osc = Pattern(
     :mf => Dtry(
       InnerBox(
         Dtry(
-          :p => Dtry(InnerPort(■.p, true)),
-          :s => Dtry(InnerPort(■.s, true)),
+          :p => Dtry(InnerPort(■.p)),
+          :s => Dtry(InnerPort(■.s)),
         ),
         Position(1,3)
       ),
@@ -64,7 +64,7 @@ damped_osc = Pattern(
     :tc => Dtry(
       InnerBox(
         Dtry(
-          :s => Dtry(InnerPort(■.s, true)),
+          :s => Dtry(InnerPort(■.s)),
         ),
         Position(1,5)
       ),
@@ -75,10 +75,10 @@ damped_osc = Pattern(
 
 damped_osc_flat = Pattern(
   Dtry(
-    :p => Dtry(Junction(false, momentum, true, Position(1,4))),
-    :s => Dtry(Junction(false, entropy, true, Position(2,5))),
+    :p => Dtry(Junction(momentum, Position(1,4))),
+    :s => Dtry(Junction(entropy, Position(2,5))),
     :osc => Dtry(
-      :q => Dtry(Junction(false, displacement, true, Position(1,2))),
+      :q => Dtry(Junction(displacement, Position(1,2))),
     ),
   ),
   Dtry(
@@ -86,7 +86,7 @@ damped_osc_flat = Pattern(
       :pe => Dtry(
         InnerBox(
           Dtry(
-            :q => Dtry(InnerPort(■.osc.q, true)),
+            :q => Dtry(InnerPort(■.osc.q)),
           ),
           Position(1,1)
         ),
@@ -94,7 +94,7 @@ damped_osc_flat = Pattern(
       :ke => Dtry(
         InnerBox(
           Dtry(
-            :p => Dtry(InnerPort(■.p, true)),
+            :p => Dtry(InnerPort(■.p)),
           ),
           Position(1,5)
         ),
@@ -102,8 +102,8 @@ damped_osc_flat = Pattern(
       :pkc => Dtry(
         InnerBox(
           Dtry(
-            :q => Dtry(InnerPort(■.osc.q, true)),
-            :p => Dtry(InnerPort(■.p, true))
+            :q => Dtry(InnerPort(■.osc.q)),
+            :p => Dtry(InnerPort(■.p))
           ),
           Position(1,3)
         ),
@@ -112,8 +112,8 @@ damped_osc_flat = Pattern(
     :mf => Dtry(
       InnerBox(
         Dtry(
-          :p => Dtry(InnerPort(■.p, true)),
-          :s => Dtry(InnerPort(■.s, true)),
+          :p => Dtry(InnerPort(■.p)),
+          :s => Dtry(InnerPort(■.s)),
         ),
         Position(2,4)
       ),
@@ -121,7 +121,7 @@ damped_osc_flat = Pattern(
     :tc => Dtry(
       InnerBox(
         Dtry(
-          :s => Dtry(InnerPort(■.s, true)),
+          :s => Dtry(InnerPort(■.s)),
         ),
         Position(2,6)
       ),

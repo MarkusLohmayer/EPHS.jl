@@ -1,16 +1,28 @@
 # mechanical oscillator
 
-pe = StorageComponent(
-  Dtry(
-    :q => Dtry(StoragePort(displacement, Const(1.5) * XVar(:q)))
+pe = let
+  k = Par(:k, 1.5)
+  q = XVar(:q)
+  E = Const(1/2) * k * q^Const(2)
+  StorageComponent(
+    Dtry(
+      :q => Dtry(displacement)
+    ),
+    E
   )
-);
+end;
 
-ke = StorageComponent(
-  Dtry(
-    :p => Dtry(StoragePort(momentum, XVar(:p) / Const(1.)))
+ke = let
+  m = Par(:m, 1.)
+  p = XVar(:p)
+  E = Const(1/2) * p^Const(2) / m
+  StorageComponent(
+    Dtry(
+      :p => Dtry(momentum)
+    ),
+    E
   )
-);
+end;
 
 pkc = ReversibleComponent(
   Dtry(
@@ -21,14 +33,14 @@ pkc = ReversibleComponent(
 
 osc = CompositeSystem(
   Dtry(
-    :q => Dtry(Junction(false, displacement, true, Position(1,2))),
-    :p => Dtry(Junction(true, momentum, true, Position(1,4))),
+    :q => Dtry(Junction(displacement, Position(1,2))),
+    :p => Dtry(Junction(momentum, Position(1,4), exposed=true)),
   ),
   Dtry(
     :pe => Dtry(
       InnerBox(
         Dtry(
-          :q => Dtry(InnerPort(■.q, true)),
+          :q => Dtry(InnerPort(■.q)),
         ),
         pe,
         Position(1,1)
@@ -37,7 +49,7 @@ osc = CompositeSystem(
     :ke => Dtry(
       InnerBox(
         Dtry(
-          :p => Dtry(InnerPort(■.p, true)),
+          :p => Dtry(InnerPort(■.p)),
         ),
         ke,
         Position(1,5)
@@ -46,8 +58,8 @@ osc = CompositeSystem(
     :pkc => Dtry(
       InnerBox(
         Dtry(
-          :q => Dtry(InnerPort(■.q, true)),
-          :p => Dtry(InnerPort(■.p, true))
+          :q => Dtry(InnerPort(■.q)),
+          :p => Dtry(InnerPort(■.p))
         ),
         pkc,
         Position(1,3)
@@ -57,8 +69,8 @@ osc = CompositeSystem(
 );
 
 @test assemble(osc) |> equations == Eq[
-  Eq(FVar(■.pe, ■.q), Div(XVar(■.ke, ■.p), Const(1.0))),
-  Eq(FVar(■.ke, ■.p), Add((Neg(Mul((Const(1.5), XVar(■.pe, ■.q)))), FVar(■, ■.p))))
+  Eq(FVar(■.ke, ■.p), Add((Mul((Const(-1.0), Par(■.pe, ■.k, 1.5), XVar(■.pe, ■.q))), FVar(■, ■.p)))),
+  Eq(FVar(■.pe, ■.q), Mul((XVar(■.ke, ■.p), Pow(Par(■.ke, ■.m, 1.0), Const(-1.0)))))
 ]
 
 
@@ -72,4 +84,5 @@ osc = CompositeSystem(
 # 7.052 μs (167 allocations: 5.78 KiB) refactor Position, convenience constructors
 # 9.709 μs (196 allocations: 6.66 KiB) components as values, dtry
 # 10.084 μs (200 allocations: 7.34 KiB) DAESystem
-# @btime assemble($osc)
+# 27.375 μs (490 allocations: 17.67 KiB) Symbolic differentiation (with simplification/normalization)
+# @btime assemble($osc);

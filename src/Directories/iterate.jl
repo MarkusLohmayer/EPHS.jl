@@ -162,3 +162,17 @@ function Base.all(p, dtry::Dtry)
     return all(p, nonempty)
   end
 end
+
+
+"""
+    collect(dtry::AbstractDtry{T}) -> Vector{T}
+
+Collect values from a directory.
+"""
+function Base.collect(dtry::AbstractDtry{T}) where {T}
+  xs = Vector{T}()
+  foreachvalue(dtry) do val
+    push!(xs, val)
+  end
+  xs
+end

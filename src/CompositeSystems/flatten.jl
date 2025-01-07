@@ -1,7 +1,12 @@
 
 MoreBase.flatten(component::Component) = component
 
-
+"""
+    MoreBase.flatten(sys::CompositeSystem{P}) ->
+The function `flatten` creates a flat system from a nested composite system using recursion.
+* nested subsystems are converted into non-hierarchical systems
+* connections, ports, and junctions are adjusted to assure consistency
+    """
 function MoreBase.flatten(sys::CompositeSystem{P}) where {P}
   sys.isflat && return sys
   # Recursively flatten subsystems
@@ -11,7 +16,7 @@ function MoreBase.flatten(sys::CompositeSystem{P}) where {P}
   # Flatten top level
   junctions = merge(
     map(sys.pattern.junctions, Junction{Nothing}) do junction
-      Junction{Nothing}(junction.exposed, junction.quantity, junction.power, nothing)
+      Junction{Nothing}(junction.quantity, nothing, junction.exposed, junction.power)
     end,
     map(boxes_flat, Dtry{Junction{Nothing}}) do box
       if box.filling isa Component
@@ -20,7 +25,7 @@ function MoreBase.flatten(sys::CompositeSystem{P}) where {P}
         filling = box.filling.pattern
         filtermap(filling.junctions, Junction{Nothing}) do junction
           junction.exposed ? nothing : Some(
-            Junction{Nothing}(false, junction.quantity, junction.power, nothing)
+            Junction{Nothing}(junction.quantity, nothing, false, junction.power)
           )
         end
       else

@@ -1,4 +1,13 @@
 
+"""
+    DAEStorage(xvar::XVar, quantity::Quantity, flow::SymExpr, effort::SymExpr)
+
+# Fields
+- `xvar`: state variable
+- `quantity`: associated [`EPHS.AbstractSystems.Quantity`]
+- `flow`: the time-derivative of the state variable
+- `effort`: the differential of the exergy function w.r.t. the state variable
+"""
 struct DAEStorage
   xvar::XVar
   quantity::Quantity
@@ -7,14 +16,31 @@ struct DAEStorage
 end
 
 
+"""
+    DAEConstraint(cvar::CVar, residual::SymExpr)
+
+The `residual` is forced to be zero by
+the corresponding constraint variable `cvar`.
+"""
 struct DAEConstraint
   cvar::CVar
   residual::SymExpr
 end
 
 
+"""
+    DAESystem(storage::Vector{DAEStorage}, constraints::Vector{DAEConstraint})
+
+A `DAESystem` defines a system of differential(-algebraic) equations.
+
+# Fields
+- `storage`: differential part (evolution of state variables)
+- `constraints`: algebraic part (residuals forced to be zero by constraint variables)
+
+See [`DAEStorage`](@ref) and [`DAEConstraint`](@ref).
+"""
 struct DAESystem
-  storages::Vector{DAEStorage}
+  storage::Vector{DAEStorage}
   constraints::Vector{DAEConstraint}
 end
 
@@ -24,13 +50,13 @@ Base.show(io::IO, ::MIME"text/plain", dae::DAESystem) =
 
 
 function Base.print(io::IO, dae::DAESystem)
-  if !isempty(dae.storages)
+  if !isempty(dae.storage)
     println(io, "Flows:")
-    foreach(dae.storages) do (; xvar, flow)
+    foreach(dae.storage) do (; xvar, flow)
       println(io, string(FVar(xvar)), " = ", string(flow))
     end
     println(io, "Efforts:")
-    foreach(dae.storages) do (; xvar, effort)
+    foreach(dae.storage) do (; xvar, effort)
       println(io, string(EVar(xvar)), " = ", string(effort))
     end
   end
@@ -43,27 +69,59 @@ function Base.print(io::IO, dae::DAESystem)
 end
 
 
+"""
+    update_parameters(dae::DAESystem, ps::Dtry{Float64}) -> DAESystem
+
+Update the parameters of the given `DAESystem`
+according to the directory of parameters `ps`.
+Parameters that are not contained in `ps` remain unchanged.
+Parameters in `ps` that are not present in the system are ignored.
+"""
+function update_parameters(dae::DAESystem, ps::AbstractDtry{Float64})
+  isempty(ps) && return dae
+  storage = map(dae.storage) do storage
+    flow = map(storage.flow, Par) do par
+      value = get(ps, par.box_path * par.par_path, par.value)
+      Par(par.box_path, par.par_path, value)
+    end
+    effort = map(storage.effort, Par) do par
+      value = get(ps, par.box_path * par.par_path, par.value)
+      Par(par.box_path, par.par_path, value)
+    end
+    DAEStorage(storage.xvar, storage.quantity, flow, effort)
+  end
+  constraints = map(dae.constraints) do constraint
+    residual = map(constraint.residual, Par) do par
+      value = get(ps, par.box_path * par.par_path, par.value)
+      Par(par.box_path, par.par_path, value)
+    end
+    DAEConstraint(constraint.cvar, residual)
+  end
+  DAESystem(storage, constraints)
+end
+
+
 # Used for testing:
 
 function equations(dae::DAESystem)
   eqs = Vector{Eq}()
-  foreach(dae.storages) do (; xvar, flow, effort)
+  foreach(dae.storage) do (; xvar, flow)
     lhs = FVar(xvar)
     rhs = map(flow, EVar) do evar
-      index = findfirst(dae.storages) do (; xvar)
+      index = findfirst(dae.storage) do (; xvar)
         xvar == XVar(evar)
       end
-      isnothing(index) ? evar : dae.storages[index].effort
+      isnothing(index) ? evar : dae.storage[index].effort
     end
     push!(eqs, Eq(lhs, rhs))
   end
   foreach(dae.constraints) do (; residual)
     lhs = Const(0.)
     rhs = map(residual, EVar) do evar
-      index = findfirst(dae.storages) do (; xvar)
+      index = findfirst(dae.storage) do (; xvar)
         xvar == XVar(evar)
       end
-      isnothing(index) ? evar : dae.storages[index].effort
+      isnothing(index) ? evar : dae.storage[index].effort
     end
     push!(eqs, Eq(lhs, rhs))
   end
@@ -72,4 +130,4 @@ end
 
 
 Base.:(==)(lhs::DAESystem, rhs::DAESystem) =
-  lhs.storages == rhs.storages && lhs.constraints == rhs.constraints
+  lhs.storage == rhs.storage && lhs.constraints == rhs.constraints

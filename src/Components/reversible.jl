@@ -1,34 +1,81 @@
 
-"A port of a `ReversibleComponent` which provides the flow variable"
+"""
+    FlowPort(quantity::Quantity, flow::SymExpr)
+
+A `FlowPort` of a [`ReversibleComponent`](@ref)
+used to define
+a gyrator-like coupling or
+a transformer-like coupling
+(in combination with a corresponding [`EffortPort`](@ref)).
+"""
 struct FlowPort
   quantity::Quantity
   flow::SymExpr
 end
 
 
-"A port of a `ReversibleComponent` which provides the effort variable"
+"""
+    EffortPort(quantity::Quantity, effort::SymExpr)
+
+A `EffortPort` of a [`ReversibleComponent`](@ref)
+used to define
+a transformer-like coupling
+(in combination with a corresponding [`FlowPort`](@ref)).
+"""
 struct EffortPort
   quantity::Quantity
   effort::SymExpr
 end
 
 
-"A state port of a `ReversibleComponent`"
+"""
+    StatePort(quantity::Quantity)
+
+A `StatePort` of a [`ReversibleComponent`](@ref)
+needed if a gyrator/transformer-like coupling or
+a constraint depends on a state variable
+of a system which is not already connected
+via a [`FlowPort`](@ref) or an [`EffortPort`](@ref).
+"""
 struct StatePort
   quantity::Quantity
 end
 
 
+"""
+    Constraint(residual::SymExpr)
+
+The residual is forced to be zero
+by the corresponding constraint variable.
+"""
 struct Constraint
   residual::SymExpr
 end
 
 
+"""
+    ReversiblePort(variant::Union{FlowPort,EffortPort,StatePort,Constraint})
+
+A 'port' of a [`ReversibleComponent`](@ref) can be a
+- [`FlowPort`](@ref) which provides a flow variable
+- [`EffortPort`](@ref) which provides an effort variable
+- [`StatePort`](@ref) which consumes a state variable
+- [`Constraint`](@ref) which defines a residual and a constraint variable
+"""
 struct ReversiblePort
   variant::Union{FlowPort,EffortPort,StatePort,Constraint}
 end
 
 
+"""
+    ReversibleComponent(ports::Dtry{ReversiblePort})
+
+A `ReversibleComponent` is a primitive system
+representing reversible dynamics, transformations, or constraints.
+
+# Fields
+- `ports`: directory of [`ReversiblePort`](@ref)s
+"""
 struct ReversibleComponent <: Component
   ports::Dtry{ReversiblePort}
 end
@@ -87,10 +134,14 @@ struct CVar <: SymVar
 end
 
 
+CVar(name::Symbol) = CVar(DtryPath(), DtryPath(name))
+
+
 Base.string(c::CVar) = string(c.box_path * c.port_path)
 
 
-CVar(port_name::Symbol) = CVar(DtryPath(), DtryPath(port_name))
+SymbolicExpressions.ast(cvar::CVar) =
+  Symbol(replace(string(cvar), '.' => '₊'))
 
 
 function Base.print(io::IO, rc::ReversibleComponent)

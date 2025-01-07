@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xl="http://www.w3.org/1999/xlink" viewBox="32 214 484 121" width="484" height="121">
+  <defs/>
+  <g id="piston" stroke="none" fill-opacity="1" fill="none" stroke-opacity="1" stroke-dasharray="none">
+    <title>piston</title>
+    <g id="piston_device">
+      <title>device</title>
+      <g id="Graphic_2">
+        <title>cylinder</title>
+        <path d="M 38.5 219 L 509.5 219 C 510.0523 219 510.5 219.44772 510.5 220 L 510.5 328.6 C 510.5 329.1523 510.0523 329.6 509.5 329.6 L 38.5 329.6 C 37.947715 329.6 37.5 329.1523 37.5 328.6 L 37.5 220 C 37.5 219.44772 37.947715 219 38.5 219 Z" fill="white"/>
+        <path d="M 38.5 219 L 509.5 219 C 510.0523 219 510.5 219.44772 510.5 220 L 510.5 328.6 C 510.5 329.1523 510.0523 329.6 509.5 329.6 L 38.5 329.6 C 37.947715 329.6 37.5 329.1523 37.5 328.6 L 37.5 220 C 37.5 219.44772 37.947715 219 38.5 219 Z" stroke="black" stroke-linecap="square" stroke-linejoin="miter" stroke-width="8"/>
+      </g>
+      <g id="Line_4">
+        <title>piston</title>
+        <line x1="247.6219" y1="223.2" x2="247.6219" y2="325.4158" stroke="#ca453e" stroke-linecap="butt" stroke-linejoin="round" stroke-width="14"/>
+      </g>
+    </g>
+  </g>
+</svg>

@@ -1,18 +1,20 @@
-
-# For the moment, this is primarily an academic exercise
+# The following is primarily an academic exercise
 # to convince ourselves that the EPHS syntax
-# (i.e. `Interface`s as objects and `Pattern{Nothing,Nothing}`s as morphisms)
-# form a `Dtry`-multicategory.
+# forms a `Dtry`-multicategory
+# with `Interface`s as objects and `Pattern{Nothing,Nothing}`s as morphisms.
+# The functions `identity` and `compose` are not called
+# from other modules (such as `CompositeSystems`).
 
 
 """
     identity(x::Interface) -> Pattern{Nothing,Nothing}
 
-Return the identity pattern on the given interface.
+Return the identity [`Pattern`](@ref)
+on the given [`Interface`](@ref).
 """
 function Base.identity(interface::Interface)
   junctions = map(interface, Junction{Nothing}) do port_type
-    Junction{Nothing}(true, port_type.quantity, port_type.power, nothing)
+    Junction{Nothing}(port_type.quantity, nothing, true, port_type.power)
   end
   boxes = Dtry{InnerBox{Nothing,Nothing}}(
     InnerBox{Nothing,Nothing}(
@@ -31,6 +33,10 @@ end
     compose(pattern::Pattern{Nothing,Nothing}, fillings::Dtry{Pattern{Nothing,Nothing}}) -> Pattern{Nothing,Nothing}
 
 Composition operation for the Dtry-multicategory of patterns.
+
+# Arguments
+- `pattern`: top-level [`Pattern`](@ref)
+- `fillings`: directory of patterns, which assigns to each [`InnerBox`](@ref) of the top-level pattern a nested pattern
 """
 function compose(
   pattern::Pattern{Nothing,Nothing},

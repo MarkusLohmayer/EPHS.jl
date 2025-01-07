@@ -1,19 +1,21 @@
 
 """
-Solve a system of nonlinear equations `residual(x) ≈ 0`
-using the Newton-Raphson method.
-Example:
-```
-using StaticArrays
-function residual(x)
-    x₁, x₂ = x
-    SA[
-        x₁-x₂+2,
-        x₁*x₁-x₂
-    ]
-end
-x = SA[0., 0.] # initial guess
-@assert nlsolve(residual, x) ≈ SA[-1., 1.]
+    nlsolve(residual::Function, x₀::AbstractVector)
+
+Solves the system of nonlinear equations `residual(x) ≈ 0`
+using the Newton-Raphson method
+with `x = x₀` as the initial guess.
+
+# Example
+```jldoctest
+julia> using StaticArrays
+
+julia> residual(x) = SA[x[1]-x[2]+2, x[1]*x[1]-x[2]];
+
+julia> x₀ = SA[0., 0.];
+
+julia> nlsolve(residual, x₀) ≈ SA[-1., 1.]
+true
 ```
 """
 function nlsolve(residual::Function, x::AbstractVector; tol::Float64=1e-12, maxiter::Int=100)
@@ -21,7 +23,7 @@ function nlsolve(residual::Function, x::AbstractVector; tol::Float64=1e-12, maxi
   nrm = norm(res)
   cnt = 1
   while nrm > tol
-    cnt < maxiter || error("nlsolve did not converge")
+    cnt < maxiter || error("nosolve: exceeded $maxiter iterations")
     jac = jacobian(residual, x)
     x = x - jac \ res
     res = residual(x)

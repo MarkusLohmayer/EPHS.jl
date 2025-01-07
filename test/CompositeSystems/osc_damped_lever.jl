@@ -1,23 +1,30 @@
 
-lever = ReversibleComponent(
-  Dtry(
-    :q₁ => Dtry(ReversiblePort(FlowPort(displacement, -(Const(2.) * FVar(:q₂))))),
-    :q₂ => Dtry(ReversiblePort(EffortPort(displacement, Const(2.) * EVar(:q₁))))
+lever = let
+  r = Par(:r, 2.)
+  q₁₊e = EVar(:q₁)
+  q₂₊f = FVar(:q₂)
+  q₁₊f = -(r * q₂₊f)
+  q₂₊e = r * q₁₊e
+  ReversibleComponent(
+    Dtry(
+      :q₁ => Dtry(ReversiblePort(FlowPort(displacement, q₁₊f))),
+      :q₂ => Dtry(ReversiblePort(EffortPort(displacement, q₂₊e)))
+    )
   )
-)
+end
 
 osc_damped_lever = CompositeSystem(
   Dtry(
-    :q₁ => Dtry(Junction(false, displacement, true, Position(1,2))),
-    :q₂ => Dtry(Junction(false, displacement, true, Position(1,4))),
-    :p => Dtry(Junction(false, momentum, true, Position(1,6))),
-    :s => Dtry(Junction(false, entropy, true, Position(2,7))),
+    :q₁ => Dtry(Junction(displacement, Position(1,2))),
+    :q₂ => Dtry(Junction(displacement, Position(1,4))),
+    :p => Dtry(Junction(momentum, Position(1,6))),
+    :s => Dtry(Junction(entropy, Position(2,7))),
   ),
   Dtry(
     :pe => Dtry(
       InnerBox(
         Dtry(
-          :q => Dtry(InnerPort(■.q₁, true)),
+          :q => Dtry(InnerPort(■.q₁)),
         ),
         pe,
         Position(1,1)
@@ -26,8 +33,8 @@ osc_damped_lever = CompositeSystem(
     :lever => Dtry(
       InnerBox(
         Dtry(
-          :q₁ => Dtry(InnerPort(■.q₁, true)),
-          :q₂ => Dtry(InnerPort(■.q₂, true))
+          :q₁ => Dtry(InnerPort(■.q₁)),
+          :q₂ => Dtry(InnerPort(■.q₂))
         ),
         lever,
         Position(1,3)
@@ -36,8 +43,8 @@ osc_damped_lever = CompositeSystem(
     :pkc => Dtry(
       InnerBox(
         Dtry(
-          :q => Dtry(InnerPort(■.q₂, true)),
-          :p => Dtry(InnerPort(■.p, true))
+          :q => Dtry(InnerPort(■.q₂)),
+          :p => Dtry(InnerPort(■.p))
         ),
         pkc,
         Position(1,5)
@@ -46,7 +53,7 @@ osc_damped_lever = CompositeSystem(
     :ke => Dtry(
       InnerBox(
         Dtry(
-          :p => Dtry(InnerPort(■.p, true)),
+          :p => Dtry(InnerPort(■.p)),
         ),
         ke,
         Position(1,7)
@@ -55,8 +62,8 @@ osc_damped_lever = CompositeSystem(
     :mf => Dtry(
       InnerBox(
         Dtry(
-          :p => Dtry(InnerPort(■.p, true)),
-          :s => Dtry(InnerPort(■.s, true)),
+          :p => Dtry(InnerPort(■.p)),
+          :s => Dtry(InnerPort(■.s)),
         ),
         mf,
         Position(2,6)
@@ -65,7 +72,7 @@ osc_damped_lever = CompositeSystem(
     :tc => Dtry(
       InnerBox(
         Dtry(
-          :s => Dtry(InnerPort(■.s, true)),
+          :s => Dtry(InnerPort(■.s)),
         ),
         tc,
         Position(2,8)
@@ -75,9 +82,9 @@ osc_damped_lever = CompositeSystem(
 );
 
 @test assemble(osc_damped_lever) |> equations == Eq[
-  Eq(FVar(■.pe, ■.q), Mul((Const(2.0), Div(XVar(■.ke, ■.p), Const(1.0))))),
-  Eq(FVar(■.ke, ■.p), Add((Neg(Mul((Const(2.0), Mul((Const(1.5), XVar(■.pe, ■.q)))))), Neg(Mul((Const(0.02), Div(XVar(■.ke, ■.p), Const(1.0)))))))),
-  Eq(FVar(■.tc, ■.s), Div(Mul((Const(0.02), Div(XVar(■.ke, ■.p), Const(1.0)), Div(XVar(■.ke, ■.p), Const(1.0)))), Mul((Div(Const(1.0), Const(2.5)), Exp(Div(XVar(■.tc, ■.s), Const(2.5)))))))
+  Eq(FVar(■.ke, ■.p), Add((Mul((Const(-1.0), Par(■.mf, ■.d, 0.02), XVar(■.ke, ■.p), Pow(Par(■.ke, ■.m, 1.0), Const(-1.0)))), Mul((Const(-1.0), Par(■.lever, ■.r, 2.0), Par(■.pe, ■.k, 1.5), XVar(■.pe, ■.q)))))),
+  Eq(FVar(■.pe, ■.q), Mul((Par(■.lever, ■.r, 2.0), XVar(■.ke, ■.p), Pow(Par(■.ke, ■.m, 1.0), Const(-1.0))))),
+  Eq(FVar(■.tc, ■.s), Mul((Par(■.mf, ■.d, 0.02), Pow(XVar(■.ke, ■.p), Const(2.0)), Pow(Par(■.ke, ■.m, 1.0), Const(-2.0)), Pow(Par(■.tc, ■.c₁, 1.0), Const(-1.0)), Pow(Exp(Mul((XVar(■.tc, ■.s), Pow(Par(■.tc, ■.c₂, 2.0), Const(-1.0))))), Const(-1.0)), Par(■.tc, ■.c₂, 2.0))))
 ]
 
 # 32.083 μs (732 allocations: 22.30 KiB) top-down approach
@@ -88,4 +95,5 @@ osc_damped_lever = CompositeSystem(
 # 13.208 μs (332 allocations: 11.56 KiB) refactor Position, convenience constructors
 # 22.958 μs (506 allocations: 16.66 KiB) components as values, dtry
 # 24.708 μs (486 allocations: 16.91 KiB) DAESystem
+# 91.875 μs (1545 allocations: 55.12 KiB) Symbolic differentiation (with simplification/normalization)
 # @btime assemble($osc_damped_lever);

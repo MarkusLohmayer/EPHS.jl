@@ -1,9 +1,10 @@
 
 """
     flatten(dtry::NonEmptyDtry{NonEmptyDtry{T}}) -> Dtry{T}
+
 Flattens a nonempty directory of nonempty directories (monad multiplication).
 """
-function flatten(dtry::NonEmptyDtry{NonEmptyDtry{T}}) where  {T}
+function MoreBase.flatten(dtry::NonEmptyDtry{NonEmptyDtry{T}}) where  {T}
   if leaf_or_node(dtry) isa DtryLeaf
     leaf = leaf_or_node(dtry)
     leaf.value
@@ -15,12 +16,17 @@ end
 
 
 """
-    flatten(dtry::Dtry{<:Dtry{T}}) -> Dtry{T}
+    flatten(dtry::Dtry{Dtry{T}}) -> Dtry{T}
+
 Flattens a directory of directories (monad multiplication).
 """
-function flatten(dtry::AbstractDtry{Dtry{T}}) where {T}
+function MoreBase.flatten(dtry::Union{
+  Dtry{Dtry{T}},
+  Dtry{NonEmptyDtry{T}},
+  NonEmptyDtry{Dtry{T}},
+}) where {T}
   isempty(dtry) && return Dtry{T}()
-  nonempty = dtry isa NonEmptyDtry ? dtry : nothing_or_nonempty(dtry)
+  nonempty = nothing_or_nonempty(dtry)
   if leaf_or_node(nonempty) isa DtryLeaf
     leaf = leaf_or_node(nonempty)
     leaf.value
