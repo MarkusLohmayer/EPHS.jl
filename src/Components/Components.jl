@@ -3,6 +3,7 @@ module Components
 export Component
 export StorageComponent, StoragePort
 export ReversibleComponent, ReversiblePort, FlowPort, EffortPort, StatePort
+export Constraint, CVar
 export IrreversibleComponent, IrreversiblePort
 export provides, provide
 

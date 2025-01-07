@@ -1,6 +1,6 @@
 
 function frompattern(fsys::FlatSystem, flow::FVar)
-  (;box_path, port_path) = flow
+  (; box_path, port_path) = flow
   box = fsys.pattern.boxes[box_path]
   junction_path = box.ports[port_path].junction
   junction = fsys.pattern.junctions[junction_path]
@@ -20,7 +20,7 @@ end
 
 
 function frompattern(fsys::FlatSystem, effort::EVar)
-  (;box_path, port_path) = effort
+  (; box_path, port_path) = effort
   box = fsys.pattern.boxes[box_path]
   junction_path = box.ports[port_path].junction
   cs = fsys.connections[junction_path]
@@ -42,7 +42,7 @@ end
 
 
 function frompattern(fsys::FlatSystem, state::XVar)
-  (;box_path, port_path) = state
+  (; box_path, port_path) = state
   box = fsys.pattern.boxes[box_path]
   junction_path = box.ports[port_path].junction
   cs = fsys.connections[junction_path]
@@ -70,8 +70,12 @@ end
 
 
 fromcomponent(fsys::FlatSystem, pvar::PowerVar, c::Component) =
-  return map(provide(c, pvar), PortVar) do rhs_pvar
-    frompattern(fsys, typeof(rhs_pvar)(pvar.box_path, rhs_pvar.port_path))
+  return map(provide(c, pvar), Union{PortVar,CVar}) do rhs_pvar
+    if rhs_pvar isa PortVar
+      frompattern(fsys, typeof(rhs_pvar)(pvar.box_path, rhs_pvar.port_path))
+    else
+      CVar(pvar.box_path, rhs_pvar.port_path)
+    end
   end
 
 
@@ -88,6 +92,11 @@ function assemble(sys::CompositeSystem)
 end
 
 
+struct DAESystem
+
+end
+
+
 function assemble(fsys::FlatSystem)
   eqs = Eq[]
   foreach(fsys.pattern.boxes) do (box_path, box)
@@ -96,6 +105,17 @@ function assemble(fsys::FlatSystem)
         flow = FVar(box_path, port_path)
         eq = Eq(flow, frompattern(fsys, flow))
         push!(eqs, eq)
+      end
+    end
+    if box.filling isa ReversibleComponent
+      foreachvalue(box.filling.ports) do port
+        if port.variant isa Constraint
+          rhs = map(port.variant.residual, PortVar) do rhs_pvar
+            frompattern(fsys, typeof(rhs_pvar)(box_path, rhs_pvar.port_path))
+          end
+          eq = Eq(Const(0), rhs)
+          push!(eqs, eq)
+        end
       end
     end
   end

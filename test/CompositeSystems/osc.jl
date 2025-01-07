@@ -4,20 +4,20 @@ pe = StorageComponent(
   Dtry(
     :q => Dtry(StoragePort(displacement, Const(1.5) * XVar(:q)))
   )
-)
+);
 
 ke = StorageComponent(
   Dtry(
     :p => Dtry(StoragePort(momentum, XVar(:p) / Const(1.)))
   )
-)
+);
 
 pkc = ReversibleComponent(
   Dtry(
     :q => Dtry(ReversiblePort(FlowPort(displacement, -EVar(:p)))),
     :p => Dtry(ReversiblePort(FlowPort(momentum, EVar(:q))))
   )
-)
+);
 
 osc = CompositeSystem(
   Dtry(

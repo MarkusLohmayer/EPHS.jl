@@ -19,8 +19,13 @@ struct StatePort
 end
 
 
+struct Constraint
+  residual::SymExpr
+end
+
+
 struct ReversiblePort
-  variant::Union{FlowPort,EffortPort,StatePort}
+  variant::Union{FlowPort,EffortPort,StatePort,Constraint}
 end
 
 
@@ -30,10 +35,14 @@ end
 
 
 function AbstractSystems.interface(rc::ReversibleComponent)
-  map(rc.ports, PortType) do reversible_port
-    reversible_port.variant isa StatePort ?
-      PortType(reversible_port.variant.quantity, false) :
-      PortType(reversible_port.variant.quantity, true)
+  filtermap(rc.ports, PortType) do reversible_port
+    if reversible_port.variant isa StatePort
+      return Some(PortType(reversible_port.variant.quantity, false))
+    elseif reversible_port.variant isa Constraint
+      return nothing
+    else
+      return Some(PortType(reversible_port.variant.quantity, true))
+    end
   end
 end
 
@@ -69,3 +78,16 @@ function provide(rc::ReversibleComponent, evar::EVar)
   end
   error("$(string(evar)) not found")
 end
+
+
+"Constraint multiplier variable"
+struct CVar <: SymVar
+  box_path::DtryPath
+  port_path::DtryPath
+end
+
+
+Base.string(c::CVar) = string(c.box_path * c.port_path)
+
+
+CVar(port_name::Symbol) = CVar(DtryPath(), DtryPath(port_name))
