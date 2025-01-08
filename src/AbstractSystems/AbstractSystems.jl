@@ -26,6 +26,7 @@ using ..SymbolicExpressions
 struct Quantity
   quantity::Symbol
   space::Symbol
+  iseven::Bool # parity wrt TRT
 end
 
 
