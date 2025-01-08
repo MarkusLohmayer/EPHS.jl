@@ -19,6 +19,9 @@ abstract type Component <: AbstractSystem end
 provides(::Component, ::PortVar) = false
 
 
+Base.show(io::IO, ::MIME"text/plain", c::Component) = print(io, c)
+
+
 include("storage.jl")
 include("reversible.jl")
 include("irreversible.jl")

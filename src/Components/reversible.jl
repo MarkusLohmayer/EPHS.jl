@@ -91,3 +91,35 @@ Base.string(c::CVar) = string(c.box_path * c.port_path)
 
 
 CVar(port_name::Symbol) = CVar(DtryPath(), DtryPath(port_name))
+
+
+function Base.print(io::IO, rc::ReversibleComponent)
+  println(io, "ReversibleComponent")
+  print_dtry(io, rc.ports; print_value=print_port)
+end
+
+
+print_port(io::IO, port::ReversiblePort, prefix::String) =
+  print_port(io, port.variant, prefix)
+
+
+function print_port(io::IO, port::FlowPort, prefix::String)
+  println(io, port.quantity)
+  print(io, prefix, "f = ", port.flow)
+end
+
+
+function print_port(io::IO, port::EffortPort, prefix::String)
+  println(io, port.quantity)
+  print(io, prefix, "e = ", port.effort)
+end
+
+
+function print_port(io::IO, port::StatePort, ::String)
+  println(io, port.quantity, " (state)")
+end
+
+
+function print_port(io::IO, port::Constraint, ::String)
+  println(io, "constraint: 0 = ", port.residual)
+end
