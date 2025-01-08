@@ -45,4 +45,5 @@ osc_damped_nested = CompositeSystem(
 # 59.625 μs (949 allocations: 33.41 KiB) isflat
 # 57.958 μs (891 allocations: 31.30 KiB) refactor Position, convenience constructors
 # 67.375 μs (1050 allocations: 35.80 KiB) components as values, dtry
+# 68.041 μs (1018 allocations: 35.72 KiB) DAESystem
 # @btime assemble($osc_damped_nested);

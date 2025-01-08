@@ -5,12 +5,11 @@ function frompattern(fsys::FlatSystem, flow::FVar)
   junction_path = box.ports[port_path].junction
   junction = fsys.pattern.junctions[junction_path]
   cs = fsys.connections[junction_path]
-  # TODO Error if fromcomponent(...) returns nothing
-  internal = -(sum(
-    fromcomponent(fsys, FVar(c.box_path, c.port_path))
+  internal = sum(
+    -(fromcomponent(fsys, FVar(c.box_path, c.port_path)))
     for c in cs
     if c.power && (c.box_path != box_path || c.port_path != port_path)
-  ))
+  )
   if junction.exposed && junction.power
     return internal + FVar(■, junction_path)
   else
@@ -26,7 +25,12 @@ function frompattern(fsys::FlatSystem, effort::EVar)
   cs = fsys.connections[junction_path]
   for c in cs
     if c.effort_provider
-      return fromcomponent(fsys, EVar(c.box_path, c.port_path))
+      evar = EVar(c.box_path, c.port_path)
+      if c.storage
+        return evar
+      else
+        return fromcomponent(fsys, evar)
+      end
     end
   end
   junction = fsys.pattern.junctions[junction_path]
@@ -92,32 +96,29 @@ function assemble(sys::CompositeSystem)
 end
 
 
-struct DAESystem
-
-end
-
-
 function assemble(fsys::FlatSystem)
-  eqs = Eq[]
+  storages = Vector{DAEStorage}()
+  constraints = Vector{DAEConstraint}()
   foreach(fsys.pattern.boxes) do (box_path, box)
     if box.filling isa StorageComponent
-      foreachpath(box.ports) do port_path
-        flow = FVar(box_path, port_path)
-        eq = Eq(flow, frompattern(fsys, flow))
-        push!(eqs, eq)
+      foreach(box.filling.ports) do (port_path, port)
+        xvar = XVar(box_path, port_path)
+        quantity = port.quantity
+        flow = frompattern(fsys, FVar(xvar))
+        effort = fromcomponent(fsys, EVar(xvar), box.filling)
+        push!(storages, DAEStorage(xvar, quantity, flow, effort))
       end
-    end
-    if box.filling isa ReversibleComponent
-      foreachvalue(box.filling.ports) do port
+    elseif box.filling isa ReversibleComponent
+      foreach(box.filling.ports) do (port_path, port)
         if port.variant isa Constraint
-          rhs = map(port.variant.residual, PortVar) do rhs_pvar
+          cvar = CVar(box_path, port_path)
+          residual = map(port.variant.residual, PortVar) do rhs_pvar
             frompattern(fsys, typeof(rhs_pvar)(box_path, rhs_pvar.port_path))
           end
-          eq = Eq(Const(0), rhs)
-          push!(eqs, eq)
+          push!(constraints, DAEConstraint(cvar, residual))
         end
       end
     end
   end
-  eqs
+  DAESystem(storages, constraints)
 end

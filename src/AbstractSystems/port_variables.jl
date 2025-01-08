@@ -44,4 +44,6 @@ FVar(port_name::Symbol) = FVar(DtryPath(), DtryPath(port_name))
 EVar(port_name::Symbol) = EVar(DtryPath(), DtryPath(port_name))
 
 
-XVar(fvar::FVar) = XVar(fvar.box_path, fvar.port_path)
+XVar(pvar::PortVar) = XVar(pvar.box_path, pvar.port_path)
+FVar(pvar::PortVar) = FVar(pvar.box_path, pvar.port_path)
+EVar(pvar::PortVar) = EVar(pvar.box_path, pvar.port_path)

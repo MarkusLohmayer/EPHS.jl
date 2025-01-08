@@ -2,6 +2,8 @@ module CompositeSystems
 
 export CompositeSystem
 export FlatSystem
+export DAESystem
+export equations
 export assemble
 
 
@@ -62,8 +64,12 @@ Base.print(io::IO, sys::CompositeSystem) =
   print(io, sys.pattern)
 
 
+# Flatten hierarchically nested composite systems
+include("flatten.jl")
+
 # Assembly of equations
 include("flat_system.jl")
+include("dae_system.jl")
 include("assemble_eqs.jl")
 
 end

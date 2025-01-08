@@ -76,9 +76,9 @@ osc_damped_flat = CompositeSystem(
 
 @test osc_damped_flat.isflat == true
 
-@test assemble(osc_damped_flat) == Eq[
+@test assemble(osc_damped_flat) |> equations == Eq[
   Eq(FVar(■.osc.pe, ■.q), Div(XVar(■.osc.ke, ■.p), Const(1.0))),
-  Eq(FVar(■.osc.ke, ■.p), Neg(Add((Mul((Const(1.5), XVar(■.osc.pe, ■.q))), Mul((Const(0.02), Div(XVar(■.osc.ke, ■.p), Const(1.0)))))))),
+  Eq(FVar(■.osc.ke, ■.p), Add((Neg(Mul((Const(1.5), XVar(■.osc.pe, ■.q)))), Neg(Mul((Const(0.02), Div(XVar(■.osc.ke, ■.p), Const(1.0)))))))),
   Eq(FVar(■.tc, ■.s), Div(Mul((Const(0.02), Div(XVar(■.osc.ke, ■.p), Const(1.0)), Div(XVar(■.osc.ke, ■.p), Const(1.0)))), Mul((Div(Const(1.0), Const(2.5)), Exp(Div(XVar(■.tc, ■.s), Const(2.5)))))))
 ]
 
@@ -89,4 +89,5 @@ osc_damped_flat = CompositeSystem(
 # 54.333 μs (852 allocations: 30.59 KiB) arbitrary nesting of patterns
 # 13.541 μs (328 allocations: 10.92 KiB) refactor Position, convenience constructors
 # 23.708 μs (487 allocations: 15.66 KiB) components as values, dtry
+# 24.167 μs (455 allocations: 15.48 KiB) DAESystem
 # @btime assemble($osc_damped_flat);

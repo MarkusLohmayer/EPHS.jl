@@ -56,13 +56,11 @@ osc = CompositeSystem(
   )
 );
 
-@test assemble(osc) == Eq[
+@test assemble(osc) |> equations == Eq[
   Eq(FVar(■.pe, ■.q), Div(XVar(■.ke, ■.p), Const(1.0))),
   Eq(FVar(■.ke, ■.p), Add((Neg(Mul((Const(1.5), XVar(■.pe, ■.q)))), FVar(■, ■.p))))
 ]
 
-# Human-readable display of equations
-# assemble(osc) |> print
 
 # 7.812 μs (205 allocations: 6.52 KiB) top-down approach
 # 6.400 μs (167 allocations: 5.53 KiB hybrid approach
@@ -73,4 +71,5 @@ osc = CompositeSystem(
 # 7.021 μs (173 allocations: 5.95 KiB) isflat
 # 7.052 μs (167 allocations: 5.78 KiB) refactor Position, convenience constructors
 # 9.709 μs (196 allocations: 6.66 KiB) components as values, dtry
+# 10.084 μs (200 allocations: 7.34 KiB) DAESystem
 # @btime assemble($osc)

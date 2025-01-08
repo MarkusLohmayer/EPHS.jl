@@ -6,7 +6,10 @@ struct Neg <: SymOp
   s::SymExpr
 end
 
-Base.string(s::Neg) = "-(" * string(s.s) * ")"
+function Base.string(s::Neg)
+  child = s.s isa SymVar ? string(s.s) : "(" * string(s.s) * ")"
+  "-" * child
+end
 
 evaluate(s::Neg) = -(evaluate(s.s))
 

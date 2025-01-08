@@ -70,8 +70,8 @@ stator = CompositeSystem(
   )
 );
 
-@test assemble(stator) == Eq[
-  Eq(FVar(■.coil, ■.b), Neg(Add((Neg(EVar(■, ■.q)), Mul((Const(0.01), Div(XVar(■.coil, ■.b), Const(1.0))))))))
+@test assemble(stator) |> equations == Eq[
+  Eq(FVar(■.coil, ■.b), Add((EVar(■, ■.q), Neg(Mul((Const(0.01), Div(XVar(■.coil, ■.b), Const(1.0)))))))),
   Eq(FVar(■.tc, ■.s), Div(Mul((Const(0.01), Div(XVar(■.coil, ■.b), Const(1.0)), Div(XVar(■.coil, ■.b), Const(1.0)))), Mul((Div(Const(1.0), Const(2.5)), Exp(Div(XVar(■.tc, ■.s), Const(2.5)))))))
 ]
 
@@ -179,10 +179,10 @@ rotor = CompositeSystem(
   )
 );
 
-@test assemble(rotor) == Eq[
-  Eq(FVar(■.coil, ■.b), Neg(Add((Neg(EVar(■, ■.q)), Mul((XVar(■, ■.bₛ), Div(XVar(■.mass, ■.p), Const(1.0)))), Mul((Const(0.01), Div(XVar(■.coil, ■.b), Const(1.0))))))))
-  Eq(FVar(■.mass, ■.p), Add((Neg(Add((Neg(Mul((XVar(■, ■.bₛ), Div(XVar(■.coil, ■.b), Const(1.0))))), Mul((Const(0.01), Div(XVar(■.mass, ■.p), Const(1.0))))))), FVar(■, ■.p))))
-  Eq(FVar(■.tc, ■.s), Neg(Add((Neg(Div(Mul((Const(0.01), Div(XVar(■.coil, ■.b), Const(1.0)), Div(XVar(■.coil, ■.b), Const(1.0)))), Mul((Div(Const(1.0), Const(2.5)), Exp(Div(XVar(■.tc, ■.s), Const(2.5))))))), Neg(Div(Mul((Const(0.01), Div(XVar(■.mass, ■.p), Const(1.0)), Div(XVar(■.mass, ■.p), Const(1.0)))), Mul((Div(Const(1.0), Const(2.5)), Exp(Div(XVar(■.tc, ■.s), Const(2.5)))))))))))
+@test assemble(rotor) |> equations == Eq[
+  Eq(FVar(■.coil, ■.b), Add((EVar(■, ■.q), Neg(Mul((XVar(■, ■.bₛ), Div(XVar(■.mass, ■.p), Const(1.0))))), Neg(Mul((Const(0.01), Div(XVar(■.coil, ■.b), Const(1.0)))))))),
+  Eq(FVar(■.mass, ■.p), Add((Mul((XVar(■, ■.bₛ), Div(XVar(■.coil, ■.b), Const(1.0)))), Neg(Mul((Const(0.01), Div(XVar(■.mass, ■.p), Const(1.0))))), FVar(■, ■.p)))),
+  Eq(FVar(■.tc, ■.s), Add((Div(Mul((Const(0.01), Div(XVar(■.coil, ■.b), Const(1.0)), Div(XVar(■.coil, ■.b), Const(1.0)))), Mul((Div(Const(1.0), Const(2.5)), Exp(Div(XVar(■.tc, ■.s), Const(2.5)))))), Div(Mul((Const(0.01), Div(XVar(■.mass, ■.p), Const(1.0)), Div(XVar(■.mass, ■.p), Const(1.0)))), Mul((Div(Const(1.0), Const(2.5)), Exp(Div(XVar(■.tc, ■.s), Const(2.5)))))))))
 ]
 
 
@@ -219,19 +219,18 @@ motor = CompositeSystem(
   )
 );
 
-@test assemble(motor) == Eq[
-  Eq(FVar(■.stator.coil, ■.b), Neg(Add((Neg(EVar(■, ■.q)), Mul((Const(0.01), Div(XVar(■.stator.coil, ■.b), Const(1.0))))))))
-  Eq(FVar(■.stator.tc, ■.s), Div(Mul((Const(0.01), Div(XVar(■.stator.coil, ■.b), Const(1.0)), Div(XVar(■.stator.coil, ■.b), Const(1.0)))), Mul((Div(Const(1.0), Const(2.5)), Exp(Div(XVar(■.stator.tc, ■.s), Const(2.5)))))))
-  Eq(FVar(■.rotor.coil, ■.b), Neg(Add((Neg(EVar(■, ■.q)), Mul((XVar(■.stator.coil, ■.b), Div(XVar(■.rotor.mass, ■.p), Const(1.0)))), Mul((Const(0.01), Div(XVar(■.rotor.coil, ■.b), Const(1.0))))))))
-  Eq(FVar(■.rotor.mass, ■.p), Add((Neg(Add((Neg(Mul((XVar(■.stator.coil, ■.b), Div(XVar(■.rotor.coil, ■.b), Const(1.0))))), Mul((Const(0.01), Div(XVar(■.rotor.mass, ■.p), Const(1.0))))))), FVar(■, ■.p))))
-  Eq(FVar(■.rotor.tc, ■.s), Neg(Add((Neg(Div(Mul((Const(0.01), Div(XVar(■.rotor.coil, ■.b), Const(1.0)), Div(XVar(■.rotor.coil, ■.b), Const(1.0)))), Mul((Div(Const(1.0), Const(2.5)), Exp(Div(XVar(■.rotor.tc, ■.s), Const(2.5))))))), Neg(Div(Mul((Const(0.01), Div(XVar(■.rotor.mass, ■.p), Const(1.0)), Div(XVar(■.rotor.mass, ■.p), Const(1.0)))), Mul((Div(Const(1.0), Const(2.5)), Exp(Div(XVar(■.rotor.tc, ■.s), Const(2.5)))))))))))
+@test assemble(motor) |> equations == Eq[
+  Eq(FVar(■.stator.coil, ■.b), Add((EVar(■, ■.q), Neg(Mul((Const(0.01), Div(XVar(■.stator.coil, ■.b), Const(1.0)))))))),
+  Eq(FVar(■.stator.tc, ■.s), Div(Mul((Const(0.01), Div(XVar(■.stator.coil, ■.b), Const(1.0)), Div(XVar(■.stator.coil, ■.b), Const(1.0)))), Mul((Div(Const(1.0), Const(2.5)), Exp(Div(XVar(■.stator.tc, ■.s), Const(2.5))))))),
+  Eq(FVar(■.rotor.coil, ■.b), Add((EVar(■, ■.q), Neg(Mul((XVar(■.stator.coil, ■.b), Div(XVar(■.rotor.mass, ■.p), Const(1.0))))), Neg(Mul((Const(0.01), Div(XVar(■.rotor.coil, ■.b), Const(1.0)))))))),
+  Eq(FVar(■.rotor.mass, ■.p), Add((Mul((XVar(■.stator.coil, ■.b), Div(XVar(■.rotor.coil, ■.b), Const(1.0)))), Neg(Mul((Const(0.01), Div(XVar(■.rotor.mass, ■.p), Const(1.0))))), FVar(■, ■.p)))),
+  Eq(FVar(■.rotor.tc, ■.s), Add((Div(Mul((Const(0.01), Div(XVar(■.rotor.coil, ■.b), Const(1.0)), Div(XVar(■.rotor.coil, ■.b), Const(1.0)))), Mul((Div(Const(1.0), Const(2.5)), Exp(Div(XVar(■.rotor.tc, ■.s), Const(2.5)))))), Div(Mul((Const(0.01), Div(XVar(■.rotor.mass, ■.p), Const(1.0)), Div(XVar(■.rotor.mass, ■.p), Const(1.0)))), Mul((Div(Const(1.0), Const(2.5)), Exp(Div(XVar(■.rotor.tc, ■.s), Const(2.5)))))))))
 ]
 
 
 ## system with motor
 
-# TODO add flywheel and extend assembly to DAE case
-# TODO connect piston with crank mechanism?
+# TODO add flywheel and connect piston with crank mechanism
 
 load_res = IrreversibleComponent(
   Dtry(
@@ -297,12 +296,12 @@ motor_rig = CompositeSystem(
   )
 );
 
-@test assemble(motor_rig) == Eq[
-  Eq(FVar(■.motor.stator.coil, ■.b), Neg(Add((Neg(EVar(■, ■.q)), Mul((Const(0.01), Div(XVar(■.motor.stator.coil, ■.b), Const(1.0))))))))
-  Eq(FVar(■.motor.stator.tc, ■.s), Div(Mul((Const(0.01), Div(XVar(■.motor.stator.coil, ■.b), Const(1.0)), Div(XVar(■.motor.stator.coil, ■.b), Const(1.0)))), Mul((Div(Const(1.0), Const(2.5)), Exp(Div(XVar(■.motor.stator.tc, ■.s), Const(2.5)))))))
-  Eq(FVar(■.motor.rotor.coil, ■.b), Neg(Add((Neg(EVar(■, ■.q)), Mul((XVar(■.motor.stator.coil, ■.b), Div(XVar(■.motor.rotor.mass, ■.p), Const(1.0)))), Mul((Const(0.01), Div(XVar(■.motor.rotor.coil, ■.b), Const(1.0))))))))
-  Eq(FVar(■.motor.rotor.mass, ■.p), Neg(Add((Neg(Mul((XVar(■.motor.stator.coil, ■.b), Div(XVar(■.motor.rotor.coil, ■.b), Const(1.0))))), Mul((Const(0.01), Div(XVar(■.motor.rotor.mass, ■.p), Const(1.0)))), Mul((Const(0.5), Div(XVar(■.motor.rotor.mass, ■.p), Const(1.0))))))))
-  Eq(FVar(■.motor.rotor.tc, ■.s), Neg(Add((Neg(Div(Mul((Const(0.01), Div(XVar(■.motor.rotor.coil, ■.b), Const(1.0)), Div(XVar(■.motor.rotor.coil, ■.b), Const(1.0)))), Mul((Div(Const(1.0), Const(2.5)), Exp(Div(XVar(■.motor.rotor.tc, ■.s), Const(2.5))))))), Neg(Div(Mul((Const(0.01), Div(XVar(■.motor.rotor.mass, ■.p), Const(1.0)), Div(XVar(■.motor.rotor.mass, ■.p), Const(1.0)))), Mul((Div(Const(1.0), Const(2.5)), Exp(Div(XVar(■.motor.rotor.tc, ■.s), Const(2.5)))))))))))
+@test assemble(motor_rig) |> equations == Eq[
+  Eq(FVar(■.motor.stator.coil, ■.b), Add((EVar(■, ■.q), Neg(Mul((Const(0.01), Div(XVar(■.motor.stator.coil, ■.b), Const(1.0)))))))),
+  Eq(FVar(■.motor.stator.tc, ■.s), Div(Mul((Const(0.01), Div(XVar(■.motor.stator.coil, ■.b), Const(1.0)), Div(XVar(■.motor.stator.coil, ■.b), Const(1.0)))), Mul((Div(Const(1.0), Const(2.5)), Exp(Div(XVar(■.motor.stator.tc, ■.s), Const(2.5))))))),
+  Eq(FVar(■.motor.rotor.coil, ■.b), Add((EVar(■, ■.q), Neg(Mul((XVar(■.motor.stator.coil, ■.b), Div(XVar(■.motor.rotor.mass, ■.p), Const(1.0))))), Neg(Mul((Const(0.01), Div(XVar(■.motor.rotor.coil, ■.b), Const(1.0)))))))),
+  Eq(FVar(■.motor.rotor.mass, ■.p), Add((Mul((XVar(■.motor.stator.coil, ■.b), Div(XVar(■.motor.rotor.coil, ■.b), Const(1.0)))), Neg(Mul((Const(0.01), Div(XVar(■.motor.rotor.mass, ■.p), Const(1.0))))), Neg(Mul((Const(0.5), Div(XVar(■.motor.rotor.mass, ■.p), Const(1.0)))))))),
+  Eq(FVar(■.motor.rotor.tc, ■.s), Add((Div(Mul((Const(0.01), Div(XVar(■.motor.rotor.coil, ■.b), Const(1.0)), Div(XVar(■.motor.rotor.coil, ■.b), Const(1.0)))), Mul((Div(Const(1.0), Const(2.5)), Exp(Div(XVar(■.motor.rotor.tc, ■.s), Const(2.5)))))), Div(Mul((Const(0.01), Div(XVar(■.motor.rotor.mass, ■.p), Const(1.0)), Div(XVar(■.motor.rotor.mass, ■.p), Const(1.0)))), Mul((Div(Const(1.0), Const(2.5)), Exp(Div(XVar(■.motor.rotor.tc, ■.s), Const(2.5))))))))),
   Eq(FVar(■.load.tc, ■.s), Div(Mul((Const(0.5), Div(XVar(■.motor.rotor.mass, ■.p), Const(1.0)), Div(XVar(■.motor.rotor.mass, ■.p), Const(1.0)))), Mul((Div(Const(1.0), Const(2.5)), Exp(Div(XVar(■.load.tc, ■.s), Const(2.5)))))))
 ]
 
@@ -311,4 +310,5 @@ motor_rig = CompositeSystem(
 # 236.334 μs (3609 allocations: 129.45 KiB) isflat
 # 216.250 μs (3320 allocations: 119.23 KiB) refactor Position, convenience constructors
 # 249.166 μs (3885 allocations: 135.36 KiB) components as values, dtry
+# 247.542 μs (3715 allocations: 132.47 KiB) DAESystem
 # @btime assemble($motor_rig);

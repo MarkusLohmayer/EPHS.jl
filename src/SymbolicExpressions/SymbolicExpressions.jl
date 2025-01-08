@@ -50,7 +50,6 @@ struct Eq
 end
 
 
-# Base.show(io::IO, ::MIME"text/plain", eq::Eq) =
 Base.print(io::IO, eq::Eq) = print(io, eq.lhs, " = ", eq.rhs)
 
 Base.print(io::IO, eqs::Vector{Eq}) = foreach(eq -> println(eq), eqs)

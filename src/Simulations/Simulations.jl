@@ -11,7 +11,7 @@ using ..SymbolicExpressions
 
 
 export nlsolve
-export compile_midpoint_update
+export midpoint_rule
 export simulate
 export Simulation
 
@@ -26,72 +26,7 @@ ast0(pvar::PortVar) = Symbol(replace(string(pvar), '.' => '₊') * "₀")
 ast1(pvar::PortVar) = Symbol(replace(string(pvar), '.' => '₊') * "₁")
 
 
-function compile_midpoint_update(sys::CompositeSystem)
-  eqs = assemble(sys)
-
-  xvars = (XVar(eq.lhs) for eq in eqs)
-
-  expr_unpack_x₀ = Expr(
-    :(=),
-    Expr(
-      :tuple,
-      (ast0(xvar) for xvar in xvars)...
-    ),
-    :x₀
-  )
-
-  expr_unpack_x₁ = Expr(
-    :(=),
-    Expr(
-      :tuple,
-      (ast1(xvar) for xvar in xvars)...
-    ),
-    :x₁
-  )
-
-  expr_midpoint = Expr[
-    Expr(
-      :(=),
-      ast(xvar),
-      :( ($(ast0(xvar)) + $(ast1(xvar))) / 2 )
-    )
-    for xvar in xvars
-  ]
-
-  expr_residual = Expr[
-    :(($(ast1(xvar)) - $(ast0(xvar))) - h * ($(ast(eq.rhs))))
-    for (xvar, eq) in zip(xvars, eqs)
-  ]
-
-  expr_solve_x₁ = :(x₁ = nlsolve(residual, x₀))
-
-  expr_update = Expr(
-    :function,
-    :(update(x₀, h)),
-    Expr(
-      :block,
-      expr_unpack_x₀,
-      Expr(
-        :function,
-        :(residual(x₁)),
-        Expr(
-          :block,
-          expr_unpack_x₁,
-          expr_midpoint...,
-          Expr(
-            :ref,
-            :SA,
-            expr_residual...
-          )
-        )
-      ),
-      expr_solve_x₁
-    )
-  )
-
-  # println(expr_update)
-  @RuntimeGeneratedFunction(expr_update)
-end
+include("midpoint.jl")
 
 
 function simulate(update::Function, x₀::T, h::Float64, tₑ::Float64) where {T<:SVector}
@@ -107,16 +42,17 @@ end
 
 struct Simulation
   sys::CompositeSystem
+  method::Function
   h::Float64
   xs::Vector
 end
 
 
-function simulate(sys::CompositeSystem, x₀::AbstractVector, h::Real, tₑ::Real)
-  update = compile_midpoint_update(sys)
+function simulate(sys::CompositeSystem, method::Function, x₀::AbstractVector, h::Real, tₑ::Real)
+  update = method(sys)
   ic = x₀ isa SVector ? x₀ : SVector{length(x₀),Float64}(x₀)
   xs = simulate(update, ic, convert(Float64, h), convert(Float64, tₑ))
-  Simulation(sys, h, xs)
+  Simulation(sys, method, h, xs)
 end
 
 
