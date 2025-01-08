@@ -48,41 +48,72 @@ struct Pattern{F<:Union{Nothing,AbstractSystem},P<:Union{Nothing,Position}}
     check::Bool=true
   ) where {F<:Union{Nothing,AbstractSystem},P<:Union{Nothing,Position}}
     if check
-      # Check if ports are assigned to junctions that exist
-      foreachvalue(boxes) do box
-        foreachvalue(box.ports) do port
+      # Check that ports are assigned to junctions that exist
+      # Check that every junction has at least one connected InnerPort
+      junction_paths = Set{DtryPath}()
+      foreachpath(junctions) do junction_path
+        push!(junction_paths, junction_path)
+      end
+      foreach(boxes) do (box_path, box)
+        foreach(box.ports) do (port_path, port)
           haskey(junctions, port.junction) ||
-            error("junction $(string(port.junction)) not found")
+            error(
+              "Port $(string(port_path)) of box $(string(box_path))" *
+              " is connected to undefined junction $(string(port.junction))"
+            )
+          delete!(junction_paths, port.junction)
         end
       end
+      isempty(junction_paths) ||
+        error(
+          "The following junctions have no connected `InnerPort`s: " *
+          join((string(path) for path in junction_paths), ", ")
+        )
     end
     new{F,P}(junctions, boxes)
   end
 end
 
 
-Junction(exposed::Bool, quantity::Quantity, power::Bool) =
-  Junction{Nothing}(exposed, quantity, power, nothing)
-
-
 Junction(exposed::Bool, quantity::Quantity, power::Bool, position::Position) =
   Junction{Position}(exposed, quantity, power, position)
 
+Junction(exposed::Bool, quantity::Quantity, power::Bool) =
+  Junction{Nothing}(exposed, quantity, power, nothing)
 
-InnerBox(ports::Dtry{InnerPort}) =
-  InnerBox{Nothing,Nothing}(ports, nothing, nothing)
+Junction(exposed::Bool, quantity::Quantity, position::Position) =
+  Junction{Position}(exposed, quantity, true, position)
+
+Junction(exposed::Bool, quantity::Quantity) =
+  Junction{Nothing}(exposed, quantity, true, nothing)
+
+Junction(quantity::Quantity, power::Bool, position::Position) =
+  Junction{Position}(false, quantity, power, position)
+
+Junction(quantity::Quantity, power::Bool) =
+  Junction{Nothing}(false, quantity, power, nothing)
+
+Junction(quantity::Quantity, position::Position) =
+  Junction{Position}(false, quantity, true, position)
+
+Junction(quantity::Quantity) =
+  Junction{Nothing}(false, quantity, true, nothing)
 
 
-InnerBox(ports::Dtry{InnerPort}, filling::AbstractSystem) =
-  InnerBox{AbstractSystem,Nothing}(ports, filling, nothing)
-
-
-InnerBox(ports::Dtry{InnerPort}, position::Position) =
-  InnerBox{Nothing,Position}(ports, nothing, position)
+InnerPort(junction::DtryPath) = InnerPort(junction, true)
 
 
 InnerBox(ports::Dtry{InnerPort}, filling::AbstractSystem, position::Position) =
   InnerBox{AbstractSystem,Position}(ports, filling, position)
+
+InnerBox(ports::Dtry{InnerPort}, filling::AbstractSystem) =
+  InnerBox{AbstractSystem,Nothing}(ports, filling, nothing)
+
+InnerBox(ports::Dtry{InnerPort}, position::Position) =
+  InnerBox{Nothing,Position}(ports, nothing, position)
+
+InnerBox(ports::Dtry{InnerPort}) =
+  InnerBox{Nothing,Nothing}(ports, nothing, nothing)
 
 
 Pattern(
