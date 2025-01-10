@@ -30,6 +30,10 @@ struct Quantity
 end
 
 
+Base.string(quantity::Quantity) =
+  "($(quantity.quantity), $(quantity.space))"
+
+
 include("quantities.jl")
 
 

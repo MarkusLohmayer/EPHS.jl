@@ -86,7 +86,7 @@ end
 function draw_ports(io, pattern, scale)
   # TODO Could integrate this into `draw_boxes!`
   foreachvalue(pattern.boxes) do box
-    foreachvalue(box.ports) do port
+    foreach(box.ports) do (port_path, port)
       junction = pattern.junctions[port.junction]
       (x1, y1, x2, y2) = scale .* (box.position.c, box.position.r, junction.position.c, junction.position.r)
       print(io,
@@ -95,6 +95,9 @@ function draw_ports(io, pattern, scale)
           stroke="black" stroke-width="2"
           stroke-dasharray="$(port.power ? "none" : "8.0,8.0")"
         />
+        <line x1="$x1" y1="$y1" x2="$x2" y2="$y2" stroke="transparent" stroke-width="10">
+          <title>$(string(port_path))</title>
+        </line>
         """
       )
     end
@@ -105,7 +108,7 @@ end
 function draw_external_ports(io, pattern, scale, grid_dims, dims)
   r_min, r_max, c_min, c_max = grid_dims
   y_min, y_max, x_min, x_max = dims
-  foreachvalue(pattern.junctions) do junction
+  foreach(pattern.junctions) do (junction_path, junction)
     if junction.exposed
       (x2, y2) = scale .* (junction.position.c, junction.position.r)
       dist_c_min = junction.position.c - c_min
@@ -124,6 +127,9 @@ function draw_external_ports(io, pattern, scale, grid_dims, dims)
           stroke="black" stroke-width="2"
           stroke-dasharray="$(junction.power ? "none" : "8.0,8.0")"
         />
+        <line x1="$x1" y1="$y1" x2="$x2" y2="$y2" stroke="transparent" stroke-width="10">
+          <title>$(string(junction_path))</title>
+        </line>
         """
       )
     end
@@ -152,11 +158,13 @@ end
 
 
 function draw_junctions(io, pattern, scale)
-  foreachvalue(pattern.junctions) do junction
+  foreach(pattern.junctions) do (junction_path, junction)
     (x, y) = scale .* (junction.position.c, junction.position.r)
     print(io,
       """
-      <circle cx="$x" cy="$y" r="8" fill="black" />
+      <circle cx="$x" cy="$y" r="8" fill="black">
+        <title>$(string(junction_path)) : $(string(junction.quantity))</title></line>
+      </circle>
       """
     )
   end
