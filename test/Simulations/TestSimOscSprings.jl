@@ -1,7 +1,11 @@
-# constrained mechanical oscillator with non-linear spring
-# Thesis: Chapter 13
+"""
+Constrained mechanical oscillator with non-linear spring
+Thesis: Chapter 13
+"""
+module TestSimOscSprings
 
-# using Test, EPHS, Plots
+using Test, EPHS
+
 
 pe₁ = let
   k = Par(:k, 1.5)
@@ -13,49 +17,10 @@ pe₁ = let
     ),
     E
   )
-end
+end;
+pe₂ = hookean_spring(2.0);
+ke = point_mass(1.0);
 
-pe₂ = let
-  k = Par(:k, 2.0)
-  q = XVar(:q)
-  E = Const(1 / 2) * k * q^Const(2)
-  StorageComponent(
-    Dtry(
-      :q => Dtry(displacement)
-    ),
-    E
-  )
-end
-
-ke = let
-  m = Par(:m, 1.)
-  p = XVar(:p)
-  E = Const(1/2) * p^Const(2) / m
-  StorageComponent(
-    Dtry(
-      :p => Dtry(momentum)
-    ),
-    E
-  )
-end
-
-sc = let
-  λ = CVar(:λ)
-  ReversibleComponent(
-    Dtry(
-      :q => Dtry(ReversiblePort(FlowPort(displacement, λ))),
-      :q₂ => Dtry(ReversiblePort(FlowPort(displacement, -λ))),
-      :λ => Dtry(ReversiblePort(Constraint(-EVar(:q) + EVar(:q₂))))
-    )
-  )
-end
-
-pkc = ReversibleComponent(
-  Dtry(
-    :q => Dtry(ReversiblePort(FlowPort(displacement, -EVar(:p)))),
-    :p => Dtry(ReversiblePort(FlowPort(momentum, EVar(:q))))
-  )
-)
 
 osc_constraint = CompositeSystem(
   Dtry(
@@ -98,7 +63,7 @@ osc_constraint = CompositeSystem(
           :q => Dtry(InnerPort(■.q)),
           :q₂ => Dtry(InnerPort(■.q₂)),
         ),
-        sc,
+        two_springs_series_connection,
         Position(2, 2)
       ),
     ),
@@ -156,9 +121,9 @@ sim_constraint = simulate(osc_constraint, midpoint_rule, ic, h, t);
 
 # midpoint_rule(assemble(osc_constraint))
 
-dae = assemble(osc_constraint)
-pe₁₊q₊e = dae.storage[2].effort
-pe₂₊q₊e = dae.storage[3].effort
+dae = assemble(osc_constraint);
+pe₁₊q₊e = dae.storage[2].effort;
+pe₂₊q₊e = dae.storage[3].effort;
 
 function constraint_err(sim)
   force1 = evolution(sim, pe₁₊q₊e)
@@ -169,7 +134,7 @@ end
 
 constraint_err(sim_constraint)
 
-energy = total_energy(osc_constraint)
+energy = total_energy(osc_constraint);
 
 function energy_err(sim)
   energie = evolution(sim, energy)
@@ -202,7 +167,7 @@ energy_err(sim_constraint)
 
 # savefig("osc_constraint_energy.pdf")
 
-# hs = [0.1, 0.05, 0.02, 0.01, 0.005, 0.002, 0.001]
+# hs = [0.1, 0.05, 0.02, 0.01, 0.005, 0.002, 0.001];
 
 # plot_convergence(
 #   osc_constraint,
@@ -229,3 +194,5 @@ energy_err(sim_constraint)
 # )
 
 # savefig("osc_constraint_convergence_constraint.pdf")
+
+end

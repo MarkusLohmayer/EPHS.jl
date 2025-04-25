@@ -1,17 +1,7 @@
+module TestOscDampedLever
 
-lever = let
-  r = Par(:r, 2.)
-  q₁₊e = EVar(:q₁)
-  q₂₊f = FVar(:q₂)
-  q₁₊f = -(r * q₂₊f)
-  q₂₊e = r * q₁₊e
-  ReversibleComponent(
-    Dtry(
-      :q₁ => Dtry(ReversiblePort(FlowPort(displacement, q₁₊f))),
-      :q₂ => Dtry(ReversiblePort(EffortPort(displacement, q₂₊e)))
-    )
-  )
-end
+using Test, EPHS
+
 
 osc_damped_lever = CompositeSystem(
   Dtry(
@@ -26,7 +16,7 @@ osc_damped_lever = CompositeSystem(
         Dtry(
           :q => Dtry(InnerPort(■.q₁)),
         ),
-        pe,
+        hookean_spring(1.5),
         Position(1,1)
       ),
     ),
@@ -36,7 +26,7 @@ osc_damped_lever = CompositeSystem(
           :q₁ => Dtry(InnerPort(■.q₁)),
           :q₂ => Dtry(InnerPort(■.q₂))
         ),
-        lever,
+        mechanical_lever(2.0),
         Position(1,3)
       ),
     ),
@@ -55,7 +45,7 @@ osc_damped_lever = CompositeSystem(
         Dtry(
           :p => Dtry(InnerPort(■.p)),
         ),
-        ke,
+        point_mass(1.0),
         Position(1,7)
       ),
     ),
@@ -65,7 +55,7 @@ osc_damped_lever = CompositeSystem(
           :p => Dtry(InnerPort(■.p)),
           :s => Dtry(InnerPort(■.s)),
         ),
-        mf,
+        linear_friction(0.02),
         Position(2,6)
       ),
     ),
@@ -74,7 +64,7 @@ osc_damped_lever = CompositeSystem(
         Dtry(
           :s => Dtry(InnerPort(■.s)),
         ),
-        tc,
+        thermal_capacity(1.0, 2.0),
         Position(2,8)
       ),
     ),
@@ -97,3 +87,5 @@ osc_damped_lever = CompositeSystem(
 # 24.708 μs (486 allocations: 16.91 KiB) DAESystem
 # 91.875 μs (1545 allocations: 55.12 KiB) Symbolic differentiation (with simplification/normalization)
 # @btime assemble($osc_damped_lever);
+
+end

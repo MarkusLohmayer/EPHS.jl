@@ -258,7 +258,7 @@ among the power variables:
 \: = \:
 \frac{1}{\theta_0} \, d \,
 \begin{bmatrix}
-  \theta & \upsilon \\
+  \theta & -\upsilon \\
   - \upsilon & \frac{\upsilon^2}{\theta}
 \end{bmatrix}
 \,

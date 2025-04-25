@@ -1,3 +1,7 @@
+module TestNLSolve
+
+using Test, EPHS, StaticArrays
+
 
 function residual(x)
   x₁, x₂ = x
@@ -8,3 +12,5 @@ function residual(x)
 end
 
 @test nlsolve(residual, SA[0., 0.]) ≈ SA[-1., 1.]
+
+end

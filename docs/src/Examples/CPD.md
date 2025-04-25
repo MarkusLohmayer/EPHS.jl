@@ -24,9 +24,12 @@ and the gas in each compartment
 result in heat transfer.
 
 
-## Storage components
-
-We start by defining
+Using the methods
+[`point_mass`](@ref),
+[`thermal_capacity`](@ref), and
+[`ideal_gas`](@ref)
+from the [`ComponentLibrary`](@ref),
+we define
 three [storage components](@ref StorageComponent)
 that model
 the kinetic energy of the piston,
@@ -34,198 +37,27 @@ the internal energy of the piston, and
 the internal energy of the gas in each compartment:
 
 ```@example 1
-mass = let
-  I = Dtry(                           # interface
-    :p => Dtry(momentum)              # port for exchange of momentum and kinetic energy
-  )
-  p = XVar(:p)                        # state variable
-  m = Par(:m, 0.5)                    # mass of the piston
-  E = Const(1 / 2) * p^Const(2) / m   # energy function
-  StorageComponent(I, E)
-end
-
-tc = let
-  I = Dtry(
-    :s => Dtry(entropy)
-  )
-  s = XVar(:s)
-  c₁ = Par(:c₁, 1.0)
-  c₂ = Par(:c₂, 2.0)
-  E = c₁ * exp(s / c₂)
-  StorageComponent(I, E)
-end
-
-gas = let
-  I  = Dtry(
-    :s => Dtry(entropy),
-    :v => Dtry(volume),
-  )
-  s = XVar(:s)
-  v = XVar(:v)
-  c₁ = Par(:c₁, 1.0)
-  c₂ = Par(:c₂, 2.5)
-  v₀ = Par(:v₀, 1.0)
-  c = Par(:c, 3 / 2)
-  E = c₁ * exp(s / c₂) * (v₀ / v)^(Const(1) / c)
-  StorageComponent(I, E)
-end;
+mass = point_mass(0.5)
+tc = thermal_capacity(1.0, 2.0)
+gas = ideal_gas(1.0, 2.5, 1.0, 1.5);
 nothing # hide
 ```
 
-## Reversible component
-
-Next, we define
+To encapsulate the piston
+into a reusable unit,
+we model it as a separate [composite system](@ref CompositeSystem).
+To define
 a [reversible component](@ref ReversibleComponent)
 that models the coupling between
 the two hydraulic energy domains
 of the gas on either side of the piston
-and the kinetic energy domain of the piston itself:
-
-```@example 1
-hkc = let
-  a = Par(:a, 2e-2) # cross-sectional area of cylinder/piston
-  v₁₊e = EVar(:v₁)
-  v₂₊e = EVar(:v₂)
-  p₊e = EVar(:p)
-  v₁₊f = -(a * p₊e)
-  v₂₊f = a * p₊e
-  p₊f = a * (v₁₊e - v₂₊e)
-  ReversibleComponent(
-    Dtry(
-      :v₁ => Dtry(ReversiblePort(FlowPort(volume, v₁₊f))),
-      :v₂ => Dtry(ReversiblePort(FlowPort(volume, v₂₊f))),
-      :p => Dtry(ReversiblePort(FlowPort(momentum, p₊f))),
-    ))
-end
-nothing # hide
-```
-
-The above defines
-a skew-symmetric relation:
-
-```math
-\begin{bmatrix}
-  \mathtt{p.f} \\
-  \mathtt{v_1.f} \\
-  \mathtt{v_2.f}
-\end{bmatrix}
-\: = \:
-\begin{bmatrix}
-   0 & a & -a \\
-  -a & 0 &  0 \\
-   a & 0 &  0 \\
-\end{bmatrix}
-\,
-\begin{bmatrix}
-  \mathtt{p.e} \\
-  \mathtt{v_1.e} \\
-  \mathtt{v_2.e}
-\end{bmatrix}
-```
-
-
-## Irreversible components
-
-Finally, we define
-two [irreversible components](@ref IrreversibleComponent)
-that model
-mechanical friction and heat transfer:
-
-```@example 1
-mf = let
-  d = Par(:d, 0.02) # friction coefficient
-  p₊e = EVar(:p)
-  s₊e = EVar(:s)
-  p₊f = d * p₊e
-  s₊f = -((d * p₊e * p₊e) / (θ₀ + s₊e))
-  IrreversibleComponent(
-    Dtry(
-      :p => Dtry(IrreversiblePort(momentum, p₊f)),
-      :s => Dtry(IrreversiblePort(entropy, s₊f)),
-    )
-  )
-end
-
-ht = let
-  α = Par(:α, 1e-3) # heat transfer coefficient
-  s₁₊e = EVar(:s₁)
-  s₂₊e = EVar(:s₂)
-  θ₁ = θ₀ + s₁₊e
-  θ₂ = θ₀ + s₂₊e
-  s₁₊f = -(α * (θ₂ - θ₁) / θ₁)
-  s₂₊f = -(α * (θ₁ - θ₂) / θ₂)
-  IrreversibleComponent(
-    Dtry(
-      :s₁ => Dtry(IrreversiblePort(entropy, s₁₊f)),
-      :s₂ => Dtry(IrreversiblePort(entropy, s₂₊f)),
-    )
-  )
-end;
-nothing # hide
-```
-
-Irreversible components are defined by
-a symmetric, non-negative definite relation:
-
-```math
-\begin{bmatrix}
-  \mathtt{p.f} \\
-  \mathtt{s.f}
-\end{bmatrix}
-\: = \:
-\frac{1}{\theta_{0}} \, d \,
-\begin{bmatrix}
-  \theta & \upsilon  \\
-  - \upsilon & \frac{\upsilon^2}{\theta}
-\end{bmatrix}
-\,
-\begin{bmatrix}
-  \mathtt{p.e} \\
-  \mathtt{s.e}
-\end{bmatrix}
-```
-
-Here,
-``\upsilon = \mathtt{p.e}``
-is the velocity and
-``\theta = \theta_{0} + \mathtt{s.e}``
-is the absolute temperature
-at which kinetic energy is dissipated
-into the thermal energy domain.
-
-
-```math
-\begin{bmatrix}
-  \mathtt{s₁.f} \\
-  \mathtt{s₂.f}
-\end{bmatrix}
-\: = \:
-\frac{1}{\theta_{0}}
-\, \alpha \,
-\begin{bmatrix}
-  \frac{\theta_{2}}{\theta_{1}} & -1 \\
-  -1 & \frac{\theta_{1}}{\theta_{2}}
-\end{bmatrix}
-\,
-\begin{bmatrix}
-  \mathtt{s₁.e} \\
-  \mathtt{s₂.e}
-\end{bmatrix}
-```
-
-Here,
-``\theta_{1} = \theta_{0} + \mathtt{s₁.e}``
-and
-``\theta_{2} = \theta_{0} + \mathtt{s₂.e}``
-represent the absolute temperature
-of the two thermal energy domains.
-
-
-## Composite system
-
-To encapsulate the piston
-into a reusable unit,
-we model it as a separate [composite system](@ref CompositeSystem):
+and the kinetic energy domain of the piston itself,
+we use the method [`hkc`](@ref) from the library.
+Further,
+we use the methods
+[`linear_friction`](@ref) and
+[`heat_transfer`](@ref)
+to define the [irreversible components](@ref IrreversibleComponent).
 
 ```@example 1
 piston = CompositeSystem(
@@ -245,7 +77,7 @@ piston = CompositeSystem(
           :v₂ => Dtry(InnerPort(■.v₂)),
           :p => Dtry(InnerPort(■.p)),
         ),
-        hkc,
+        hkc(0.02),
         Position(1, 3)
       ),
     ),
@@ -264,7 +96,7 @@ piston = CompositeSystem(
           :p => Dtry(InnerPort(■.p)),
           :s => Dtry(InnerPort(■.s)),
         ),
-        mf,
+        linear_friction(0.02),
         Position(3, 3)
       ),
     ),
@@ -274,7 +106,7 @@ piston = CompositeSystem(
           :s₁ => Dtry(InnerPort(■.s₁)),
           :s₂ => Dtry(InnerPort(■.s)),
         ),
-        ht,
+        heat_transfer(0.01),
         Position(4, 2)
       ),
     ),
@@ -284,7 +116,7 @@ piston = CompositeSystem(
           :s₁ => Dtry(InnerPort(■.s₂)),
           :s₂ => Dtry(InnerPort(■.s)),
         ),
-        ht,
+        heat_transfer(0.01),
         Position(4, 4)
       ),
     ),

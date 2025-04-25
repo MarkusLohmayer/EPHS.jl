@@ -1,6 +1,9 @@
 module TestPatterns
 
-using Test, EPHS.Patterns, EPHS.AbstractSystems, EPHS.Directories
+using Test
+using EPHS.Directories
+using EPHS.AbstractSystems
+using EPHS.Patterns
 
 
 osc = Pattern(

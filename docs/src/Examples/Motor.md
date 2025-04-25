@@ -18,77 +18,25 @@ we combine them into the motor model.
 First and foremost,
 the stator has a coil,
 which generates a magnetic field.
-The following storage component models its inductance:
+We use the methods [`linear_inductor`](@ref)
+and [`thermal_capacity`](@ref)
+from the [`ComponentLibrary`](@ref)
+to define storage components
+that model its inductance and thermal capacity:
 
 ```@example 1
-coil = let
-  I = Dtry(
-    :b => Dtry(magnetic_flux)
-  )
-  b = XVar(:b)
-  l = Par(:l, 1.) # inductance
-  E = Const(0.5) * b^Const(2) / l
-  StorageComponent(I, E)
-end;
+coil = linear_inductor(1.0)
+tc = thermal_capacity(1.0, 2.0);
 nothing # hide
 ```
 
-To connect the coil,
-which stores magnetic energy,
-to a source of electric energy,
-we need to model
-the reversible coupling
-between the electric and the magnetic energy domain:
-
-```@example 1
-emc = ReversibleComponent(
-  Dtry(
-    :q => Dtry(ReversiblePort(FlowPort(charge, EVar(:b)))),
-    :b => Dtry(ReversiblePort(FlowPort(magnetic_flux, -EVar(:q))))
-  )
-);
-nothing # hide
-```
-
-The following irreversible component
-models the resistance of the coil:
-
-```@example 1
-res = let
-  r = Par(:r, 0.01) # resistance coefficient
-  b₊e = EVar(:b)
-  s₊e = EVar(:s)
-  b₊f = r * b₊e
-  s₊f = -((r * b₊e * b₊e) / (θ₀ + s₊e))
-  IrreversibleComponent(
-    Dtry(
-      :b => Dtry(IrreversiblePort(magnetic_flux, b₊f)),
-      :s => Dtry(IrreversiblePort(entropy, s₊f))
-    )
-  )
-end;
-nothing # hide
-```
-
-The following component models
-storage of thermal energy in the stator:
-
-```@example 1
-tc = let
-  I = Dtry(
-    :s => Dtry(entropy)
-  )
-  s = XVar(:s)
-  c₁ = Par(:c₁, 1.0)
-  c₂ = Par(:c₂, 2.0)
-  E = c₁ * exp(s / c₂)
-  StorageComponent(I, E)
-end;
-nothing # hide
-```
-
-Now, we can interconnect the primitive systems
-into the stator model:
+To define the stator model,
+we further use the reversible component [`emc`](@ref)
+that models the coupling
+between the electric and the magnetic energy domain,
+and we use the method [`magnetic_resistor`](@ref)
+to define an irreversible component
+that models the resistance of the coil.
 
 ```@example 1
 stator = CompositeSystem(
@@ -123,7 +71,7 @@ stator = CompositeSystem(
           :b => Dtry(InnerPort(■.b)),
           :s => Dtry(InnerPort(■.s))
         ),
-        res,
+        magnetic_resistor(0.01),
         Position(2, 4)
       ),
     ),
@@ -143,48 +91,21 @@ stator = CompositeSystem(
 
 ## Rotor
 
-To define the rotor model,
-we can reuse the primitive subsystems of the stator model,
+For simplicity, we reuse
+the primitive subsystems `coil` and `tc` of the stator model,
 although the parameters probably need to be updated.
-
-Additionally,
-we need a component that models storage of kinetic energy
-due to the rotors angular mass:
+Further,
+we use the method [`angular_mass`](@ref) from the library
+to define a component
+that models storage of kinetic energy:
 
 ```@example 1
-mass = let
-  I = Dtry(
-    :p => Dtry(angular_momentum)
-  )
-  p = XVar(:p)
-  m = Par(:m, 1.) # angular mass
-  E = Const(1/2) * p^Const(2) / m
-  StorageComponent(I, E)
-end;
+mass = angular_mass(1.0);
 nothing # hide
 ```
 
-We also model the mechanical friction of the rotor:
-
-```@example 1
-mf = let
-  d = Par(:d, 0.01)
-  p₊e = EVar(:p)
-  s₊e = EVar(:s)
-  p₊f = d * p₊e
-  s₊f = -((d * p₊e * p₊e) / (θ₀ + s₊e))
-  IrreversibleComponent(
-    Dtry(
-      :p => Dtry(IrreversiblePort(angular_momentum, p₊f)),
-      :s => Dtry(IrreversiblePort(entropy, s₊f))
-    )
-  )
-end;
-nothing # hide
-```
-
-Last but not least,
-we need a reversible component that
+As the centerpiece of the model,
+we define a reversible component that
 describes the coupling of
 the magnetic energy domain
 and the kinetic energy domain,
@@ -208,8 +129,10 @@ end;
 nothing # hide
 ```
 
-We can now combine all primitive systems
-into the rotor model:
+To define the rotor model,
+we additionally use the library method
+[`rotational_friction`](@ref)
+to describe the mechanical friction of the rotor.
 
 ```@example 1
 rotor = CompositeSystem(
@@ -266,7 +189,7 @@ rotor = CompositeSystem(
           :b => Dtry(InnerPort(■.b)),
           :s => Dtry(InnerPort(■.s))
         ),
-        res,
+        magnetic_resistor(0.01),
         Position(3, 3)
       ),
     ),
@@ -276,7 +199,7 @@ rotor = CompositeSystem(
           :p => Dtry(InnerPort(■.p)),
           :s => Dtry(InnerPort(■.s))
         ),
-        mf,
+        rotational_friction(0.01),
         Position(3, 5)
       ),
     ),
@@ -296,7 +219,7 @@ rotor = CompositeSystem(
 
 ## Motor
 
-Now we can interconnect
+Now we interconnect
 the stator and rotor:
 
 ```@example 1

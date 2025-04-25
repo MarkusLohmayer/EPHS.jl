@@ -27,8 +27,11 @@ include("Components/Components.jl")
 # Composite systems (filled patterns, assembly of systems of equations)
 include("CompositeSystems/CompositeSystems.jl")
 
-# Numerical integration, post processing
+# Numerical integration, post-processing
 include("Simulations/Simulations.jl")
+
+# Standard library for components
+include("ComponentLibrary/ComponentLibrary.jl")
 
 
 @reexport using .MoreBase
@@ -48,5 +51,7 @@ include("Simulations/Simulations.jl")
 @reexport using .CompositeSystems
 
 @reexport using .Simulations
+
+@reexport using .ComponentLibrary
 
 end

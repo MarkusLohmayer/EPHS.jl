@@ -1,39 +1,11 @@
-# DC shunt motor
+"""
+DC shunt motor
+"""
+module TestMotor
+
+using Test, EPHS
 
 ## stator
-
-coil = let
-  l = Par(:l, 1.0)
-  b = XVar(:b)
-  E = Const(0.5) * b^Const(2) / l
-  StorageComponent(
-    Dtry(
-      :b => Dtry(magnetic_flux)
-    ),
-    E
-  )
-end
-
-emc = ReversibleComponent(
-  Dtry(
-    :q => Dtry(ReversiblePort(FlowPort(charge, EVar(:b)))),
-    :b => Dtry(ReversiblePort(FlowPort(magnetic_flux, -EVar(:q))))
-  )
-)
-
-res = let
-  r = Par(:r, 0.01)
-  b₊e = EVar(:b)
-  s₊e = EVar(:s)
-  b₊f = r * b₊e
-  s₊f = -((r * b₊e * b₊e) / (θ₀ + s₊e))
-  IrreversibleComponent(
-    Dtry(
-      :b => Dtry(IrreversiblePort(magnetic_flux, b₊f)),
-      :s => Dtry(IrreversiblePort(entropy, s₊f))
-    )
-  )
-end
 
 stator = CompositeSystem(
   Dtry(
@@ -57,7 +29,7 @@ stator = CompositeSystem(
         Dtry(
           :b => Dtry(InnerPort(■.b)),
         ),
-        coil,
+        linear_inductor(1.0),
         Position(1, 3)
       ),
     ),
@@ -67,7 +39,7 @@ stator = CompositeSystem(
           :b => Dtry(InnerPort(■.b)),
           :s => Dtry(InnerPort(■.s))
         ),
-        res,
+        magnetic_resistor(0.01),
         Position(2, 4)
       ),
     ),
@@ -76,12 +48,12 @@ stator = CompositeSystem(
         Dtry(
           :s => Dtry(InnerPort(■.s))
         ),
-        tc,
+        thermal_capacity(1.0, 2.0),
         Position(1, 5)
       ),
     ),
   )
-);
+)
 
 @test assemble(stator) |> equations == Eq[
   Eq(FVar(■.coil, ■.b), Add((EVar(■, ■.q), Mul((Const(-1.0), Par(■.res, ■.r, 0.01), XVar(■.coil, ■.b), Pow(Par(■.coil, ■.l, 1.0), Const(-1.0))))))),
@@ -90,18 +62,6 @@ stator = CompositeSystem(
 
 
 ## rotor
-
-angular_mass = let
-  m = Par(:m, 1.0)
-  p = XVar(:p)
-  E = Const(1 / 2) * p^Const(2) / m
-  StorageComponent(
-    Dtry(
-      :p => Dtry(angular_momentum)
-    ),
-    E
-  )
-end
 
 mkc = let
   bₛ₊x = XVar(:bₛ)
@@ -118,19 +78,6 @@ mkc = let
   )
 end
 
-rotational_friction = let
-  d = Par(:d, 0.01)
-  p₊e = EVar(:p)
-  s₊e = EVar(:s)
-  p₊f = d * p₊e
-  s₊f = -((d * p₊e * p₊e) / (θ₀ + s₊e))
-  IrreversibleComponent(
-    Dtry(
-      :p => Dtry(IrreversiblePort(angular_momentum, p₊f)),
-      :s => Dtry(IrreversiblePort(entropy, s₊f))
-    )
-  )
-end
 
 rotor = CompositeSystem(
   Dtry(
@@ -156,7 +103,7 @@ rotor = CompositeSystem(
         Dtry(
           :b => Dtry(InnerPort(■.b)),
         ),
-        coil,
+        linear_inductor(1.0),
         Position(1, 3)
       ),
     ),
@@ -176,7 +123,7 @@ rotor = CompositeSystem(
         Dtry(
           :p => Dtry(InnerPort(■.p)),
         ),
-        angular_mass,
+        angular_mass(1.0),
         Position(1, 5)
       ),
     ),
@@ -186,7 +133,7 @@ rotor = CompositeSystem(
           :b => Dtry(InnerPort(■.b)),
           :s => Dtry(InnerPort(■.s))
         ),
-        res,
+        magnetic_resistor(0.01),
         Position(3, 3)
       ),
     ),
@@ -196,7 +143,7 @@ rotor = CompositeSystem(
           :p => Dtry(InnerPort(■.p)),
           :s => Dtry(InnerPort(■.s))
         ),
-        rotational_friction,
+        rotational_friction(0.01),
         Position(3, 5)
       ),
     ),
@@ -205,12 +152,12 @@ rotor = CompositeSystem(
         Dtry(
           :s => Dtry(InnerPort(■.s))
         ),
-        tc,
+        thermal_capacity(1.0, 2.0),
         Position(4, 4)
       ),
     ),
   )
-);
+)
 
 
 ## motor
@@ -244,7 +191,7 @@ motor = CompositeSystem(
       ),
     ),
   )
-);
+)
 
 @test assemble(motor) |> equations == Eq[
   Eq(FVar(■.rotor.coil, ■.b), Add((EVar(■, ■.q), Mul((Const(-1.0), XVar(■.stator.coil, ■.b), XVar(■.rotor.mass, ■.p), Pow(Par(■.rotor.mass, ■.m, 1.0), Const(-1.0)))), Mul((Const(-1.0), Par(■.rotor.res, ■.r, 0.01), XVar(■.rotor.coil, ■.b), Pow(Par(■.rotor.coil, ■.l, 1.0), Const(-1.0))))))),
@@ -258,20 +205,6 @@ motor = CompositeSystem(
 
 # TODO add flywheel and connect piston with crank mechanism
 
-load_res = let
-  d = Par(:r, 0.01)
-  p₊e = EVar(:p)
-  s₊e = EVar(:s)
-  p₊f = d * p₊e
-  s₊f = -((d * p₊e * p₊e) / (θ₀ + s₊e))
-  IrreversibleComponent(
-    Dtry(
-      :p => Dtry(IrreversiblePort(angular_momentum, p₊f)),
-      :s => Dtry(IrreversiblePort(entropy, s₊f))
-    )
-  )
-end
-
 load = CompositeSystem(
   Dtry(
     :p => Dtry(Junction(angular_momentum, Position(1, 1), exposed=true)),
@@ -284,7 +217,7 @@ load = CompositeSystem(
           :p => Dtry(InnerPort(■.p)),
           :s => Dtry(InnerPort(■.s)),
         ),
-        load_res,
+        rotational_friction(0.01),
         Position(1, 2)
       ),
     ),
@@ -293,12 +226,12 @@ load = CompositeSystem(
         Dtry(
           :s => Dtry(InnerPort(■.s)),
         ),
-        tc,
+        thermal_capacity(1.0, 2.0),
         Position(1, 4)
       ),
     ),
   )
-);
+)
 
 
 motor_rig = CompositeSystem(
@@ -327,7 +260,7 @@ motor_rig = CompositeSystem(
       ),
     ),
   )
-);
+)
 
 assemble(motor_rig)
 
@@ -339,3 +272,5 @@ assemble(motor_rig)
 # 247.542 μs (3715 allocations: 132.47 KiB) DAESystem
 # 524.459 μs (7382 allocations: 262.09 KiB) Symbolic differentiation (with simplification/normalization)
 # @btime assemble($motor_rig);
+
+end

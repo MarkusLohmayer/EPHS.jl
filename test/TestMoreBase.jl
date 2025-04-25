@@ -1,6 +1,7 @@
-module MoreBase
+module TestMoreBase
 
-using Test, EPHS.MoreBase
+using Test
+using EPHS.MoreBase
 
 
 struct Foo

@@ -11,46 +11,15 @@ and the potential energy
 is distributed between the springs
 to satisfy this constraint.
 
-We assume that the components
-`pe`, `ke` and `pkc`
-from the [Oscillator](@ref) example are already defined.
-
 ```@setup 1
 using EPHS, Plots
-
-pe = let
-  k = Par(:k, 1.5)
-  q = XVar(:q)
-  I = Dtry(
-    :q => Dtry(displacement)
-  )
-  E = Const(1/2) * k * q^Const(2)
-  StorageComponent(I, E)
-end
-
-ke = let
-  m = Par(:m, 1.)
-  p = XVar(:p)
-  I = Dtry(
-    :p => Dtry(momentum)
-  )
-  E = Const(1/2) * p^Const(2) / m
-  StorageComponent(I, E)
-end
-
-pkc = ReversibleComponent(
-  Dtry(
-    :q => Dtry(ReversiblePort(FlowPort(displacement, -EVar(:p)))),
-    :p => Dtry(ReversiblePort(FlowPort(momentum, EVar(:q))))
-  )
-)
 ```
 
 We define a reversible component representing the constraint
 that the velocities (efforts) of two springs are equal:
 
 ```@example 1
-c = ReversibleComponent(
+sc = ReversibleComponent(
   Dtry(
     :q => Dtry(ReversiblePort(FlowPort(displacement, CVar(:λ)))),
     :q₂ => Dtry(ReversiblePort(FlowPort(displacement, -CVar(:λ)))),
@@ -83,6 +52,12 @@ The constraint variable ``\lambda`` is distributing
 the overall (change of) displacement
 between the two springs.
 
+Next, we define the constrained oscillator.
+To not reinvent the wheel, we use
+[`hookean_spring`](@ref),
+[`point_mass`](@ref), and
+[`pkc`](@ref)
+from the [`ComponentLibrary`](@ref).
 
 ```@example 1
 osc_constraint = CompositeSystem(
@@ -97,7 +72,7 @@ osc_constraint = CompositeSystem(
         Dtry(
           :q => Dtry(InnerPort(■.q)),
         ),
-        pe,
+        hookean_spring(2.0),
         Position(1, 1)
       ),
     ),
@@ -106,17 +81,17 @@ osc_constraint = CompositeSystem(
         Dtry(
           :q => Dtry(InnerPort(■.q₂)),
         ),
-        pe,
+        hookean_spring(6.0),
         Position(3, 1)
       ),
     ),
-    :c => Dtry(
+    :sc => Dtry(
       InnerBox(
         Dtry(
           :q => Dtry(InnerPort(■.q)),
           :q₂ => Dtry(InnerPort(■.q₂)),
         ),
-        c,
+        sc,
         Position(2, 2)
       ),
     ),
@@ -135,7 +110,7 @@ osc_constraint = CompositeSystem(
         Dtry(
           :p => Dtry(InnerPort(■.p)),
         ),
-        ke,
+        point_mass(1.0),
         Position(1, 5)
       ),
     ),
@@ -153,7 +128,6 @@ assemble(osc_constraint)
 ## Simulation
 
 We define an initial condition,
-modify the stiffness parameters,
 simulate the system using the midpoint rule,
 and plot the resulting displacements:
 
@@ -169,17 +143,9 @@ ic_constraint = Dtry(
     :q => Dtry(0.0),
   )
 )
-ps = Dtry(
-  :pe₁ => Dtry(
-    :k => Dtry(2.0),
-  ),
-  :pe₂ => Dtry(
-    :k => Dtry(6.0),
-  )
-)
 h = 0.1
 t = 10
-sim = simulate(osc_constraint, midpoint_rule, ic_constraint, h, t; ps);
+sim = simulate(osc_constraint, midpoint_rule, ic_constraint, h, t)
 
 plot_evolution(
   sim,
@@ -198,7 +164,7 @@ and hence contributes less to the overall displacement.
 To verify the numerical solution of
 the differential-algebraic equation,
 we compare the system with the unconstrained oscillator.
-We assume that `osc` and `ic` are defined
+The following code assumes that `osc` and `ic` are defined
 as in the previous example.
 
 ```@setup 1
@@ -213,7 +179,7 @@ osc = CompositeSystem(
         Dtry(
           :q => Dtry(InnerPort(■.q)),
         ),
-        pe,
+        hookean_spring(1.5),
         Position(1, 1)
       ),
     ),
@@ -222,7 +188,7 @@ osc = CompositeSystem(
         Dtry(
           :p => Dtry(InnerPort(■.p)),
         ),
-        ke,
+        point_mass(1.0),
         Position(1, 5)
       ),
     ),
@@ -294,11 +260,7 @@ ic_comparison = Dtry(
   :osc_constraint => ic_constraint,
 )
 
-ps = Dtry(
-  :osc_constraint => ps,
-)
-
-sim = simulate(comparison, midpoint_rule, ic_comparison, h, t; ps)
+sim = simulate(comparison, midpoint_rule, ic_comparison, h, t)
 
 maximum(abs.(
   evolution(

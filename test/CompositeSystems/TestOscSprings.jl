@@ -1,15 +1,9 @@
-# mechanical oscillator with constraint (two springs in series)
+"""
+mechanical oscillator with constraint (two springs in series)
+"""
+module TestOscConstraintSprings
 
-sc = let
-  λ = CVar(:λ)
-  ReversibleComponent(
-    Dtry(
-      :q => Dtry(ReversiblePort(FlowPort(displacement, λ))),
-      :q₂ => Dtry(ReversiblePort(FlowPort(displacement, -λ))),
-      :λ => Dtry(ReversiblePort(Constraint(-EVar(:q) + EVar(:q₂))))
-    )
-  )
-end
+using Test, EPHS
 
 osc_constraint = CompositeSystem(
   Dtry(
@@ -23,7 +17,7 @@ osc_constraint = CompositeSystem(
         Dtry(
           :q => Dtry(InnerPort(■.q)),
         ),
-        pe,
+        hookean_spring(1.5),
         Position(1, 1)
       ),
     ),
@@ -32,7 +26,7 @@ osc_constraint = CompositeSystem(
         Dtry(
           :p => Dtry(InnerPort(■.p)),
         ),
-        ke,
+        point_mass(1.0),
         Position(1, 5)
       ),
     ),
@@ -52,7 +46,7 @@ osc_constraint = CompositeSystem(
           :q => Dtry(InnerPort(■.q)),
           :q₂ => Dtry(InnerPort(■.q₂)),
         ),
-        sc,
+        two_springs_series_connection,
         Position(2, 2)
       ),
     ),
@@ -61,7 +55,7 @@ osc_constraint = CompositeSystem(
         Dtry(
           :q => Dtry(InnerPort(■.q₂)),
         ),
-        pe,
+        hookean_spring(1.5),
         Position(3, 1)
       ),
     ),
@@ -78,3 +72,5 @@ assemble(osc_constraint) |> equations == Eq[
 # 16.708 μs (324 allocations: 11.83 KiB) DAESystem
 # 48.625 μs (868 allocations: 31.19 KiB) Symbolic differentiation (with simplification/normalization)
 # @btime assemble($osc_constraint);
+
+end

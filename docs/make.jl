@@ -21,6 +21,7 @@ makedocs(
     CompositeSystems,
     Simulations,
     Base.get_extension(EPHS, :PlotsExt),
+    ComponentLibrary,
   ],
   pages=[
     "Home" => "index.md",
@@ -54,6 +55,7 @@ makedocs(
       "Reference/Components.md",
       "Reference/CompositeSystems.md",
       "Reference/Simulations.md",
+      "Reference/ComponentLibrary.md",
     ],
   ],
 )

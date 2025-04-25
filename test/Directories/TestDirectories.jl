@@ -1,6 +1,8 @@
 module TestDirectories
 
-using Test, EPHS.Directories, EPHS.MoreBase
+using Test
+using EPHS.MoreBase: flatten
+using EPHS.Directories
 
 include("nonempty.jl")
 

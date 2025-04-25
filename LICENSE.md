@@ -1,4 +1,4 @@
-**Copyright (c) 2022 Markus Lohmayer**
+**Copyright (c) 2025 Markus Lohmayer**
 
 **Commercial users must contact markus.lohmayer@gmail.com to purchase a commercial-use license.**
 

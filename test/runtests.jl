@@ -1,37 +1,43 @@
 using Test
 
 @testset "MoreBase" begin
-  include("MoreBase.jl")
+  include("TestMoreBase.jl")
 end
 
 @testset "TupleDicts" begin
-  include("TupleDicts.jl")
+  include("TestTupleDicts.jl")
 end
 
 @testset "Directories" begin
-  include("Directories/Directories.jl")
+  include("Directories/TestDirectories.jl")
 end
 
 # @testset "AbstractSystems" begin
-#   include("AbstractSystems/AbstractSystems.jl")
+#   include("AbstractSystems/TestAbstractSystems.jl")
 # end
 
 @testset "Patterns" begin
-  include("Patterns/Patterns.jl")
+  include("Patterns/TestPatterns.jl")
 end
 
 # @testset "SymbolicExpressions" begin
-#   include("SymbolicExpressions/SymbolicExpressions.jl")
+#   include("SymbolicExpressions/TestSymbolicExpressions.jl")
 # end
 
 # @testset "Components" begin
-#   include("Components/Components.jl")
+#   include("Components/TestComponents.jl")
 # end
 
 @testset "CompositeSystems" begin
-  include("CompositeSystems/CompositeSystems.jl")
+  include("CompositeSystems/TestOsc.jl")
+  include("CompositeSystems/TestOscLever.jl")
+  include("CompositeSystems/TestOscSprings.jl")
+  include("CompositeSystems/TestMotor.jl")
 end
 
 @testset "Simulations" begin
-  include("Simulations/Simulations.jl")
+  include("Simulations/TestNLSolve.jl")
+  include("Simulations/TestSimOsc.jl")
+  include("Simulations/TestSimOscSprings.jl")
+  include("Simulations/TestCPD.jl")
 end
