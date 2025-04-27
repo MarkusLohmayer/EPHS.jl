@@ -40,11 +40,11 @@ module Directories
 
 export AbstractDtry
 export NonEmptyDtry, Dtry
-export print_dtry
+export print_dtry, print_dtry_repr
 export DtryAccessError, DtryBranchError, DtryLeafError
 export DtryPath, ■
 export hasprefix, haspath
-export mapwithpath, zipmap, zipmapwithpath, filtermap, mapreducewithpath
+export mapwithpath, zipmap, zipmapwithpath, filtermap, filtermapwithpath, mapreducewithpath
 export foreachpath, foreachvalue
 
 

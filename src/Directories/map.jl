@@ -104,7 +104,7 @@ end
     zipmap(f, dtry1::NonEmptyDtry{T1}, dtry2::NonEmptyDtry{T2}, X::Type) -> NonEmptyDtry{X}
 
 Given a nonempty directory of `T1`s and a nonempty directory of `T2`s
-with the same tree sturcture, as well as a function `f : T1 × T2 -> X`,
+with the same tree structure, as well as a function `f : T1 × T2 -> X`,
 produce a new nonempty directory of `X`s,
 where the value at path `p` is given by `f(dtry1[p], dtry2[p])`.
 """
@@ -133,7 +133,7 @@ end
 """
     zipmap(f, dtry1::Dtry{T1}, dtry2::Dtry{T2}, X::Type) -> Dtry{X}
 
-Given a directory of `T1`s and a directory of `T2`s with the same tree sturcture,
+Given a directory of `T1`s and a directory of `T2`s with the same tree structure,
 as well as a function `f : T1 × T2 -> X`,
 produce a new directory of `X`s,
 where the value at path `p` is given by `f(dtry1[p], dtry2[p])`.
@@ -167,7 +167,7 @@ end
     zip(dtry1::NonEmptyDtry{T1}, dtry2::NonEmptyDtry{T2}) -> NonEmptyDtry{Tuple{T1,T2}}
     zip(dtry1::Dtry{T1}, dtry2::Dtry{T2}) -> Dtry{Tuple{T1,T2}}
 
-Given a directory of `T1`s and a directory of `T2`s with the same tree sturcture,
+Given a directory of `T1`s and a directory of `T2`s with the same tree structure,
 as well as a function `f : T1 × T2 -> X`,
 produce a directory of `Tuple{T1,T2}`s,
 where the value at path `p` is given by `(dtry1[p], dtry2[p])`.
@@ -179,7 +179,7 @@ Base.zip(dtry1::AbstractDtry{T1}, dtry2::AbstractDtry{T2}) where {T1,T2} =
 """
     zipmapwithpath(f, dtry1::NonEmptyDtry{T1}, dtry2::NonEmptyDtry{T2}, X::Type) -> NonEmptyDtry{X}
 
-Given a directory of `T1`s and a directory of `T2`s with the same tree sturcture,
+Given a directory of `T1`s and a directory of `T2`s with the same tree structure,
 as well as a function `f : DtryPath × T1 × T2 -> X`,
 produce a new directory of `X`s,
 where the value at path `p` is given by `f(p, dtry1[p], dtry2[p])`.
@@ -209,7 +209,7 @@ end
 """
     zipmapwithpath(f, dtry1::Dtry{T1}, dtry2::Dtry{T2}, X::Type) -> Dtry{X}
 
-Given a directory of `T1`s and a directory of `T2`s with the same tree sturcture,
+Given a directory of `T1`s and a directory of `T2`s with the same tree structure,
 as well as a function `f : DtryPath × T1 × T2 -> X`,
 produce a new directory of `X`s,
 where the value at path `p` is given by `f(p, dtry1[p], dtry2[p])`.
@@ -253,10 +253,35 @@ function filtermap(f, dtry::AbstractDtry{T}, X::Type) where {T}
     leaf = leaf_or_node(nonempty)
     old_value::T = leaf.value
     res = f(old_value)
-    return isnothing(res) ? Dtry{X}() : Dtry{X}(res.value)
+    return isnothing(res) ? Dtry{X}() : Dtry{X}(something(res))
   else
     node = leaf_or_node(nonempty)
     return Dtry{X}((name => filtermap(f, child, X) for (name, child) in node.branches)...)
+  end
+end
+
+
+"""
+    filtermapwithpath(f, dtry::AbstractDtry{T}, X::Type) -> Dtry{X}
+
+Make a new directory of `X`s from a (nonempty) directory of `T`s
+based on a function `f : DtryPath × T -> Union{Some{X},Nothing}`.
+When `f` returns `nothing`, the respective entry is filtered out.
+"""
+function filtermapwithpath(f, dtry::AbstractDtry{T}, X::Type; prefix=■) where {T}
+  isempty(dtry) && return Dtry{X}()
+  nonempty = nothing_or_nonempty(dtry)
+  if leaf_or_node(nonempty) isa DtryLeaf
+    leaf = leaf_or_node(nonempty)
+    old_value::T = leaf.value
+    res = f(prefix, old_value)
+    return isnothing(res) ? Dtry{X}() : Dtry{X}(something(res))
+  else
+    node = leaf_or_node(nonempty)
+    return Dtry{X}((
+      name => filtermapwithpath(f, child, X; prefix=getproperty(prefix, name))
+      for (name, child) in node.branches
+    )...)
   end
 end
 
