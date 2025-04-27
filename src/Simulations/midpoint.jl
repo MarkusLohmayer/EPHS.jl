@@ -1,7 +1,7 @@
 
 # Simple hack to make simulation work for systems with external ports
 _isolate(flow::SymExpr) =
-  map(flow, FVar) do fvar
+  replace(flow, FVar) do fvar
     fvar.box_path == ■ ? Const(0.0) : fvar
   end
 

@@ -27,7 +27,7 @@ function assemble(fsys::FlatSystem)
       foreach(box.filling.ports) do (port_path, port)
         if port.variant isa Constraint
           cvar = CVar(box_path, port_path)
-          residual = map(port.variant.residual, PortVar) do rhs_pvar
+          residual = replace(port.variant.residual, PortVar) do rhs_pvar
             frompattern(fsys, typeof(rhs_pvar)(box_path, rhs_pvar.port_path))
           end
           push!(constraints, DAEConstraint(cvar, residual))

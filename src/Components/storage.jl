@@ -113,13 +113,13 @@ end
 
 
 AbstractSystems.total_energy(sc::StorageComponent; box_path::DtryPath=■) =
-  isempty(box_path) ? sc.energy : map(sc.energy, XVar) do xvar
+  isempty(box_path) ? sc.energy : replace(sc.energy, XVar) do xvar
     XVar(box_path, xvar.port_path)
   end
 
 
 function AbstractSystems.total_entropy(sc::StorageComponent; box_path::DtryPath=■)
-  expr = Const(0.)
+  expr = Const(0.0)
   foreach(sc.ports) do (port_path, port)
     if port.quantity == entropy
       expr = expr + XVar(box_path, port_path)

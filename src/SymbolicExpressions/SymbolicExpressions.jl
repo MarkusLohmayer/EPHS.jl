@@ -13,17 +13,16 @@ export ast
 export SymOp, SymVal, SymVar
 export Eq
 
-# operations
+# Operations
 export Neg, Exp
 export Div, Pow
 export Add, Mul
 
-# constants
+# Constants
 export Const
 
 
 using OrderedCollections: OrderedDict
-
 
 
 """
@@ -36,7 +35,7 @@ for all internal nodes (operations) of a `SymExpr`.
 abstract type SymExpr end
 
 
-# API for SymExpr:
+# API for `SymExpr`:
 
 Base.string(::SymExpr) = error("Not implemented")
 
@@ -49,7 +48,6 @@ Together with the methods called in the returned Julia `Expr`,
 `ast` defines the semantics of the mathematical `SymExpr` syntax.
 """
 ast(::SymExpr) = error("Not implemented")
-
 
 
 Base.print(io::IO, s::SymExpr) = print(io, string(s))
@@ -105,10 +103,10 @@ struct Eq
   rhs::SymExpr
 end
 
-# print symbolic equations
+# Print symbolic equations
 Base.print(io::IO, eq::Eq) = print(io, eq.lhs, " = ", eq.rhs)
 
-# print each line of a equation vector
+# Print each line of an equation vector
 Base.print(io::IO, eqs::Vector{Eq}) = foreach(eq -> println(io, eq), eqs)
 
 
@@ -118,7 +116,7 @@ include("operations.jl")
 # Numeric literals
 include("const.jl")
 
-# Transform expression trees
-include("map.jl")
+# Traverse and transform expression trees
+include("prewalk.jl")
 
 end

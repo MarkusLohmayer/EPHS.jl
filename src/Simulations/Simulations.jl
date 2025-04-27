@@ -159,8 +159,8 @@ separated by the time step size `sim.h`.
 timegrid(sim::SimulationResult) = [i * sim.h for i in 0:length(sim.xs)-1]
 
 
-function expand_flows_and_efforts_in_terms_of_states(expr::SymExpr, dae::DAESystem)
-  map(expr, Union{FVar,EVar}) do pvar
+expand_flows_and_efforts_in_terms_of_states(expr::SymExpr, dae::DAESystem) =
+  replace(expr, Union{FVar,EVar}) do pvar
     index = findfirst(dae.storage) do (; xvar)
       pvar.box_path == xvar.box_path && pvar.port_path == xvar.port_path
     end
@@ -174,7 +174,6 @@ function expand_flows_and_efforts_in_terms_of_states(expr::SymExpr, dae::DAESyst
       dae.storage[index].effort
     end
   end
-end
 
 
 # Evolution of (functions of) the state variables

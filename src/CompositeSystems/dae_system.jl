@@ -80,18 +80,18 @@ Parameters in `ps` that are not present in the system are ignored.
 function update_parameters(dae::DAESystem, ps::AbstractDtry{Float64})
   isempty(ps) && return dae
   storage = map(dae.storage) do storage
-    flow = map(storage.flow, Par) do par
+    flow = replace(storage.flow, Par) do par
       value = get(ps, par.box_path * par.par_path, par.value)
       Par(par.box_path, par.par_path, value)
     end
-    effort = map(storage.effort, Par) do par
+    effort = replace(storage.effort, Par) do par
       value = get(ps, par.box_path * par.par_path, par.value)
       Par(par.box_path, par.par_path, value)
     end
     DAEStorage(storage.xvar, storage.quantity, flow, effort)
   end
   constraints = map(dae.constraints) do constraint
-    residual = map(constraint.residual, Par) do par
+    residual = replace(constraint.residual, Par) do par
       value = get(ps, par.box_path * par.par_path, par.value)
       Par(par.box_path, par.par_path, value)
     end
@@ -107,7 +107,7 @@ function equations(dae::DAESystem)
   eqs = Vector{Eq}()
   foreach(dae.storage) do (; xvar, flow)
     lhs = FVar(xvar)
-    rhs = map(flow, EVar) do evar
+    rhs = replace(flow, EVar) do evar
       index = findfirst(dae.storage) do (; xvar)
         xvar == XVar(evar)
       end
@@ -117,7 +117,7 @@ function equations(dae::DAESystem)
   end
   foreach(dae.constraints) do (; residual)
     lhs = Const(0.)
-    rhs = map(residual, EVar) do evar
+    rhs = replace(residual, EVar) do evar
       index = findfirst(dae.storage) do (; xvar)
         xvar == XVar(evar)
       end
