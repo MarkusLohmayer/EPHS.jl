@@ -2,8 +2,16 @@
 
 In this example,
 we model a mechanical oscillator
-with two springs connected in series.
-This imposes the constraint that
+with two springs connected in series:
+
+```@raw html
+<div style="text-align: center;">
+    <img src="../../assets/examples/osc_constraint.svg" width="400"/>
+</div>
+&nbsp;
+```
+
+The series connection imposes the constraint that
 the forces in both springs must be equal.
 Consequently,
 the overall displacement
@@ -15,49 +23,20 @@ to satisfy this constraint.
 using EPHS, Plots
 ```
 
-We define a reversible component representing the constraint
-that the velocities (efforts) of two springs are equal:
-
-```@example 1
-sc = ReversibleComponent(
-  Dtry(
-    :q => Dtry(ReversiblePort(FlowPort(displacement, CVar(:λ)))),
-    :q₂ => Dtry(ReversiblePort(FlowPort(displacement, -CVar(:λ)))),
-    :λ => Dtry(ReversiblePort(Constraint(-EVar(:q) + EVar(:q₂))))
-  )
-)
-```
-
-```math
-\begin{bmatrix}
-  \mathtt{q.f} \\
-  \mathtt{q_2.f} \\
-  0
-\end{bmatrix}
-\: = \:
-\begin{bmatrix}
-  0 & 0 & +1 \\
-  0 & 0 & -1 \\
-  -1 & +1 & 0
-\end{bmatrix}
-\,
-\begin{bmatrix}
-  \mathtt{q.e} \\
-  \mathtt{q_2.e} \\
-  \lambda
-\end{bmatrix}
-```
-
-The constraint variable ``\lambda`` is distributing
-the overall (change of) displacement
-between the two springs.
-
-Next, we define the constrained oscillator.
-To not reinvent the wheel, we use
+To not reinvent the wheel, this time we use
 [`hookean_spring`](@ref),
 [`point_mass`](@ref), and
 [`pkc`](@ref)
 from the [`ComponentLibrary`](@ref).
+Besides these components,
+which are defined as in the previous example,
+we use [`two_springs_series_connection`](@ref),
+which represents the constraint
+that the velocities (efforts) of two springs are equal:
+
+```@docs; canonical=false
+two_springs_series_connection
+```
 
 ```@example 1
 osc_constraint = CompositeSystem(
@@ -91,7 +70,7 @@ osc_constraint = CompositeSystem(
           :q => Dtry(InnerPort(■.q)),
           :q₂ => Dtry(InnerPort(■.q₂)),
         ),
-        sc,
+        two_springs_series_connection,
         Position(2, 2)
       ),
     ),

@@ -1,7 +1,7 @@
 # Run script from the root folder:
 # `julia ./test/coverage.jl`
-# Result can be used e.g. with VSCode plugin Coverage Gutters:
-# From Command Palette: Coverage Gutters: Display Coverage
+# Result can be viewed e.g. with VSCode plugin Coverage Gutters:
+# Command Palette: Coverage Gutters: Display Coverage
 
 using Pkg
 

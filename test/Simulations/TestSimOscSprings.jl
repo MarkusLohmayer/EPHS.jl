@@ -1,6 +1,6 @@
 """
 Constrained mechanical oscillator with non-linear spring
-Thesis: Chapter 13
+Thesis: Section 3.2
 """
 module TestSimOscSprings
 
@@ -78,6 +78,8 @@ osc_constraint = CompositeSystem(
     ),
   )
 )
+
+assemble(osc_constraint)
 
 h = 0.01
 t = 10.0

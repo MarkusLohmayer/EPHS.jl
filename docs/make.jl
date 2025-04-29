@@ -10,7 +10,12 @@ makedocs(
   sitename="EPHS.jl",
   authors="Markus Lohmayer <markus.lohmayer@fau.de>",
   format=Documenter.HTML(
+    assets = ["assets/favicon.ico"],
     canonical="https://MarkusLohmayer.github.io/EPHS.jl/stable",
+    collapselevel = 1,
+    example_size_threshold = nothing,
+    size_threshold = nothing,
+    size_threshold_warn = nothing,
   ),
   modules=[
     Directories,

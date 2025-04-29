@@ -11,6 +11,7 @@ using ...Components
 
 export pkc
 export emc
+export mkc
 export mechanical_lever
 export two_springs_series_connection, two_masses_rigid_connection
 export hkc
@@ -78,6 +79,49 @@ const emc = ReversibleComponent(
     :b => Dtry(ReversiblePort(FlowPort(magnetic_flux, -EVar(:q))))
   )
 )
+
+
+@doc raw"""
+Magnetic-kinetic coupling:
+Reversible coupling of
+of a magnetic energy domain at port ``\mathtt{b}`` (magnetic flux) and
+a kinetic energy domain at port ``\mathtt{p}`` (angular momentum)
+based on the Lorentz force.
+The strength of the coupling is proportional to
+the magnetic flux at the state port ``\mathtt{b_s}``.
+The Dirac structure is given by
+```math
+\begin{bmatrix}
+  \mathtt{b.f} \\
+  \mathtt{p.f}
+\end{bmatrix}
+\: = \:
+\begin{bmatrix}
+  0 & +\mathtt{b_s.x} \\
+  -\mathtt{b_s.x} & 0
+\end{bmatrix}
+\,
+\begin{bmatrix}
+  \mathtt{b.e} \\
+  \mathtt{p.e}
+\end{bmatrix}
+\,.
+```
+"""
+const mkc = let
+  bₛ₊x = XVar(:bₛ)
+  b₊e = EVar(:b)
+  p₊e = EVar(:p)
+  b₊f = bₛ₊x * p₊e
+  p₊f = -(bₛ₊x * b₊e)
+  ReversibleComponent(
+    Dtry(
+      :b => Dtry(ReversiblePort(FlowPort(magnetic_flux, b₊f))),
+      :p => Dtry(ReversiblePort(FlowPort(angular_momentum, p₊f))),
+      :bₛ => Dtry(ReversiblePort(StatePort(magnetic_flux)))
+    )
+  )
+end
 
 
 @doc raw"""

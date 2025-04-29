@@ -22,9 +22,9 @@ Please consult this article for further details and references to other literatu
 
 * To see the implementation in action, have a look at the [Examples](@ref) section.
 
-* Limitations of the current implementation and a vision for the next phase of the project are summarized on the [Vision](@ref) page.
+* Our vision for the future is summarized on the [Vision](@ref) page.
 
-* The last section provides a [Reference](@ref) focused on the Julia codebase.
+* The last section provides a [Reference](@ref) for the Julia codebase.
 
 
 ## Contact

@@ -236,6 +236,7 @@ struct Pattern{F<:Union{Nothing,AbstractSystem},P<:Union{Nothing,Position}}
       junction_paths = Set{DtryPath}()
       foreachpath(junctions) do junction_path
         push!(junction_paths, junction_path)
+        # TODO Why do we need disjoint namespaces?
         hasprefix(boxes, junction_path) &&
           error(
             "Namespaces of `junctions` and `boxes` are not distinct:" *

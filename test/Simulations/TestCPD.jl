@@ -1,6 +1,6 @@
 """
 Isolated cylinder-piston device
-Thesis: Chapter 14
+Thesis: Section 3.3
 """
 module TestCPD
 
