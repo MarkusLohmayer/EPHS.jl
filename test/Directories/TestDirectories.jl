@@ -9,6 +9,7 @@ include("nonempty.jl")
 
 
 @test Dtry{Int}() == Dtry{Int}()
+@test Dtry(42)[] == 42
 
 # @btime begin
 d1 = Dtry(:a => Dtry(10), :b => Dtry(20), :c => Dtry(30))
