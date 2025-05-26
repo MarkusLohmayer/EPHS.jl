@@ -5,7 +5,6 @@ module TestMotor
 
 using Test, EPHS
 
-## stator
 
 stator = CompositeSystem(
   Dtry(
@@ -29,7 +28,7 @@ stator = CompositeSystem(
         Dtry(
           :b => Dtry(InnerPort(■.b)),
         ),
-        linear_inductor(1.0),
+        linear_inductor(l=1.0),
         Position(1, 3)
       ),
     ),
@@ -39,7 +38,7 @@ stator = CompositeSystem(
           :b => Dtry(InnerPort(■.b)),
           :s => Dtry(InnerPort(■.s))
         ),
-        magnetic_resistor(0.01),
+        magnetic_resistor(r=0.01),
         Position(2, 4)
       ),
     ),
@@ -48,7 +47,7 @@ stator = CompositeSystem(
         Dtry(
           :s => Dtry(InnerPort(■.s))
         ),
-        thermal_capacity(1.0, 2.0),
+        thermal_capacity(c₁=1.0, c₂=2.0),
         Position(1, 5)
       ),
     ),
@@ -59,24 +58,6 @@ stator = CompositeSystem(
   Eq(FVar(■.coil, ■.b), Add((EVar(■, ■.q), Mul((Const(-1.0), Par(■.res, ■.r, 0.01), XVar(■.coil, ■.b), Pow(Par(■.coil, ■.l, 1.0), Const(-1.0))))))),
   Eq(FVar(■.tc, ■.s), Mul((Par(■.res, ■.r, 0.01), Pow(XVar(■.coil, ■.b), Const(2.0)), Pow(Par(■.coil, ■.l, 1.0), Const(-2.0)), Pow(Par(■.tc, ■.c₁, 1.0), Const(-1.0)), Pow(Exp(Mul((XVar(■.tc, ■.s), Pow(Par(■.tc, ■.c₂, 2.0), Const(-1.0))))), Const(-1.0)), Par(■.tc, ■.c₂, 2.0)))),
 ]
-
-
-## rotor
-
-mkc = let
-  bₛ₊x = XVar(:bₛ)
-  b₊e = EVar(:b)
-  p₊e = EVar(:p)
-  b₊f = bₛ₊x * p₊e
-  p₊f = -(bₛ₊x * b₊e)
-  ReversibleComponent(
-    Dtry(
-      :b => Dtry(ReversiblePort(FlowPort(magnetic_flux, b₊f))),
-      :p => Dtry(ReversiblePort(FlowPort(angular_momentum, p₊f))),
-      :bₛ => Dtry(ReversiblePort(StatePort(magnetic_flux)))
-    )
-  )
-end
 
 
 rotor = CompositeSystem(
@@ -103,7 +84,7 @@ rotor = CompositeSystem(
         Dtry(
           :b => Dtry(InnerPort(■.b)),
         ),
-        linear_inductor(1.0),
+        linear_inductor(l=1.0),
         Position(1, 3)
       ),
     ),
@@ -123,7 +104,7 @@ rotor = CompositeSystem(
         Dtry(
           :p => Dtry(InnerPort(■.p)),
         ),
-        angular_mass(1.0),
+        angular_mass(m=1.0),
         Position(1, 5)
       ),
     ),
@@ -133,7 +114,7 @@ rotor = CompositeSystem(
           :b => Dtry(InnerPort(■.b)),
           :s => Dtry(InnerPort(■.s))
         ),
-        magnetic_resistor(0.01),
+        magnetic_resistor(r=0.01),
         Position(3, 3)
       ),
     ),
@@ -143,7 +124,7 @@ rotor = CompositeSystem(
           :p => Dtry(InnerPort(■.p)),
           :s => Dtry(InnerPort(■.s))
         ),
-        rotational_friction(0.01),
+        rotational_friction(d=0.01),
         Position(3, 5)
       ),
     ),
@@ -152,15 +133,13 @@ rotor = CompositeSystem(
         Dtry(
           :s => Dtry(InnerPort(■.s))
         ),
-        thermal_capacity(1.0, 2.0),
+        thermal_capacity(c₁=1.0, c₂=2.0),
         Position(4, 4)
       ),
     ),
   )
 )
 
-
-## motor
 
 motor = CompositeSystem(
   Dtry(
@@ -201,9 +180,6 @@ motor = CompositeSystem(
   Eq(FVar(■.stator.tc, ■.s), Mul((Par(■.stator.res, ■.r, 0.01), Pow(XVar(■.stator.coil, ■.b), Const(2.0)), Pow(Par(■.stator.coil, ■.l, 1.0), Const(-2.0)), Pow(Par(■.stator.tc, ■.c₁, 1.0), Const(-1.0)), Pow(Exp(Mul((XVar(■.stator.tc, ■.s), Pow(Par(■.stator.tc, ■.c₂, 2.0), Const(-1.0))))), Const(-1.0)), Par(■.stator.tc, ■.c₂, 2.0)))),
 ]
 
-## system with motor
-
-# TODO add flywheel and connect piston with crank mechanism
 
 load = CompositeSystem(
   Dtry(
@@ -217,7 +193,7 @@ load = CompositeSystem(
           :p => Dtry(InnerPort(■.p)),
           :s => Dtry(InnerPort(■.s)),
         ),
-        rotational_friction(0.01),
+        rotational_friction(d=0.01),
         Position(1, 2)
       ),
     ),
@@ -226,7 +202,7 @@ load = CompositeSystem(
         Dtry(
           :s => Dtry(InnerPort(■.s)),
         ),
-        thermal_capacity(1.0, 2.0),
+        thermal_capacity(c₁=1.0, c₂=2.0),
         Position(1, 4)
       ),
     ),

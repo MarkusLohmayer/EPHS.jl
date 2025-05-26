@@ -25,8 +25,8 @@ to define storage components
 that model its inductance and thermal capacity:
 
 ```@example 1
-coil = linear_inductor(1.0)
-tc = thermal_capacity(1.0, 2.0);
+coil = linear_inductor(l=1.0)
+tc = thermal_capacity(c₁=1.0, c₂=2.0);
 nothing # hide
 ```
 
@@ -71,7 +71,7 @@ stator = CompositeSystem(
           :b => Dtry(InnerPort(■.b)),
           :s => Dtry(InnerPort(■.s))
         ),
-        magnetic_resistor(0.01),
+        magnetic_resistor(r=0.01),
         Position(2, 4)
       ),
     ),
@@ -99,7 +99,7 @@ to define a component
 that models storage of kinetic energy:
 
 ```@example 1
-mass = angular_mass(1.0);
+mass = angular_mass(m=1.0);
 nothing # hide
 ```
 
@@ -170,7 +170,7 @@ rotor = CompositeSystem(
           :b => Dtry(InnerPort(■.b)),
           :s => Dtry(InnerPort(■.s))
         ),
-        magnetic_resistor(0.01),
+        magnetic_resistor(r=0.01),
         Position(3, 3)
       ),
     ),
@@ -180,7 +180,7 @@ rotor = CompositeSystem(
           :p => Dtry(InnerPort(■.p)),
           :s => Dtry(InnerPort(■.s))
         ),
-        rotational_friction(0.01),
+        rotational_friction(d=0.01),
         Position(3, 5)
       ),
     ),

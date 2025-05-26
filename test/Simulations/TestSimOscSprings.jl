@@ -18,8 +18,8 @@ pe₁ = let
     E
   )
 end;
-pe₂ = hookean_spring(2.0);
-ke = point_mass(1.0);
+pe₂ = hookean_spring(k=2.0);
+ke = point_mass(m=1.0);
 
 
 osc_constraint = CompositeSystem(

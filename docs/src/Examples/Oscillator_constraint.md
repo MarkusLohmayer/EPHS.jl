@@ -51,7 +51,7 @@ osc_constraint = CompositeSystem(
         Dtry(
           :q => Dtry(InnerPort(■.q)),
         ),
-        hookean_spring(2.0),
+        hookean_spring(k=2.0),
         Position(1, 1)
       ),
     ),
@@ -60,7 +60,7 @@ osc_constraint = CompositeSystem(
         Dtry(
           :q => Dtry(InnerPort(■.q₂)),
         ),
-        hookean_spring(6.0),
+        hookean_spring(k=6.0),
         Position(3, 1)
       ),
     ),
@@ -89,7 +89,7 @@ osc_constraint = CompositeSystem(
         Dtry(
           :p => Dtry(InnerPort(■.p)),
         ),
-        point_mass(1.0),
+        point_mass(m=1.0),
         Position(1, 5)
       ),
     ),
@@ -158,7 +158,7 @@ osc = CompositeSystem(
         Dtry(
           :q => Dtry(InnerPort(■.q)),
         ),
-        hookean_spring(1.5),
+        hookean_spring(k=1.5),
         Position(1, 1)
       ),
     ),
@@ -167,7 +167,7 @@ osc = CompositeSystem(
         Dtry(
           :p => Dtry(InnerPort(■.p)),
         ),
-        point_mass(1.0),
+        point_mass(m=1.0),
         Position(1, 5)
       ),
     ),

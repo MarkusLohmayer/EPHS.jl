@@ -125,7 +125,7 @@ end
 
 
 @doc raw"""
-    mechanical_lever(r::Float64) -> ReversibleComponent
+    mechanical_lever(; r::Float64) -> ReversibleComponent
 
 Create an ideal mechanical lever
 connecting two potential energy domains
@@ -149,7 +149,7 @@ The Dirac structure is given by
 \,.
 ```
 """
-mechanical_lever(r::Float64) =
+mechanical_lever(; r::Float64) =
   let
     r = Par(:r, r)
     q₁₊e = EVar(:q₁)
@@ -243,7 +243,7 @@ const two_masses_rigid_connection =
 
 
 @doc raw"""
-    hkc(a::Float64) -> ReversibleComponent
+    hkc(; a::Float64) -> ReversibleComponent
 
 Hydraulic-kinetic coupling:
 Create a reversible coupling between
@@ -275,7 +275,7 @@ The Dirac structure is given by
 where
 the parameter ``a`` is the cross-sectional area of the piston.
 """
-hkc(a::Float64) =
+hkc(; a::Float64) =
   let
     a = Par(:a, a)
     v₁₊e = EVar(:v₁)

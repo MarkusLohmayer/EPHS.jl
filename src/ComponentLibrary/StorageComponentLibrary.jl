@@ -16,7 +16,7 @@ export thermal_capacity, ideal_gas
 
 
 @doc raw"""
-    hookean_spring(k::Float64) -> StorageComponent
+    hookean_spring(; k::Float64) -> StorageComponent
 
 Create a Hookean spring
 with default stiffness parameter ``k``.
@@ -25,7 +25,7 @@ The energy function is given by
 where
 ``q`` is the displacement variable.
 """
-hookean_spring(k::Float64) =
+hookean_spring(; k::Float64) =
   let
     k = Par(:k, k)
     q = XVar(:q)
@@ -40,7 +40,7 @@ hookean_spring(k::Float64) =
 
 
 @doc raw"""
-    point_mass(m::Float64) -> StorageComponent
+    point_mass(; m::Float64) -> StorageComponent
 
 Create a point mass
 with default mass parameter ``m``.
@@ -49,7 +49,7 @@ The energy function is given by
 where
 ``p`` is the momentum variable.
 """
-point_mass(m::Float64) =
+point_mass(; m::Float64) =
   let
     m = Par(:m, m)
     p = XVar(:p)
@@ -64,7 +64,7 @@ point_mass(m::Float64) =
 
 
 @doc raw"""
-    angular_mass(m::Float64) -> StorageComponent
+    angular_mass(; m::Float64) -> StorageComponent
 
 Create an angular mass
 with default angular mass parameter ``m``.
@@ -73,7 +73,7 @@ The energy function is given by
 where
 ``p`` is the angular momentum variable.
 """
-angular_mass(m::Float64) =
+angular_mass(; m::Float64) =
   let
     m = Par(:m, m)
     p = XVar(:p)
@@ -88,7 +88,7 @@ angular_mass(m::Float64) =
 
 
 @doc raw"""
-    linear_inductor(l::Float64) -> StorageComponent
+    linear_inductor(; l::Float64) -> StorageComponent
 
 Create a linear inductor
 with default inductivity parameter ``l``.
@@ -97,7 +97,7 @@ The energy function is given by
 where
 ``b`` is the magnetic flux variable.
 """
-linear_inductor(l::Float64) =
+linear_inductor(; l::Float64) =
   let
     l = Par(:l, l)
     b = XVar(:b)
@@ -112,7 +112,7 @@ linear_inductor(l::Float64) =
 
 
 @doc raw"""
-    thermal_capacity(c₁::Float64, c₂::Float64) -> StorageComponent
+    thermal_capacity(; c₁::Float64, c₂::Float64) -> StorageComponent
 
 Create a model of a thermal capacity.
 The energy function is
@@ -121,7 +121,7 @@ where
 ``s`` is the entropy variable and
 ``c_1`` and ``c_2`` are constitutive parameters.
 """
-thermal_capacity(c₁::Float64, c₂::Float64) =
+thermal_capacity(; c₁::Float64, c₂::Float64) =
   let
     c₁ = Par(:c₁, c₁)
     c₂ = Par(:c₂, c₂)
@@ -137,7 +137,7 @@ thermal_capacity(c₁::Float64, c₂::Float64) =
 
 
 @doc raw"""
-    ideal_gas(c₁::Float64, c₂::Float64, v₀::Float64, c::Float64) -> StorageComponent
+    ideal_gas(; c₁::Float64, c₂::Float64, v₀::Float64, c::Float64) -> StorageComponent
 
 Create an ideal gas model.
 The energy function is given by
@@ -148,7 +148,7 @@ where
 and
 ``c_1``, ``c_2``, ``v_0`` and ``c`` are constitutive parameters.
 """
-ideal_gas(c₁::Float64, c₂::Float64, v₀::Float64, c::Float64) =
+ideal_gas(; c₁::Float64, c₂::Float64, v₀::Float64, c::Float64) =
   let
     c₁ = Par(:c₁, c₁)
     c₂ = Par(:c₂, c₂)

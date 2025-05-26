@@ -22,7 +22,7 @@ piston = CompositeSystem(
         Dtry(
           :p => Dtry(InnerPort(■.p)),
         ),
-        point_mass(0.5),
+        point_mass(m=0.5),
         Position(2, 1)
       ),
     ),
@@ -31,7 +31,7 @@ piston = CompositeSystem(
         Dtry(
           :s => Dtry(InnerPort(■.s)),
         ),
-        thermal_capacity(1.0, 2.0),
+        thermal_capacity(c₁=1.0, c₂=2.0),
         Position(5, 2)
       ),
     ),
@@ -41,7 +41,7 @@ piston = CompositeSystem(
           :p => Dtry(InnerPort(■.p)),
           :s => Dtry(InnerPort(■.s)),
         ),
-        linear_friction(0.02),
+        linear_friction(d=0.02),
         Position(3, 2)
       ),
     ),
@@ -51,7 +51,7 @@ piston = CompositeSystem(
           :s₁ => Dtry(InnerPort(■.s₁)),
           :s₂ => Dtry(InnerPort(■.s)),
         ),
-        heat_transfer(1e-3),
+        heat_transfer(h=1e-3),
         Position(4, 1)
       ),
     ),
@@ -61,7 +61,7 @@ piston = CompositeSystem(
           :s₁ => Dtry(InnerPort(■.s₂)),
           :s₂ => Dtry(InnerPort(■.s)),
         ),
-        heat_transfer(1e-3),
+        heat_transfer(h=1e-3),
         Position(4, 3)
       ),
     ),
@@ -72,14 +72,14 @@ piston = CompositeSystem(
           :v₂ => Dtry(InnerPort(■.v₂)),
           :p => Dtry(InnerPort(■.p)),
         ),
-        hkc(1.963e-2),
+        hkc(a=1.963e-2),
         Position(1, 2)
       ),
     ),
   ),
 )
 
-gas₁ = ideal_gas(1.0, 2.5, 1.0, 1.5);
+gas₁ = ideal_gas(c₁=1.0, c₂=2.5, v₀=1.0, c=1.5);
 gas₂ = gas₁;
 
 cpd = CompositeSystem(

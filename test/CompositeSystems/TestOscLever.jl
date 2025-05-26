@@ -16,7 +16,7 @@ osc_damped_lever = CompositeSystem(
         Dtry(
           :q => Dtry(InnerPort(■.q₁)),
         ),
-        hookean_spring(1.5),
+        hookean_spring(k=1.5),
         Position(1,1)
       ),
     ),
@@ -26,7 +26,7 @@ osc_damped_lever = CompositeSystem(
           :q₁ => Dtry(InnerPort(■.q₁)),
           :q₂ => Dtry(InnerPort(■.q₂))
         ),
-        mechanical_lever(2.0),
+        mechanical_lever(r=2.0),
         Position(1,3)
       ),
     ),
@@ -45,7 +45,7 @@ osc_damped_lever = CompositeSystem(
         Dtry(
           :p => Dtry(InnerPort(■.p)),
         ),
-        point_mass(1.0),
+        point_mass(m=1.0),
         Position(1,7)
       ),
     ),
@@ -55,7 +55,7 @@ osc_damped_lever = CompositeSystem(
           :p => Dtry(InnerPort(■.p)),
           :s => Dtry(InnerPort(■.s)),
         ),
-        linear_friction(0.02),
+        linear_friction(d=0.02),
         Position(2,6)
       ),
     ),
@@ -64,7 +64,7 @@ osc_damped_lever = CompositeSystem(
         Dtry(
           :s => Dtry(InnerPort(■.s)),
         ),
-        thermal_capacity(1.0, 2.0),
+        thermal_capacity(c₁=1.0, c₂=2.0),
         Position(2,8)
       ),
     ),

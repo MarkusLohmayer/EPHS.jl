@@ -15,7 +15,7 @@ export heat_transfer
 
 
 @doc raw"""
-    linear_friction(d::Float64) -> IrreversibleComponent
+    linear_friction(; d::Float64) -> IrreversibleComponent
 
 Create a linear model of mechanical friction
 with default friction parameter ``d``.
@@ -53,7 +53,7 @@ is the absolute temperature
 at which kinetic energy is dissipated
 into the thermal energy domain at port ``\mathtt{s}`` (entropy).
 """
-linear_friction(d::Float64) =
+linear_friction(; d::Float64) =
   let
     d = Par(:d, d)
     p₊e = EVar(:p)
@@ -70,7 +70,7 @@ linear_friction(d::Float64) =
 
 
 @doc raw"""
-    rotational_friction(d::Float64) -> IrreversibleComponent
+    rotational_friction(; d::Float64) -> IrreversibleComponent
 
 Create a linear model of rotational friction
 with default friction parameter ``d``.
@@ -108,7 +108,7 @@ is the absolute temperature
 at which kinetic energy is dissipated
 into the thermal energy domain at port ``\mathtt{s}`` (entropy).
 """
-rotational_friction(d::Float64) =
+rotational_friction(; d::Float64) =
   let
     d = Par(:d, d)
     p₊e = EVar(:p)
@@ -125,7 +125,7 @@ rotational_friction(d::Float64) =
 
 
 @doc raw"""
-    magnetic_resistor(r::Float64) -> IrreversibleComponent
+    magnetic_resistor(; r::Float64) -> IrreversibleComponent
 
 Create a model of a linear resistor
 with default resistance parameter ``r``.
@@ -163,7 +163,7 @@ is the absolute temperature
 at which magnetic energy is dissipated
 into the thermal energy domain at port ``\mathtt{s}`` (entropy).
 """
-magnetic_resistor(r::Float64) =
+magnetic_resistor(; r::Float64) =
   let
     r = Par(:r, r)
     b₊e = EVar(:b)
@@ -180,10 +180,10 @@ magnetic_resistor(r::Float64) =
 
 
 @doc raw"""
-    heat_transfer(α::Float64) -> IrreversibleComponent
+    heat_transfer(; h::Float64) -> IrreversibleComponent
 
 Create a linear model of heat transfer
-with default heat transfer parameter ``\alpha``.
+with default heat transfer parameter ``h``.
 The Onsager sturcutre is given by
 ```math
 \begin{bmatrix}
@@ -192,7 +192,7 @@ The Onsager sturcutre is given by
 \end{bmatrix}
 \: = \:
 \frac{1}{\theta_{0}}
-\, \alpha \,
+\, h \,
 \begin{bmatrix}
   \frac{\theta_{2}}{\theta_{1}} & -1 \\
   -1 & \frac{\theta_{1}}{\theta_{2}}
@@ -204,8 +204,8 @@ The Onsager sturcutre is given by
 \end{bmatrix}
 \: = \:
 \begin{bmatrix}
-  -\frac{\alpha \, (\theta_2 - \theta_1)}{\theta_1} \\
-  -\frac{\alpha \, (\theta_1 - \theta_2)}{\theta_2}
+  -\frac{h \, (\theta_2 - \theta_1)}{\theta_1} \\
+  -\frac{h \, (\theta_1 - \theta_2)}{\theta_2}
 \end{bmatrix}
 \,,
 ```
@@ -216,15 +216,15 @@ and
 represent the absolute temperature
 of the two thermal energy domains.
 """
-heat_transfer(α::Float64) =
+heat_transfer(; h::Float64) =
   let
-    α = Par(:α, α)
+    h = Par(:h, h)
     s₁₊e = EVar(:s₁)
     s₂₊e = EVar(:s₂)
     θ₁ = θ₀ + s₁₊e
     θ₂ = θ₀ + s₂₊e
-    s₁₊f = -(α * (θ₂ - θ₁) / θ₁)
-    s₂₊f = -(α * (θ₁ - θ₂) / θ₂)
+    s₁₊f = -(h * (θ₂ - θ₁) / θ₁)
+    s₂₊f = -(h * (θ₁ - θ₂) / θ₂)
     IrreversibleComponent(
       Dtry(
         :s₁ => Dtry(IrreversiblePort(entropy, s₁₊f)),

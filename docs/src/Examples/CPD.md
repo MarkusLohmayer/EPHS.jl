@@ -37,9 +37,9 @@ the internal energy of the piston, and
 the internal energy of the gas in each compartment:
 
 ```@example 1
-mass = point_mass(0.5)
-tc = thermal_capacity(1.0, 2.0)
-gas = ideal_gas(1.0, 2.5, 1.0, 1.5);
+mass = point_mass(m=0.5)
+tc = thermal_capacity(c₁=1.0, c₂=2.0)
+gas = ideal_gas(c₁=1.0, c₂=2.5, v₀=1.0, c=1.5);
 nothing # hide
 ```
 
@@ -77,7 +77,7 @@ piston = CompositeSystem(
           :v₂ => Dtry(InnerPort(■.v₂)),
           :p => Dtry(InnerPort(■.p)),
         ),
-        hkc(0.02),
+        hkc(a=0.02),
         Position(1, 3)
       ),
     ),
@@ -96,7 +96,7 @@ piston = CompositeSystem(
           :p => Dtry(InnerPort(■.p)),
           :s => Dtry(InnerPort(■.s)),
         ),
-        linear_friction(0.02),
+        linear_friction(d=0.02),
         Position(3, 3)
       ),
     ),
@@ -106,7 +106,7 @@ piston = CompositeSystem(
           :s₁ => Dtry(InnerPort(■.s₁)),
           :s₂ => Dtry(InnerPort(■.s)),
         ),
-        heat_transfer(0.01),
+        heat_transfer(h=0.01),
         Position(4, 2)
       ),
     ),
@@ -116,7 +116,7 @@ piston = CompositeSystem(
           :s₁ => Dtry(InnerPort(■.s₂)),
           :s₂ => Dtry(InnerPort(■.s)),
         ),
-        heat_transfer(0.01),
+        heat_transfer(h=0.01),
         Position(4, 4)
       ),
     ),
