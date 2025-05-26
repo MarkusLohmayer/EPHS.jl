@@ -106,7 +106,7 @@ function Base.print(io::IO, sc::StorageComponent)
 end
 
 
-function print_port(io::IO, port::StoragePort, prefix::String)
+function print_port(io::IO, port::StoragePort; prefix::String)
   println(io, port.quantity)
   print(io, prefix, "e = ", port.effort)
 end

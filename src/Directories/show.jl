@@ -1,5 +1,6 @@
 
 Base.show(io::IO, ::MIME"text/plain", dtry::AbstractDtry) = print_dtry(io, dtry)
+Base.show(io::IO, ::MIME"text/plain", dtry::AbstractDtry{<:AbstractDtry}) = print_dtry(io, dtry; print_value=print_dtry)
 
 
 """
@@ -7,7 +8,7 @@ Base.show(io::IO, ::MIME"text/plain", dtry::AbstractDtry) = print_dtry(io, dtry)
 
 Write a pretty-printed representation of the given directory to `io`.
 As an optional keyword argument,
-a function `print_value(io::IO, value::T, prefix::String)`
+a function `print_value(io::IO, value::T; prefix::String)`
 can be used to pretty-print the values.
 Whenever the output of `print_value` spans more than one line,
 `prefix` is prepended to the extra lines.
@@ -41,7 +42,7 @@ function print_dtry(
       show(io, leaf.value)
     else
       # `prefix::String` argument is relevant only if output of `print_value` has multiple lines
-      print_value(io, leaf.value, prefix * "     ")
+      print_value(io, leaf.value; prefix=prefix * "     ")
     end
   else
     node = leaf_or_node(dtry)
@@ -70,7 +71,7 @@ function _print_dtry(
       if isnothing(print_value)
         show(io, child.value)
       else
-        print_value(io, child.value, prefix * (islast ? "   " : "│  ") * repeat(" ", length(name) + 4))
+        print_value(io, child.value; prefix=prefix * (islast ? "   " : "│  ") * repeat(" ", length(name) + 4))
       end
     else
       print(io, prefix * branch_prefix * name)

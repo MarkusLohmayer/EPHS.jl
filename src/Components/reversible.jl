@@ -150,27 +150,27 @@ function Base.print(io::IO, rc::ReversibleComponent)
 end
 
 
-print_port(io::IO, port::ReversiblePort, prefix::String) =
-  print_port(io, port.variant, prefix)
+print_port(io::IO, port::ReversiblePort; prefix::String) =
+  print_port(io, port.variant; prefix)
 
 
-function print_port(io::IO, port::FlowPort, prefix::String)
+function print_port(io::IO, port::FlowPort; prefix::String)
   println(io, port.quantity)
   print(io, prefix, "f = ", port.flow)
 end
 
 
-function print_port(io::IO, port::EffortPort, prefix::String)
+function print_port(io::IO, port::EffortPort; prefix::String)
   println(io, port.quantity)
   print(io, prefix, "e = ", port.effort)
 end
 
 
-function print_port(io::IO, port::StatePort, ::String)
-  println(io, port.quantity, " (state)")
+function print_port(io::IO, port::StatePort; prefix::String)
+  print(io, port.quantity, " (state)")
 end
 
 
-function print_port(io::IO, port::Constraint, ::String)
-  println(io, "constraint: 0 = ", port.residual)
+function print_port(io::IO, port::Constraint; prefix::String)
+  print(io, "constraint: 0 = ", port.residual)
 end

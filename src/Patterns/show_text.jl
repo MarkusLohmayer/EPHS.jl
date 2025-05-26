@@ -11,7 +11,7 @@ function Base.print(io::IO, pattern::Pattern{F,P}) where {F,P}
 end
 
 
-function print_junction(io::IO, junction::Junction, _::String)
+function print_junction(io::IO, junction::Junction; prefix::String)
   print(io,
     "(" *
     string(junction.quantity.quantity) *
@@ -29,7 +29,7 @@ function print_junction(io::IO, junction::Junction, _::String)
 end
 
 
-function print_box(io::IO, box::InnerBox, prefix::String)
+function print_box(io::IO, box::InnerBox; prefix::String)
   if !isnothing(box.filling)
     println(io, typeof(box.filling))
     print(io, prefix)
@@ -38,7 +38,7 @@ function print_box(io::IO, box::InnerBox, prefix::String)
 end
 
 
-function print_port(io::IO, port::InnerPort, _::String)
+function print_port(io::IO, port::InnerPort; prefix::String)
   print(io, port.junction)
   if !port.power
     print(io, " (state)")
