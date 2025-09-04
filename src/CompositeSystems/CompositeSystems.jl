@@ -8,6 +8,7 @@ see [`DAESystem`](@ref) and [`assemble`](@ref).
 module CompositeSystems
 
 export CompositeSystem
+export subsystem
 export DAESystem
 export equations
 export assemble
@@ -58,6 +59,24 @@ function CompositeSystem(
 end
 
 
+"""
+    CompositeSystem{Nothing}(sys::CompositeSystem{Position})
+
+Reduce a `CompsiteSystem{Position}` to a `CompositeSystem{Nothing}`
+by forgetting the the positions of junctions and boxes.
+"""
+function CompositeSystem{Nothing}(sys::CompositeSystem{Position})
+  junctions = map(sys.pattern.junctions, Junction{Nothing}) do junction
+    Junction{Nothing}(junction.quantity, nothing, junction.exposed, junction.power)
+  end
+  boxes = map(sys.pattern.boxes, InnerBox{AbstractSystem,Nothing}) do box
+    InnerBox{AbstractSystem,Nothing}(box.ports, box.filling, nothing)
+  end
+  pattern = Pattern{AbstractSystem,Nothing}(junctions, boxes; check=false)
+  CompositeSystem{Nothing}(pattern)
+end
+
+
 AbstractSystems.interface(sys::CompositeSystem) = interface(sys.pattern)
 
 
@@ -72,6 +91,10 @@ Base.show(io::IO, ::MIME"text/plain", sys::CompositeSystem{Nothing}) =
 
 Base.print(io::IO, sys::CompositeSystem) =
   print(io, sys.pattern)
+
+
+subsystem(sys::CompositeSystem, box_path::DtryPath) =
+  sys.pattern.boxes[box_path].filling
 
 
 function AbstractSystems.total_energy(sys::CompositeSystem; box_path::DtryPath=■)
@@ -95,11 +118,14 @@ end
 # Flatten hierarchically nested composite systems
 include("flatten.jl")
 
-# Assembly of equations
+# Assembly of equations (flatten then interconnect primitive subsystems)
 include("flat_system.jl")
 include("frompattern.jl")
 include("fromcomponent.jl")
 include("dae_system.jl")
 include("assemble.jl")
+
+# Semantics of composite systems ((recursively) interconnect subsystems)
+include("relation.jl")
 
 end

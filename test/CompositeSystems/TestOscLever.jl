@@ -5,10 +5,10 @@ using Test, EPHS
 
 osc_damped_lever = CompositeSystem(
   Dtry(
-    :q₁ => Dtry(Junction(displacement, Position(1,2))),
-    :q₂ => Dtry(Junction(displacement, Position(1,4))),
-    :p => Dtry(Junction(momentum, Position(1,6))),
-    :s => Dtry(Junction(entropy, Position(2,7))),
+    :q₁ => Dtry(Junction(displacement, Position(1, 2))),
+    :q₂ => Dtry(Junction(displacement, Position(1, 4))),
+    :p => Dtry(Junction(momentum, Position(1, 6))),
+    :s => Dtry(Junction(entropy, Position(2, 7))),
   ),
   Dtry(
     :pe => Dtry(
@@ -17,7 +17,7 @@ osc_damped_lever = CompositeSystem(
           :q => Dtry(InnerPort(■.q₁)),
         ),
         hookean_spring(k=1.5),
-        Position(1,1)
+        Position(1, 1)
       ),
     ),
     :lever => Dtry(
@@ -27,7 +27,7 @@ osc_damped_lever = CompositeSystem(
           :q₂ => Dtry(InnerPort(■.q₂))
         ),
         mechanical_lever(r=2.0),
-        Position(1,3)
+        Position(1, 3)
       ),
     ),
     :pkc => Dtry(
@@ -37,7 +37,7 @@ osc_damped_lever = CompositeSystem(
           :p => Dtry(InnerPort(■.p))
         ),
         pkc,
-        Position(1,5)
+        Position(1, 5)
       ),
     ),
     :ke => Dtry(
@@ -46,7 +46,7 @@ osc_damped_lever = CompositeSystem(
           :p => Dtry(InnerPort(■.p)),
         ),
         point_mass(m=1.0),
-        Position(1,7)
+        Position(1, 7)
       ),
     ),
     :mf => Dtry(
@@ -56,7 +56,7 @@ osc_damped_lever = CompositeSystem(
           :s => Dtry(InnerPort(■.s)),
         ),
         linear_friction(d=0.02),
-        Position(2,6)
+        Position(2, 6)
       ),
     ),
     :tc => Dtry(
@@ -65,7 +65,7 @@ osc_damped_lever = CompositeSystem(
           :s => Dtry(InnerPort(■.s)),
         ),
         thermal_capacity(c₁=1.0, c₂=2.0),
-        Position(2,8)
+        Position(2, 8)
       ),
     ),
   )
@@ -76,6 +76,26 @@ osc_damped_lever = CompositeSystem(
   Eq(FVar(■.pe, ■.q), Mul((Par(■.lever, ■.r, 2.0), XVar(■.ke, ■.p), Pow(Par(■.ke, ■.m, 1.0), Const(-1.0))))),
   Eq(FVar(■.tc, ■.s), Mul((Par(■.mf, ■.d, 0.02), Pow(XVar(■.ke, ■.p), Const(2.0)), Pow(Par(■.ke, ■.m, 1.0), Const(-2.0)), Pow(Par(■.tc, ■.c₁, 1.0), Const(-1.0)), Pow(Exp(Mul((XVar(■.tc, ■.s), Pow(Par(■.tc, ■.c₂, 2.0), Const(-1.0))))), Const(-1.0)), Par(■.tc, ■.c₂, 2.0))))
 ]
+
+@test relation(osc_damped_lever) == Relation(;
+  storage=Dtry(
+    :ke => Dtry(
+      Dtry(
+        :p => Dtry{SymExpr}(Add((Mul((Const(-1.0), Par(■.mf, ■.d, 0.02), XVar(■.ke, ■.p), Pow(Par(■.ke, ■.m, 1.0), Const(-1.0)))), Mul((Const(-1.0), Par(■.lever, ■.r, 2.0), Par(■.pe, ■.k, 1.5), XVar(■.pe, ■.q))))))
+      )
+    ),
+    :pe => Dtry(
+      Dtry(
+        :q => Dtry{SymExpr}(Mul((Par(■.lever, ■.r, 2.0), XVar(■.ke, ■.p), Pow(Par(■.ke, ■.m, 1.0), Const(-1.0)))))
+      )
+    ),
+    :tc => Dtry(
+      Dtry(
+        :s => Dtry{SymExpr}(Mul((Par(■.mf, ■.d, 0.02), Pow(XVar(■.ke, ■.p), Const(2.0)), Pow(Par(■.ke, ■.m, 1.0), Const(-2.0)), Pow(Par(■.tc, ■.c₁, 1.0), Const(-1.0)), Pow(Exp(Mul((XVar(■.tc, ■.s), Pow(Par(■.tc, ■.c₂, 2.0), Const(-1.0))))), Const(-1.0)), Par(■.tc, ■.c₂, 2.0))))
+      )
+    )
+  )
+)
 
 # 32.083 μs (732 allocations: 22.30 KiB) top-down approach
 # 18.833 μs (504 allocations: 15.91 KiB) hybrid approach, 41% less runtime

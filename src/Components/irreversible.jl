@@ -28,6 +28,8 @@ struct IrreversibleComponent <: Component
 end
 
 
+# API for `AbstractSystem`s:
+
 function AbstractSystems.interface(ic::IrreversibleComponent)
   map(ic.ports, PortType) do irreversible_port
     PortType(irreversible_port.quantity, true)
@@ -37,6 +39,16 @@ end
 
 AbstractSystems.fillcolor(::IrreversibleComponent) = "#FF7F80"
 
+
+function AbstractSystems.relation(ic::IrreversibleComponent)
+  ports = map(ic.ports, Port) do irreversible_port
+    Port(FlowProvider(irreversible_port.flow))
+  end
+  Relation(; ports)
+end
+
+
+# `provides` and `provide` for `assemble`:
 
 provides(ic::IrreversibleComponent, fvar::FVar) =
   haspath(ic.ports, fvar.port_path)
@@ -50,6 +62,8 @@ function provide(ic::IrreversibleComponent, fvar::FVar)
   error("$(string(fvar)) not found")
 end
 
+
+# Printing:
 
 function Base.print(io::IO, ic::IrreversibleComponent)
   println(io, "IrreversibleComponent")

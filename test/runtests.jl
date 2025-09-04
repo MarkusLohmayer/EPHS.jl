@@ -24,9 +24,9 @@ end
 #   include("SymbolicExpressions/TestSymbolicExpressions.jl")
 # end
 
-# @testset "Components" begin
-#   include("Components/TestComponents.jl")
-# end
+@testset "Components" begin
+  include("Components/TestComponents.jl")
+end
 
 @testset "CompositeSystems" begin
   include("CompositeSystems/TestOsc.jl")

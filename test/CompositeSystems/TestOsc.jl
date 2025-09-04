@@ -43,10 +43,33 @@ osc = CompositeSystem(
   )
 )
 
+
 @test assemble(osc) |> equations == Eq[
   Eq(FVar(■.ke, ■.p), Add((Mul((Const(-1.0), Par(■.pe, ■.k, 1.5), XVar(■.pe, ■.q))), FVar(■, ■.p)))),
   Eq(FVar(■.pe, ■.q), Mul((XVar(■.ke, ■.p), Pow(Par(■.ke, ■.m, 1.0), Const(-1.0)))))
 ]
+
+
+@test relation(osc) == Relation(;
+  storage=Dtry(
+    :ke => Dtry(
+      Dtry(
+        :p => Dtry{SymExpr}(Add((FVar(■, ■.p), Mul((Const(-1.0), Par(■.pe, ■.k, 1.5), XVar(■.pe, ■.q))))))
+      )
+    ),
+    :pe => Dtry(
+      Dtry(
+        :q => Dtry{SymExpr}(Mul((XVar(■.ke, ■.p), Pow(Par(■.ke, ■.m, 1.0), Const(-1.0)))))
+      )
+    )
+  ),
+  ports=Dtry(
+    :p => Dtry(Port(
+      StateProvider(XVar(■.ke, ■.p)),
+      EffortProvider(Mul((XVar(■.ke, ■.p), Pow(Par(■.ke, ■.m, 1.0), Const(-1.0)))))
+    ))
+  )
+)
 
 
 # 7.812 μs (205 allocations: 6.52 KiB) top-down approach
@@ -124,13 +147,39 @@ osc_damped_flat = CompositeSystem(
   )
 )
 
+
 @test osc_damped_flat.isflat == true
+
 
 @test assemble(osc_damped_flat) |> equations == Eq[
   Eq(FVar(■.osc.ke, ■.p), Add((Mul((Const(-1.0), Par(■.mf, ■.d, 0.02), XVar(■.osc.ke, ■.p), Pow(Par(■.osc.ke, ■.m, 1.0), Const(-1.0)))), Mul((Const(-1.0), Par(■.osc.pe, ■.k, 1.5), XVar(■.osc.pe, ■.q)))))),
   Eq(FVar(■.osc.pe, ■.q), Mul((XVar(■.osc.ke, ■.p), Pow(Par(■.osc.ke, ■.m, 1.0), Const(-1.0))))),
   Eq(FVar(■.tc, ■.s), Mul((Par(■.mf, ■.d, 0.02), Pow(XVar(■.osc.ke, ■.p), Const(2.0)), Pow(Par(■.osc.ke, ■.m, 1.0), Const(-2.0)), Pow(Par(■.tc, ■.c₁, 1.0), Const(-1.0)), Pow(Exp(Mul((XVar(■.tc, ■.s), Pow(Par(■.tc, ■.c₂, 2.0), Const(-1.0))))), Const(-1.0)), Par(■.tc, ■.c₂, 2.0)))),
 ]
+
+
+@test relation(osc_damped_flat) == Relation(;
+  storage=Dtry(
+    :osc => Dtry(
+      :ke => Dtry(
+        Dtry(
+          :p => Dtry{SymExpr}(Add((Mul((Const(-1.0), Par(■.mf, ■.d, 0.02), XVar(■.osc.ke, ■.p), Pow(Par(■.osc.ke, ■.m, 1.0), Const(-1.0)))), Mul((Const(-1.0), Par(■.osc.pe, ■.k, 1.5), XVar(■.osc.pe, ■.q))))))
+        )
+      ),
+      :pe => Dtry(
+        Dtry(
+          :q => Dtry{SymExpr}(Mul((XVar(■.osc.ke, ■.p), Pow(Par(■.osc.ke, ■.m, 1.0), Const(-1.0)))))
+        )
+      )
+    ),
+    :tc => Dtry(
+      Dtry(
+        :s => Dtry{SymExpr}(Mul((Par(■.mf, ■.d, 0.02), Pow(XVar(■.osc.ke, ■.p), Const(2.0)), Pow(Par(■.osc.ke, ■.m, 1.0), Const(-2.0)), Pow(Par(■.tc, ■.c₁, 1.0), Const(-1.0)), Pow(Exp(Mul((XVar(■.tc, ■.s), Pow(Par(■.tc, ■.c₂, 2.0), Const(-1.0))))), Const(-1.0)), Par(■.tc, ■.c₂, 2.0))))
+      )
+    )
+  )
+)
+
 
 # 25.458 μs (573 allocations: 17.53 KiB) top-down approach
 # 18.875 μs (480 allocations: 14.70 KiB) hybrid approach, 26% less runtime
@@ -181,9 +230,14 @@ osc_damped_nested = CompositeSystem(
   )
 )
 
+
 @test osc_damped_nested.isflat == false
 
+
+@test flatten(osc_damped_nested) == CompositeSystem{Nothing}(osc_damped_flat)
 @test assemble(osc_damped_nested) == assemble(osc_damped_flat)
+@test relation(osc_damped_nested) == relation(osc_damped_flat)
+
 
 # 50.625 μs (781 allocations: 27.59 KiB) two levels of nesting
 # 85.041 μs (1265 allocations: 45.20 KiB) arbitrary nesting of patterns

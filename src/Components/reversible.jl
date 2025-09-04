@@ -12,6 +12,9 @@ struct FlowPort
   quantity::Quantity
   flow::SymExpr
 end
+# TODO FlowPort ≈ FlowProvider
+# TODO EffortPort ≈ EffortProvider
+# TODO StatePort ≈ StateConsumer
 
 
 """
@@ -53,6 +56,7 @@ struct Constraint
 end
 
 
+# TODO FlowPort or EffortPort may also consume a state variable
 """
     ReversiblePort(variant::Union{FlowPort,EffortPort,StatePort,Constraint})
 
@@ -81,6 +85,8 @@ struct ReversibleComponent <: Component
 end
 
 
+# API for `AbstractSystem`s:
+
 function AbstractSystems.interface(rc::ReversibleComponent)
   filtermap(rc.ports, PortType) do reversible_port
     if reversible_port.variant isa StatePort
@@ -96,6 +102,36 @@ end
 
 AbstractSystems.fillcolor(::ReversibleComponent) = "#3DB57B"
 
+
+function AbstractSystems.relation(rc::ReversibleComponent)
+  constraints = filtermap(rc.ports, SymExpr) do reversible_port
+    if reversible_port.variant isa Constraint
+      constraint = reversible_port.variant
+      return Some(constraint.residual)
+    end
+    return nothing
+  end
+  ports = filtermapwithpath(rc.ports, Port) do port_path, reversible_port
+    if reversible_port.variant isa FlowPort
+      flow_port = reversible_port.variant
+      return Some(Port(FlowProvider(flow_port.flow)))
+    elseif reversible_port.variant isa EffortPort
+      effort_port = reversible_port.variant
+      return Some(Port(EffortProvider(effort_port.effort)))
+    elseif reversible_port.variant isa StatePort
+      return Some(Port(StateConsumer()))
+    else # Constraint
+      return nothing
+    end
+  end
+  Relation(;
+    constraints=isempty(constraints) ? Dtry{Dtry{SymExpr}}() : Dtry(constraints),
+    ports
+  )
+end
+
+
+# `provides` and `provide` for `assemble`:
 
 function provides(rc::ReversibleComponent, fvar::FVar)
   x = get(rc.ports, fvar.port_path, nothing)
@@ -127,22 +163,7 @@ function provide(rc::ReversibleComponent, evar::EVar)
 end
 
 
-"Constraint multiplier variable"
-struct CVar <: SymVar
-  box_path::DtryPath
-  port_path::DtryPath
-end
-
-
-CVar(name::Symbol) = CVar(DtryPath(), DtryPath(name))
-
-
-Base.string(c::CVar) = string(c.box_path * c.port_path)
-
-
-SymbolicExpressions.ast(cvar::CVar) =
-  Symbol(replace(string(cvar), '.' => '₊'))
-
+# Printing:
 
 function Base.print(io::IO, rc::ReversibleComponent)
   println(io, "ReversibleComponent")
@@ -174,3 +195,22 @@ end
 function print_port(io::IO, port::Constraint; prefix::String)
   print(io, "constraint: 0 = ", port.residual)
 end
+
+
+# Constraint variables
+
+"Constraint multiplier variable"
+struct CVar <: SymVar
+  box_path::DtryPath
+  port_path::DtryPath
+end
+
+
+CVar(name::Symbol) = CVar(DtryPath(), DtryPath(name))
+
+
+Base.string(c::CVar) = string(c.box_path * c.port_path)
+
+
+SymbolicExpressions.ast(cvar::CVar) =
+  Symbol(replace(string(cvar), '.' => '₊'))

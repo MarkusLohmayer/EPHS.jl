@@ -12,6 +12,7 @@ struct StoragePort
   quantity::Quantity
   effort::SymExpr
 end
+# TODO StoragePort ≈ EffortProvider
 
 
 """
@@ -30,6 +31,7 @@ to compute the effort variables of the ports.
 """
 struct StorageComponent <: Component
   ports::Dtry{StoragePort}
+  # TODO ports::Dtry{Tuple{Quantity,EffortProvider}}
   energy::SymExpr
 
   # TODO Check that the only port variables appearing in `energy` are
@@ -64,6 +66,8 @@ function StorageComponent(ports::Dtry{Quantity}, energy::SymExpr)
 end
 
 
+# API for `AbstractSystem`s:
+
 function AbstractSystems.interface(sc::StorageComponent)
   map(sc.ports, PortType) do storage_port
     PortType(storage_port.quantity, true)
@@ -73,6 +77,42 @@ end
 
 AbstractSystems.fillcolor(::StorageComponent) = "#5082B0"
 
+
+function AbstractSystems.relation(sc::StorageComponent)
+  storage = mapwithpath(sc.ports, SymExpr) do port_path, _
+      FVar(DtryPath(), port_path)
+    end
+  ports = mapwithpath(sc.ports, Port) do port_path, storage_port
+    Port(
+      StateProvider(XVar(DtryPath(), port_path)),
+      EffortProvider(storage_port.effort)
+    )
+  end
+  Relation(;
+    storage=isempty(storage) ? Dtry{Dtry{SymExpr}}() : Dtry(storage),
+    ports
+  )
+end
+
+
+AbstractSystems.total_energy(sc::StorageComponent; box_path::DtryPath=■) =
+  isempty(box_path) ? sc.energy : replace(sc.energy, XVar) do xvar
+    XVar(box_path, xvar.port_path)
+  end
+
+
+function AbstractSystems.total_entropy(sc::StorageComponent; box_path::DtryPath=■)
+  expr = Const(0.0)
+  foreach(sc.ports) do (port_path, port)
+    if port.quantity == entropy
+      expr = expr + XVar(box_path, port_path)
+    end
+  end
+  expr
+end
+
+
+# `provides` and `provide` for `assemble`:
 
 provides(sc::StorageComponent, xvar::XVar) =
   haspath(sc.ports, xvar.port_path)
@@ -91,6 +131,7 @@ end
 
 
 function provide(sc::StorageComponent, evar::EVar)
+  # evar.box_path is ignored; handled by `fromcomponent`
   x = get(sc.ports, evar.port_path, nothing)
   if !isnothing(x)
     return x.effort
@@ -98,6 +139,8 @@ function provide(sc::StorageComponent, evar::EVar)
   error("$(string(evar)) not found")
 end
 
+
+# Printing:
 
 function Base.print(io::IO, sc::StorageComponent)
   println(io, "StorageComponent")
@@ -109,21 +152,4 @@ end
 function print_port(io::IO, port::StoragePort; prefix::String)
   println(io, port.quantity)
   print(io, prefix, "e = ", port.effort)
-end
-
-
-AbstractSystems.total_energy(sc::StorageComponent; box_path::DtryPath=■) =
-  isempty(box_path) ? sc.energy : replace(sc.energy, XVar) do xvar
-    XVar(box_path, xvar.port_path)
-  end
-
-
-function AbstractSystems.total_entropy(sc::StorageComponent; box_path::DtryPath=■)
-  expr = Const(0.0)
-  foreach(sc.ports) do (port_path, port)
-    if port.quantity == entropy
-      expr = expr + XVar(box_path, port_path)
-    end
-  end
-  expr
 end

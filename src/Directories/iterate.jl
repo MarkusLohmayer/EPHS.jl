@@ -97,6 +97,39 @@ function foreachvalue(f, dtry::Dtry)
 end
 
 
+function Base.foreach(f, dtry1::NonEmptyDtry, dtry2::NonEmptyDtry; prefix=■)
+  if leaf_or_node(dtry1) isa DtryLeaf && leaf_or_node(dtry2) isa DtryLeaf
+    leaf1 = leaf_or_node(dtry1)
+    leaf2 = leaf_or_node(dtry2)
+    f((prefix, leaf1.value, leaf2.value))
+    return nothing
+  elseif leaf_or_node(dtry1) isa DtryNode && leaf_or_node(dtry2) isa DtryNode
+    node1 = leaf_or_node(dtry1)
+    node2 = leaf_or_node(dtry2)
+    if keys(node1.branches) == keys(node2.branches)
+      for ((name, child1), (_, child2)) in zip(node1.branches, node2.branches)
+        foreach(f, child1, child2; prefix=getproperty(prefix, name))
+      end
+      return nothing
+    end
+  end
+  error("the two directories do not have the same tree structure")
+end
+
+
+function Base.foreach(f, dtry1::Dtry, dtry2::Dtry)
+  if !isempty(dtry1) && !isempty(dtry2)
+    nonempty1 = nothing_or_nonempty(dtry1)
+    nonempty2 = nothing_or_nonempty(dtry2)
+    return foreach(f, nonempty1, nonempty2)
+  end
+  if isempty(dtry1) || isempty(dtry2)
+    error("the two directories do not have the same tree structure")
+  end
+  nothing
+end
+
+
 # Probably not needed since we don't define `iterate`
 Base.valtype(::AbstractDtry{T}) where {T} = T
 Base.valtype(::Type{<:AbstractDtry{T}}) where {T} = T

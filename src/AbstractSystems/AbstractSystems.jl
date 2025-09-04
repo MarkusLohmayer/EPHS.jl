@@ -28,13 +28,20 @@ export volume
 export PortVar, PowerVar
 export XVar, FVar, EVar
 
+# Semantics
+export relation
+export StateProvider, StateConsumer
+export FlowProvider, EffortProvider
+export Port
+export Relation
+
 
 using ..Directories
 using ..SymbolicExpressions
 
 
 """
-    Quantitiy(quantity::Symbol, space::Symbol, iseven::Bool)
+    Quantity(quantity::Symbol, space::Symbol, iseven::Bool)
 
 A `Quantity` represents a physical quantity
 and is used to define a [`PortType`](@ref).
@@ -119,6 +126,14 @@ fillcolor(::AbstractSystem) = error("not implemented")
 
 
 """
+    relation(system::AbstractSystem) -> Relation
+
+Returns the [Relation](@ref) that defines the semantics of the system.
+"""
+relation(::AbstractSystem) = error("not implemented")
+
+
+"""
     total_energy(system::AbstractSystem) -> SymExr
 
 Returns a symbolic expression for the total energy of the system.
@@ -135,5 +150,8 @@ total_entropy(::AbstractSystem; box_path::DtryPath=■) = error("not implemented
 
 
 include("port_variables.jl")
+
+
+include("relation.jl")
 
 end

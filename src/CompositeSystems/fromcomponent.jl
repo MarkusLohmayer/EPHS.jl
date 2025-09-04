@@ -6,12 +6,12 @@ end
 
 
 fromcomponent(fsys::FlatSystem, pvar::PowerVar, c::Component) =
-  return replace(provide(c, pvar), Union{PortVar,CVar,Par}) do x
+  replace(provide(c, pvar), Union{PortVar,CVar,Par}) do x
     if x isa PortVar
       frompattern(fsys, typeof(x)(pvar.box_path, x.port_path))
     elseif x isa CVar
       CVar(pvar.box_path, x.port_path)
-    else
+    else # x isa Par
       if x.box_path == DtryPath(:ENV)
         x
       else

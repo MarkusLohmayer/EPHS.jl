@@ -12,7 +12,7 @@ function Base.map(f, dtry::NonEmptyDtry{T}, X::Type) where {T}
     old_value::T = leaf.value
     new_value::X = f(old_value)
     NonEmptyDtry{X}(new_value)
-  else
+  else # isa DtryNode
     node = leaf_or_node(dtry)
     NonEmptyDtry{X}((name => map(f, child, X) for (name, child) in node.branches)...)
   end
@@ -126,7 +126,7 @@ function zipmap(f, dtry1::NonEmptyDtry{T1}, dtry2::NonEmptyDtry{T2}, X::Type) wh
       )...)
     end
   end
-  error("the two directories have not the same tree structure")
+  error("the two directories do not have the same tree structure")
 end
 
 
@@ -159,7 +159,7 @@ function zipmap(f, dtry1::Dtry{T1}, dtry2::Dtry{T2}, X::Type) where {T1,T2}
       )...)
     end
   end
-  error("the two directories have not the same tree structure")
+  error("the two directories do not have the same tree structure")
 end
 
 
@@ -202,7 +202,7 @@ function zipmapwithpath(f, dtry1::NonEmptyDtry{T1}, dtry2::NonEmptyDtry{T2}, X::
       )...)
     end
   end
-  error("the two directories have not the same tree structure")
+  error("the two directories do not have the same tree structure")
 end
 
 
@@ -235,7 +235,7 @@ function zipmapwithpath(f, dtry1::Dtry{T1}, dtry2::Dtry{T2}, X::Type; prefix=■
       )...)
     end
   end
-  error("the two directories have not the same tree structure")
+  error("the two directories do not have the same tree structure")
 end
 
 

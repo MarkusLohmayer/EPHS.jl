@@ -60,14 +60,41 @@ osc_constraint = CompositeSystem(
       ),
     ),
   )
-);
+)
 
-assemble(osc_constraint) |> equations == Eq[
+@test assemble(osc_constraint) |> equations == Eq[
   Eq(FVar(■.ke, ■.p), Mul((Const(-1.0), Par(■.pe, ■.k, 1.5), XVar(■.pe, ■.q)))),
-  Eq(FVar(■.pe, ■.q), Add((Mul((Const(-1.0), CVar(■.c, ■.λ))), Mul((XVar(■.ke, ■.p), Pow(Par(■.ke, ■.m, 1.0), Const(-1.0))))))),
-  Eq(FVar(■.pe₂, ■.q), CVar(■.c, ■.λ)),
+  Eq(FVar(■.pe, ■.q), Add((Mul((XVar(■.ke, ■.p), Pow(Par(■.ke, ■.m, 1.0), Const(-1.0)))), Mul((Const(-1.0), CVar(■.sc, ■.λ)))))),
+  Eq(FVar(■.pe₂, ■.q), CVar(■.sc, ■.λ)),
   Eq(Const(0.0), Add((Mul((Const(-1.0), Par(■.pe, ■.k, 1.5), XVar(■.pe, ■.q))), Mul((Par(■.pe₂, ■.k, 1.5), XVar(■.pe₂, ■.q))))))
 ]
+
+@test relation(osc_constraint) == Relation(;
+  storage=Dtry(
+    :ke => Dtry(
+      Dtry(
+        :p => Dtry{SymExpr}(Mul((Const(-1.0), Par(■.pe, ■.k, 1.5), XVar(■.pe, ■.q))))
+      )
+    ),
+    :pe => Dtry(
+      Dtry(
+        :q => Dtry{SymExpr}(Add((Mul((XVar(■.ke, ■.p), Pow(Par(■.ke, ■.m, 1.0), Const(-1.0)))), Mul((Const(-1.0), CVar(■.sc, ■.λ))))))
+      )
+    ),
+    :pe₂ => Dtry(
+      Dtry(
+        :q => Dtry{SymExpr}(CVar(■.sc, ■.λ))
+      )
+    )
+  ),
+  constraints=Dtry(
+    :sc => Dtry(
+      Dtry(
+        :λ => Dtry{SymExpr}(Add((Mul((Const(-1.0), Par(■.pe, ■.k, 1.5), XVar(■.pe, ■.q))), Mul((Par(■.pe₂, ■.k, 1.5), XVar(■.pe₂, ■.q))))))
+      )
+    )
+  )
+)
 
 # 16.708 μs (324 allocations: 11.83 KiB) DAESystem
 # 48.625 μs (868 allocations: 31.19 KiB) Symbolic differentiation (with simplification/normalization)
