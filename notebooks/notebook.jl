@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.3
+# v0.20.8
 
 using Markdown
 using InteractiveUtils
@@ -12,6 +12,7 @@ begin
 	using Test
 	using EPHS
 	using Plots
+	using AbstractTrees
 end
 
 # ╔═╡ 617a56bb-2793-48ae-b845-b802fe8d3454
@@ -26,16 +27,20 @@ md"""
 md"""
 ## Energy-based modeling
 
-* **Hamiltonian system**s (mechanics, and also classical electromagnetism)
+* **Hamiltonian system**s (classical mechanics and electromagnetism)
     * **energy function** ("Hamiltonian")
-    * **symplectic structure**
-     (or more general Poisson-/presymplectic-/Dirac structures)
-* Thermodynamic modeling (here focus on CIT/LIT)
+    * **symplectic structure** (or Poisson-/presymplectic-/Dirac structure)
+* Thermodynamic modeling (with focus on CIT/LIT)
     * **first and second law**
     * **reversible-irreversible splitting** of dynamics
-        * reversible dynamics don't dissipate (no entropy production)
-        * irreversible dynamics are energy conserving
-    * Onsager symmetry
+        * reversible dynamics
+          * inherently conserves energy
+          * doesn't dissipate (no entropy production)
+          * satisfies integrability condition
+        * irreversible dynamics
+          * inherently produces entropy
+          * conserves energy
+          * satisfies Onsager symmetry
     * metriplectic/GENERIC framework (class of state space ODEs/PDEs)
 """
 
@@ -55,57 +60,42 @@ md"""
   * structure guarantees passivity, i.e. $\dot{H}(x(t)) \leq \langle y(t) \mid u(t) \rangle$
 """
 
-# ╔═╡ 67eac152-f37b-4088-b060-6b4cdb87b1dc
+# ╔═╡ f178a258-4c18-4e90-bc6a-04628fe03757
 md"""
-## Discussion about bond graphs
+## Bond graphs vs port-Hamiltonian systems
 
-* subsystems are primitive elements
-  * we could allow **arbitrarily complex subsystems**!
-* composed system (network of elements) is itself closed
-  * we could **allow bond graphs to be open** (**outer box**/interface)
-* composition should ...
-  * **exist** when interfaces match
-  * be **unique**, given no further data than the bond graphs, which are to be composed
-  * be **associative** (unique flattened hierachy of bond graphs)
+* bond graphs
+  * subsystems are explicit and primitve/flat
+  * interconnection realized through graphical notation
+  * bond graphs are not inherently composable
+* port-Hamiltonian systems
+  * subsystems are not explicit (only $H$, $J$, $R$)
+  * PHS can be interconnected (or "composed") through 'interconnecting Dirac structure'
 """
 
-# ╔═╡ 5c604120-4b49-4b4c-9d04-0eaf2405ebe8
+# ╔═╡ 4dd43ce4-9f43-41fb-b4de-45d2b33ff79c
 md"""
-## Discussion about port-Hamiltonian systems
+## Exergetic port-Hamiltonian systems modeling language
 
-* port-Hamiltonian systems compose
-* concept of subsystems is not explicit
-  * similar to (3 + 4 ⤳ 7; 2 + 5 ⤳ 7)
-    * 7 does not remember it is a 3 + 4
-* we could make explicit the concepts of
-  * subsystems and their ports (interface)
-* a model/system is a hierarchy of port-Hamiltonian systems
-  * systems have subsystems, which may have further subsystems ...
-"""
-
-# ╔═╡ 00d618cf-a8b2-4a14-b944-01a3fb9724ec
-md"""
-## Discussion summary
-
-* bond graphs are reticulated presentations of a system, which are not composable as such
-* port-Hamiltonian systems are composable, but composite systems are not defined using a graphical syntax similar to bond graphs
-"""
-
-# ╔═╡ 663b6e88-18ff-4ff7-a333-e6807ef49e67
-md"""
-## Approach behind `EPHS.jl`
-
-* formalize modularity and hierarchical nesting of systems through composable, graphical syntax (applied category theory)
-
-* syntax: composable, simpler version of open bond graphs
+* subsystems are explicit and can be hierarchically nested
+* interconnection realized through composable graphical syntax
+  * simpler version of (open) bond graphs
+* inherently composable
+  * syntax forms a multicategory
+    * objects: system interfaces
+    * morphisms: interconnection patterns
+    * when interfaces match, composition of patterns is uniquely defined and associative
+  * functorial semantics
+    * objects: bundles of port variables
+    * morphisms: relations between bundles of port-variables
 * thermodynamic modeling
-  * first and second law, reversible-irreversible splitting, ...
-  * syntax is energy/exergy flow diagram (as used in engineering thermodynamics)
+  * reversible-irreversible splitting consistent with first and second laws
+  * syntactic expressions are energy/exergy flow diagrams (as used in engineering thermodynamics)
 """
 
 # ╔═╡ 1a3f9083-6169-4327-84f9-6d62332e9aba
 md"""
-## `Dtry`, the monadic data structure behind `EPHS.jl`
+## Directories: a well-behaved formalism for hierarchical organization in categorical systems theory
 
 **A directory contains values associated to a hierarchically-defined system**
 
@@ -113,7 +103,7 @@ Example: (real-valued) initial conditions
 """
 
 # ╔═╡ 49d533ca-3ced-4814-983e-3c7c69adfe31
-ics = Dtry(
+ic = Dtry(
   :osc => Dtry(
     :pe => Dtry(
       :q => Dtry(1.0),
@@ -128,16 +118,16 @@ ics = Dtry(
 )
 
 # ╔═╡ 0ebf6384-77f4-4c49-8faf-17b8549f5ad0
-ics.osc # access subdirectory named `osc`
+ic.osc    # access subdirectory named `osc`
 
 # ╔═╡ 1233a4cf-4871-4852-a332-418dff69e405
-ics.tc.s
+ic.tc.s   # access primitive subdirectory
 
 # ╔═╡ 3164fe5b-cd32-4f3e-bb60-9cc0b5d73ecb
-ics.tc.s[]
+ic.tc.s[] # directly access corresponding value
 
 # ╔═╡ aa6e9e66-00eb-46ee-8607-f80687ce7ff4
-ics[■.osc.pe.q]
+ic[■.osc.pe.q]  # access value via complete path
 
 # ╔═╡ c4f2a81e-684e-4b56-a0b4-6ed112a6da40
 md"""
@@ -148,13 +138,16 @@ md"""
 """
 
 # ╔═╡ d4d14845-8c6c-4c2b-9f3b-fe893c275d17
-Dtry("hello world") # monad unit
+Dtry("hello world") # monad unit wraps a value as a primitive directory
 
 # ╔═╡ d71a7ecb-e8f6-4f7b-96ec-4798cce74c23
-Dtry(
-  :oszillator => Dtry(ics.osc), # directory as value!
-  :thermische_kapazitaet => Dtry(ics.tc)
-) |> flatten # monad multiplication
+dd = Dtry(
+  :oszillator => Dtry(ic.osc), # directory as value!
+  :thermische_kapazitaet => Dtry(ic.tc)
+)
+
+# ╔═╡ 2f7e2627-84cd-4d6b-906d-58309ecc8849
+flatten(dd) # monad multiplication
 
 # ╔═╡ 1110a995-96ed-4d27-a17e-a07462451cd6
 md"""
@@ -166,29 +159,35 @@ md"""
 * composition: hierarchical nesting of systems/patterns
 """
 
-# ╔═╡ 63dd09e4-da2f-40f8-91ea-6986ef016055
+# ╔═╡ 58418029-d0bc-42e0-b818-67356268f662
 md"""
-A `Dtry`-multicategory is essentially a human-friendly strictification of a symmetric monoidal category
-
-
-Rather than using a binary monoidal product (i.e. a bifunctor required to satisfy coherence diagrams) to combine objects/morphisms in parallel,
-`Dtry`-multicategory uses human-friendly names to address parts of combined objects/morphisms.
-
-Examples:
-* combination of multiple subsystems of an interconnection pattern
-* combination of multiple ports and parameters of a system
+Interconnection pattern of a mechanical oscillator model:
+* pe - potential energy (storage)
+* ke - kinetic energy (storage)
+* pkc - potential-kinetic coupling (reversible dynamics, canonical symplectic structure)
 """
 
 # ╔═╡ 2f61d0a9-eb87-42c3-8b4b-98ff28861d53
 pattern_osc = Pattern(
-  Dtry(
-    :q => Dtry(Junction(displacement, Position(1,2))),
-    :p => Dtry(Junction(momentum, Position(1,4), exposed=true)),
+  Dtry( # directory of junctions
+    :q => Dtry(
+		Junction(
+			displacement,
+			Position(1,2)
+		)
+	),
+    :p => Dtry(
+		Junction(
+			momentum,
+			Position(1,4),
+			exposed=true
+		)
+	),
   ),
-  Dtry(
+  Dtry( # directory of inner boxes (subsystems)
     :pe => Dtry(
       InnerBox(
-        Dtry(
+        Dtry( # directory of ports
           :q => Dtry(InnerPort(■.q)),
         ),
         Position(1,1)
@@ -214,13 +213,8 @@ pattern_osc = Pattern(
   )
 )
 
-# ╔═╡ 58418029-d0bc-42e0-b818-67356268f662
-md"""
-Interconnection pattern of mechanical oscillator:
-* pe - potential energy (storage)
-* ke - kinetic energy (storage)
-* pkc - potential-kinetic coupling (canonical symplectic structure)
-"""
+# ╔═╡ e42e187c-4a8f-4246-8241-db864496391a
+pattern_osc |> print
 
 # ╔═╡ 20cba0e2-dd7f-457d-b612-b45ecce76657
 pattern_damped_osc = Pattern(
@@ -256,6 +250,9 @@ pattern_damped_osc = Pattern(
     ),
   )
 )
+
+# ╔═╡ 3f0e20ac-fa7a-4af8-a65f-b0e27e4ee737
+interface(pattern_damped_osc, ■.osc) == interface(pattern_osc)
 
 # ╔═╡ d605e9e6-5e5c-44f0-b471-156ed5829b3e
 pattern_damped_osc_flat = Pattern(
@@ -326,78 +323,51 @@ let
 	)) == P(pattern_damped_osc_flat)
 end
 
-# ╔═╡ 3f0e20ac-fa7a-4af8-a65f-b0e27e4ee737
-@assert interface(pattern_damped_osc, ■.osc) == interface(pattern_osc)
+# ╔═╡ 73399877-352c-411c-a3d3-77b6a6d21cb6
+pattern_damped_osc_flat |> print
 
 # ╔═╡ 1bd2a462-2f4a-4cdb-b1e3-17ed02454839
 md"""
-#### Let's add semantics
+## Semantics
+
+* Every system implies a relation
+* A system is either primitive or composed of other systems:
 """
 
-# ╔═╡ de5e1060-1960-4473-b1d1-b613637ceca2
-md"""
-A system is either primitive or composed of other systems
-"""
-
-# ╔═╡ 06dbd3ee-e48a-40f5-ac70-9c88ef030a8e
-subtypes(AbstractSystem)
+# ╔═╡ a4fa5ecb-6a82-43db-8fef-8a106684751e
+begin
+	AbstractTrees.children(d::DataType) = subtypes(d)
+	print_tree(AbstractSystem)
+end
 
 # ╔═╡ dc83fca3-35b9-4f7e-af0b-004490671439
 md"""
-There are three types of primitive systems (called "components")
+
+### Components
+
+There are three types of primitive systems, also called 'components'
 """
 
-# ╔═╡ 191694be-923a-4160-ac3e-6f0bc4912814
-subtypes(Component)
+# ╔═╡ 7056eb21-ba88-47c2-a053-4913d8f0f013
+hookean_spring(k=1.5)
+
+# ╔═╡ e5def323-17a6-441b-bf5c-1241f46e3436
+pkc
+
+# ╔═╡ 7e0bd601-9a95-47ea-9ba4-0a8d297d2acc
+linear_friction(d=0.02)
 
 # ╔═╡ 481fa23f-698c-4bd3-addf-057167fadd1c
 md"""
-A composite system is given by an interconnection pattern,
-where each inner box is filled by a system!
+### Composite systems
 
-- each subsystem implies a relation
-- pattern implies a relation
-- composing these relations gives the relation implied by the composite system
+* A composite system is given by an interconnection pattern, where each inner box is filled by a system
+* Patterns also imply a relation (functorial semantics of syntax)
+* Relation implied by composite system is given by combining the relations implied by the subsystems in parallel and pre-composing with the relation implied by the pattern
 """
 
-# ╔═╡ bd8d67cf-39a0-4596-b00e-8fc7465397d8
-md"""
-So, let's define the relevant components:
-"""
-
-# ╔═╡ 89330912-a6b4-4a92-8963-9d6e169e6acf
-pe = let
-  k = Par(:k, 1.5)
-  q = XVar(:q)
-  E = Const(1/2) * k * q^Const(2)
-  StorageComponent(
-    Dtry(
-      :q => Dtry(displacement)
-    ),
-    E
-  )
-end
-
-# ╔═╡ c50a90fc-50b1-4977-93cb-cffb47c0986e
-ke = let
-  m = Par(:m, 1.)
-  p = XVar(:p)
-  E = Const(1/2) * p^Const(2) / m
-  StorageComponent(
-    Dtry(
-      :p => Dtry(momentum)
-    ),
-    E
-  )
-end
-
-# ╔═╡ 8b3e79a4-fb59-46cb-b113-8e69249bb7a7
-pkc = ReversibleComponent(
-  Dtry(
-    :q => Dtry(ReversiblePort(FlowPort(displacement, -EVar(:p)))),
-    :p => Dtry(ReversiblePort(FlowPort(momentum, EVar(:q))))
-  )
-)
+# ╔═╡ d095d44c-c04a-43fa-985a-c358db7280d7
+pkc
 
 # ╔═╡ e3c50826-b007-4b1b-9283-41c4862c5d0f
 osc = CompositeSystem(
@@ -411,7 +381,7 @@ osc = CompositeSystem(
         Dtry(
           :q => Dtry(InnerPort(■.q)),
         ),
-        pe, # storage component for potential energy
+        hookean_spring(k=1.5),
         Position(1,1)
       ),
     ),
@@ -420,7 +390,7 @@ osc = CompositeSystem(
         Dtry(
           :p => Dtry(InnerPort(■.p)),
         ),
-        ke, # storage component for kinetic energy
+        point_mass(m=1.0),
         Position(1,5)
       ),
     ),
@@ -430,7 +400,7 @@ osc = CompositeSystem(
           :q => Dtry(InnerPort(■.q)),
           :p => Dtry(InnerPort(■.p))
         ),
-        pkc, # Reversible component for potential-kinetic coupling
+        pkc,
         Position(1,3)
       ),
     ),
@@ -439,35 +409,6 @@ osc = CompositeSystem(
 
 # ╔═╡ ba8d0e88-78fc-4587-99af-08a2ef83e91c
 assemble(osc) |> equations |> print
-
-# ╔═╡ eb02ca60-5cf6-4179-8770-a8f3cf255d64
-tc = let
-  c₁ = Par(:c₁, 1.0)
-  c₂ = Par(:c₂, 2.0)
-  s = XVar(:s)
-  E = c₁ * exp(s / c₂)
-  StorageComponent(
-    Dtry(
-      :s => Dtry(entropy)
-    ),
-    E
-  )
-end
-
-# ╔═╡ f84a78b0-fc6c-424e-a5f8-edce7e06b7c2
-mf = let
-  d = Par(:d, 0.02)
-  p₊e = EVar(:p)
-  s₊e = EVar(:s)
-  p₊f = d * p₊e
-  s₊f = -((d * p₊e * p₊e) / (θ₀ + s₊e))
-  IrreversibleComponent(
-    Dtry(
-      :p => Dtry(IrreversiblePort(momentum, p₊f)),
-      :s => Dtry(IrreversiblePort(entropy, s₊f))
-    )
-  )
-end
 
 # ╔═╡ f67baa05-26d3-4639-b8ff-b801f2ddd47f
 osc_damped = CompositeSystem(
@@ -491,7 +432,7 @@ osc_damped = CompositeSystem(
           :p => Dtry(InnerPort(■.p)),
           :s => Dtry(InnerPort(■.s)),
         ),
-        mf, # irreversible component (mechanical friction)
+        linear_friction(d=0.02),
         Position(1,3)
       ),
     ),
@@ -500,34 +441,39 @@ osc_damped = CompositeSystem(
         Dtry(
           :s => Dtry(InnerPort(■.s)),
         ),
-        tc, # storage component (thermal capacity)
+        thermal_capacity(c₁=1.0, c₂=2.0),
         Position(1,5)
       ),
     ),
   )
 )
 
+# ╔═╡ fed755ff-03b6-42bc-956a-0f950025553b
+osc_damped |> print
+
 # ╔═╡ c0745d5d-56a1-40ff-8635-878d0a45ae65
-assemble(osc_damped)
+assemble(osc_damped) |> equations |> print
 
 # ╔═╡ d02064ad-695a-43f0-bc2e-251f216c15b4
 md"""
-#### Now, let's run a simulation
+#### Let's run a simulation
 
 First, we set an initial condition for the hierarchically defined system:
 """
 
 # ╔═╡ c4a516b3-dec7-4ad2-b146-baed0bb95e67
-sim = simulate(osc_damped, midpoint_rule, ics, 0.01, 20);
+sim = simulate(osc_damped, midpoint_rule, ic, 0.01, 20);
 
-# ╔═╡ d7cee76d-caf0-40ec-ba9e-cad4566bb896
-f = osc_damped |> assemble |> midpoint_rule
+# ╔═╡ 4c226f67-e5ad-453b-8e4e-99a5aafbdd7c
+ic
+
+# ╔═╡ 6ab4b77a-ead0-4d5c-be18-865223cb202c
+assemble(osc) |> midpoint_rule
 
 # ╔═╡ 984df1d6-340e-4069-a55c-8d11899ab490
 let
 q = XVar(DtryPath(:osc, :pe), DtryPath(:q))
-p = XVar(DtryPath(:osc, :ke), DtryPath(:p))
-plot_evolution(sim, q, p)
+plot_evolution(sim, q)
 end
 
 # ╔═╡ e5897d2d-fcf4-4895-8e5e-d52c59d6f99f
@@ -536,101 +482,14 @@ s = XVar(DtryPath(:tc), DtryPath(:s))
 plot_evolution(sim, s)
 end
 
-# ╔═╡ f46afc98-c50d-4432-9ef7-8efd68f86353
-md"""
-#### DAE example
-"""
-
-# ╔═╡ db5a47d3-96f2-4004-8826-2fa6d3471c95
-hc = let
-  λ = CVar(:λ)
-  ReversibleComponent(
-    Dtry(
-      :q => Dtry(ReversiblePort(FlowPort(displacement, λ))),
-      :q₂ => Dtry(ReversiblePort(FlowPort(displacement, -λ))),
-      :λ => Dtry(ReversiblePort(Constraint(-EVar(:q) + EVar(:q₂))))
-    )
-  )
-end
-
-# ╔═╡ 974cc4ba-bdcb-4e67-83af-aa63e42a91b1
-osc_constraint = CompositeSystem(
-  Dtry(
-    :q => Dtry(Junction(displacement, Position(1, 2))),
-    :p => Dtry(Junction(momentum, Position(1, 4))),
-    :q₂ => Dtry(Junction(displacement, Position(3, 2))),
-  ),
-  Dtry(
-    :pe => Dtry(
-      InnerBox(
-        Dtry(
-          :q => Dtry(InnerPort(■.q)),
-        ),
-        pe,
-        Position(1, 1)
-      ),
-    ),
-    :ke => Dtry(
-      InnerBox(
-        Dtry(
-          :p => Dtry(InnerPort(■.p)),
-        ),
-        ke,
-        Position(1, 5)
-      ),
-    ),
-    :pkc => Dtry(
-      InnerBox(
-        Dtry(
-          :q => Dtry(InnerPort(■.q)),
-          :p => Dtry(InnerPort(■.p))
-        ),
-        pkc,
-        Position(1, 3)
-      ),
-    ),
-    :hc => Dtry(
-      InnerBox(
-        Dtry(
-          :q => Dtry(InnerPort(■.q)),
-          :q₂ => Dtry(InnerPort(■.q₂)),
-        ),
-        hc,
-        Position(2, 2)
-      ),
-    ),
-    :pe₂ => Dtry(
-      InnerBox(
-        Dtry(
-          :q => Dtry(InnerPort(■.q₂)),
-        ),
-        pe,
-        Position(3, 1)
-      ),
-    ),
-  )
-)
-
-# ╔═╡ 494185ac-87c9-40fb-bde4-9d208ba73fb3
-assemble(osc_constraint)
-
-# ╔═╡ 649578a2-ed83-4b81-9d23-53012972026b
-md"""
-# Possible next steps
-
-- Show that the language framework and its implementation scales
-"""
-
 # ╔═╡ Cell order:
 # ╟─617a56bb-2793-48ae-b845-b802fe8d3454
 # ╟─2001e3e6-3d5a-40ee-964f-2fe1fbff3ebe
-# ╟─88752a0c-de2e-11ef-1572-c10479e38922
+# ╠═88752a0c-de2e-11ef-1572-c10479e38922
 # ╟─0296f687-7e3f-471e-b431-a63330976154
 # ╟─08f633bc-0e00-4fb6-9464-b48db005c7e9
-# ╟─67eac152-f37b-4088-b060-6b4cdb87b1dc
-# ╟─5c604120-4b49-4b4c-9d04-0eaf2405ebe8
-# ╟─00d618cf-a8b2-4a14-b944-01a3fb9724ec
-# ╟─663b6e88-18ff-4ff7-a333-e6807ef49e67
+# ╟─f178a258-4c18-4e90-bc6a-04628fe03757
+# ╟─4dd43ce4-9f43-41fb-b4de-45d2b33ff79c
 # ╟─1a3f9083-6169-4327-84f9-6d62332e9aba
 # ╠═49d533ca-3ced-4814-983e-3c7c69adfe31
 # ╠═0ebf6384-77f4-4c49-8faf-17b8549f5ad0
@@ -640,37 +499,32 @@ md"""
 # ╟─c4f2a81e-684e-4b56-a0b4-6ed112a6da40
 # ╠═d4d14845-8c6c-4c2b-9f3b-fe893c275d17
 # ╠═d71a7ecb-e8f6-4f7b-96ec-4798cce74c23
+# ╠═2f7e2627-84cd-4d6b-906d-58309ecc8849
 # ╟─1110a995-96ed-4d27-a17e-a07462451cd6
-# ╟─63dd09e4-da2f-40f8-91ea-6986ef016055
-# ╠═2f61d0a9-eb87-42c3-8b4b-98ff28861d53
+# ╠═e42e187c-4a8f-4246-8241-db864496391a
 # ╟─58418029-d0bc-42e0-b818-67356268f662
-# ╠═20cba0e2-dd7f-457d-b612-b45ecce76657
+# ╟─2f61d0a9-eb87-42c3-8b4b-98ff28861d53
+# ╟─20cba0e2-dd7f-457d-b612-b45ecce76657
+# ╠═3f0e20ac-fa7a-4af8-a65f-b0e27e4ee737
 # ╟─d605e9e6-5e5c-44f0-b471-156ed5829b3e
 # ╠═f87e71e4-be18-4c2e-8a9e-f20e731570d9
-# ╠═3f0e20ac-fa7a-4af8-a65f-b0e27e4ee737
+# ╠═73399877-352c-411c-a3d3-77b6a6d21cb6
 # ╟─1bd2a462-2f4a-4cdb-b1e3-17ed02454839
-# ╟─de5e1060-1960-4473-b1d1-b613637ceca2
-# ╠═06dbd3ee-e48a-40f5-ac70-9c88ef030a8e
+# ╟─a4fa5ecb-6a82-43db-8fef-8a106684751e
 # ╟─dc83fca3-35b9-4f7e-af0b-004490671439
-# ╠═191694be-923a-4160-ac3e-6f0bc4912814
+# ╠═7056eb21-ba88-47c2-a053-4913d8f0f013
+# ╠═e5def323-17a6-441b-bf5c-1241f46e3436
+# ╠═7e0bd601-9a95-47ea-9ba4-0a8d297d2acc
 # ╟─481fa23f-698c-4bd3-addf-057167fadd1c
-# ╟─bd8d67cf-39a0-4596-b00e-8fc7465397d8
-# ╠═89330912-a6b4-4a92-8963-9d6e169e6acf
-# ╟─c50a90fc-50b1-4977-93cb-cffb47c0986e
-# ╟─8b3e79a4-fb59-46cb-b113-8e69249bb7a7
-# ╠═e3c50826-b007-4b1b-9283-41c4862c5d0f
+# ╠═d095d44c-c04a-43fa-985a-c358db7280d7
+# ╟─e3c50826-b007-4b1b-9283-41c4862c5d0f
 # ╠═ba8d0e88-78fc-4587-99af-08a2ef83e91c
-# ╟─eb02ca60-5cf6-4179-8770-a8f3cf255d64
-# ╟─f84a78b0-fc6c-424e-a5f8-edce7e06b7c2
-# ╟─f67baa05-26d3-4639-b8ff-b801f2ddd47f
+# ╠═f67baa05-26d3-4639-b8ff-b801f2ddd47f
+# ╠═fed755ff-03b6-42bc-956a-0f950025553b
 # ╠═c0745d5d-56a1-40ff-8635-878d0a45ae65
 # ╟─d02064ad-695a-43f0-bc2e-251f216c15b4
 # ╠═c4a516b3-dec7-4ad2-b146-baed0bb95e67
-# ╠═d7cee76d-caf0-40ec-ba9e-cad4566bb896
+# ╠═4c226f67-e5ad-453b-8e4e-99a5aafbdd7c
+# ╠═6ab4b77a-ead0-4d5c-be18-865223cb202c
 # ╠═984df1d6-340e-4069-a55c-8d11899ab490
 # ╠═e5897d2d-fcf4-4895-8e5e-d52c59d6f99f
-# ╟─f46afc98-c50d-4432-9ef7-8efd68f86353
-# ╟─db5a47d3-96f2-4004-8826-2fa6d3471c95
-# ╟─974cc4ba-bdcb-4e67-83af-aa63e42a91b1
-# ╠═494185ac-87c9-40fb-bde4-9d208ba73fb3
-# ╟─649578a2-ed83-4b81-9d23-53012972026b
