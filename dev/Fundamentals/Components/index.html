@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Components · EPHS.jl</title><meta name="title" content="Components · EPHS.jl"/><meta property="og:title" content="Components · EPHS.jl"/><meta property="twitter:title" content="Components · EPHS.jl"/><meta name="description" content="Documentation for EPHS.jl."/><meta property="og:description" content="Documentation for EPHS.jl."/><meta property="twitter:description" content="Documentation for EPHS.jl."/><meta property="og:url" content="https://MarkusLohmayer.github.io/EPHS.jl/stable/Fundamentals/Components/"/><meta property="twitter:url" content="https://MarkusLohmayer.github.io/EPHS.jl/stable/Fundamentals/Components/"/><link rel="canonical" href="https://MarkusLohmayer.github.io/EPHS.jl/stable/Fundamentals/Components/"/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script><link href="../../assets/favicon.ico" rel="icon" type="image/x-icon"/></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../../"><img src="../../assets/logo.svg" alt="EPHS.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="../../">EPHS.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><input class="collapse-toggle" id="menuitem-2" type="checkbox"/><label class="tocitem" for="menuitem-2"><span class="docs-label">Background</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../Background/Overview/">Overview</a></li><li><a class="tocitem" href="../../Background/EnergyBased/">Energy-based modeling</a></li><li><a class="tocitem" href="../../Background/PortBased/">Port-based modeling</a></li><li><a class="tocitem" href="../../Background/Discussion/">Discussion</a></li><li><a class="tocitem" href="../../Background/Approach/">The approach behind EPHS.jl</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-3" type="checkbox" checked/><label class="tocitem" for="menuitem-3"><span class="docs-label">Fundamentals</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../Overview/">Overview</a></li><li><a class="tocitem" href="../Directories/">Directories</a></li><li><a class="tocitem" href="../Patterns/">Patterns</a></li><li class="is-active"><a class="tocitem" href>Components</a><ul class="internal"><li><a class="tocitem" href="#Storage-components"><span>Storage components</span></a></li><li><a class="tocitem" href="#Reversible-components"><span>Reversible components</span></a></li><li><a class="tocitem" href="#Irreversible-components"><span>Irreversible components</span></a></li></ul></li></ul></li><li><input class="collapse-toggle" id="menuitem-4" type="checkbox"/><label class="tocitem" for="menuitem-4"><span class="docs-label">Examples</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../Examples/Overview/">Overview</a></li><li><a class="tocitem" href="../../Examples/Oscillator/">Oscillator</a></li><li><a class="tocitem" href="../../Examples/Oscillator_constraint/">Constrained oscillator</a></li><li><a class="tocitem" href="../../Examples/CPD/">Cylinder-piston device</a></li><li><a class="tocitem" href="../../Examples/Motor/">DC shunt motor</a></li></ul></li><li><a class="tocitem" href="../../Vision/">Vision</a></li><li><input class="collapse-toggle" id="menuitem-6" type="checkbox"/><label class="tocitem" for="menuitem-6"><span class="docs-label">Reference</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../Reference/Overview/">Overview</a></li><li><a class="tocitem" href="../../Reference/Directories/">Directories</a></li><li><a class="tocitem" href="../../Reference/SymbolicExpressions/">SymbolicExpressions</a></li><li><a class="tocitem" href="../../Reference/AbstractSystems/">AbstractSystems</a></li><li><a class="tocitem" href="../../Reference/Patterns/">Patterns</a></li><li><a class="tocitem" href="../../Reference/Components/">Components</a></li><li><a class="tocitem" href="../../Reference/CompositeSystems/">CompositeSystems</a></li><li><a class="tocitem" href="../../Reference/Simulations/">Simulations</a></li><li><a class="tocitem" href="../../Reference/ComponentLibrary/">ComponentLibrary</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Fundamentals</a></li><li class="is-active"><a href>Components</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Components</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/MarkusLohmayer/EPHS.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/MarkusLohmayer/EPHS.jl/blob/main/docs/src/Fundamentals/Components.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="ComponentsIntro"><a class="docs-heading-anchor" href="#ComponentsIntro">Components</a><a id="ComponentsIntro-1"></a><a class="docs-heading-anchor-permalink" href="#ComponentsIntro" title="Permalink"></a></h1><p>Any system is ultimately composed of primitive systems, also called components. As reflected in the EPHS.jl logo, there are three kinds of them:</p><ul><li>Storage components are primitive systems representing <strong>storage of energy</strong>. Inner boxes filled with a storage component are displayed with a <strong>blue</strong> filling.</li><li>Reversible components represent <strong>reversible couplings</strong> between energy domains, <strong>reversible transformations</strong>, or <strong>constraints</strong>.  They conserve energy, entropy, and exergy. Inner boxes filled with a reversible component are displayed with a <strong>green</strong> filling.</li><li>Irreversible components model <strong>irreversible processes</strong>. They conserve energy, produce entropy, and destroy exergy. Inner boxes filled with an irreversible component are displayed with a <strong>red</strong> filling.</li></ul><p>In summary, the blue boxes correspond to the state of a given system, the green boxes correspond to its reversible dynamics, and the red boxes correspond to its irreversible dynamics.</p><p>To guarantee a thermodynamically consistent reversible-irreversible splitting of the dynamics of arbitrarily interconnected composite systems, systems are defined with respect to a fixed <a href="https://en.wikipedia.org/wiki/Exergy">exergy</a> reference environment. Here, we assume that the environment contains entropy and volume. The constant, energy-conjugate, intensive variables are the reference temperature <span>$\theta_0$</span> and the reference pressure <span>$\pi_0$</span>.</p><p>Every component has an interface <span>$I$</span>. We write <span>$x \in \mathcal{X}_I$</span> for the combined state variable, and <span>$(x, \, f, \, e) \in \mathcal{P}_I$</span> for the combined state, flow, and effort variables associated to all its ports.</p><h2 id="Storage-components"><a class="docs-heading-anchor" href="#Storage-components">Storage components</a><a id="Storage-components-1"></a><a class="docs-heading-anchor-permalink" href="#Storage-components" title="Permalink"></a></h2><p>A storage component is defined by its interface (of power ports) <span>$I$</span>, and an energy function <span>$E \colon \mathcal{X}_I \to \mathbb{R}$</span>. Based on the reference environment, the energy function induces the corresponding exergy function <span>$H \colon \mathcal{X}_I \to \mathbb{R}$</span>.</p><p>The rate of change of each state variable is given by its corresponding flow variable:</p><p class="math-container">\[\frac{\mathrm{d} x}{\mathrm{d} t}
+\: = \:
+f\]</p><p>Each effort variable is given by the partial derivative of the exergy function with respect to the corresponding state variable:</p><p class="math-container">\[e
+\: = \:
+\frac{\mathrm{d} H}{\mathrm{d} x}\]</p><p>Consequently, the rate of change of the stored exergy is given by the pairing of the effort and flow variables:</p><p class="math-container">\[\frac{\mathrm{d} H}{\mathrm{d} t}
+\: = \:
+\langle e \mid f \rangle\]</p><p>As a first example, let&#39;s define a <a href="../../Reference/Components/#EPHS.Components.StorageComponent"><code>StorageComponent</code></a> representing the potential energy of a Hookean spring:</p><pre><code class="language-julia hljs">pe = let
+  I = Dtry(                       # interface
+    :q =&gt; Dtry(displacement)
+  )
+  q = XVar(:q)                    # state variable
+  k = Par(:k, 1.5)                # parameter with default value
+  E = Const(1/2) * k * q^Const(2) # energy function
+  StorageComponent(I, E)
+end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">StorageComponent
+■
+└─ q =&gt; Quantity(:displacement, :ℝ, true)
+        e = k * q.x
+Energy: 0.5 * k * (q.x^2.0)</code></pre><p>The <code>let</code> block is used to contain the Julia variables <code>I</code>, <code>q</code>, <code>k</code>, and <code>E</code> within a local scope.</p><p>Since <code>E</code> does not represent <em>internal energy</em>, the energy and exergy functions are equal.</p><p>To complete the picture, we consider a storage component that models the internal energy of an ideal gas contained in a compartment with variable volume:</p><pre><code class="language-julia hljs">gas = let
+  I = Dtry(
+    :s =&gt; Dtry(entropy),
+    :v =&gt; Dtry(volume),
+  )
+  s = XVar(:s)
+  v = XVar(:v)
+  c = Par(:c, 3 / 2)
+  c₁ = Par(:c₁, 1.0)
+  c₂ = Par(:c₂, 2.5)
+  v₀ = Par(:v₀, 1.0)
+  E = c₁ * exp(s / c₂) * (v₀ / v)^(Const(1) / c)
+  StorageComponent(I, E)
+end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">StorageComponent
+■
+├─ s =&gt; Quantity(:entropy, :ℝ, true)
+│       e = c₁ * (exp(s.x * (c₂^-1.0))) * (c₂^-1.0) * (v₀^(c^-1.0)) * ((v.x^-1.0)^(c^-1.0)) + -1.0 * ENV.θ
+└─ v =&gt; Quantity(:volume, :ℝ, true)
+        e = -1.0 * c₁ * (exp(s.x * (c₂^-1.0))) * (v₀^(c^-1.0)) * (c^-1.0) * (v.x^-1.0) * (v.x^(-1.0 * (c^-1.0))) + ENV.π
+Energy: c₁ * (exp(s.x * (c₂^-1.0))) * (v₀^(c^-1.0)) * ((v.x^-1.0)^(c^-1.0))</code></pre><p>Since the storage component has state variables representing entropy and volume, the induced exergy function <span>$H$</span> is defined by</p><p class="math-container">\[H(s, \, v)
+\: = \:
+E(s, \, v) \, - \, \theta_0 \, s \, + \, \pi_0 * v\]</p><p>The effort variables are hence given by <span>$\mathtt{s.e} = \theta - \theta_0$</span> and <span>$\mathtt{v.e} = -(\pi - \pi_0)$</span>, where <span>$\theta = \frac{\partial E}{\partial s}$</span> and <span>$\pi = -\frac{\partial E}{\partial v}$</span>.</p><p>We note that in the output above, the (Julia) constants <a href="../../Reference/Components/#EPHS.Components.θ₀"><code>θ₀</code></a> and <a href="../../Reference/Components/#EPHS.Components.π₀"><code>π₀</code></a> are printed as <code>ENV.θ</code> and <code>ENV.π</code>, respectively.</p><h2 id="Reversible-components"><a class="docs-heading-anchor" href="#Reversible-components">Reversible components</a><a id="Reversible-components-1"></a><a class="docs-heading-anchor-permalink" href="#Reversible-components" title="Permalink"></a></h2><p>Reversible components can represent generalized gyrators, generalized transformers, and constraints. While a single component can in general combine all three aspects, here we treat them separately.</p><p>Reversible components conserve exergy and all extensive quantities also present in the environment, including entropy. Thus, they also conserve energy.</p><h3 id="Generalized-gyrators"><a class="docs-heading-anchor" href="#Generalized-gyrators">Generalized gyrators</a><a id="Generalized-gyrators-1"></a><a class="docs-heading-anchor-permalink" href="#Generalized-gyrators" title="Permalink"></a></h3><p>The relation defining a generalized gyrator is of the following form:</p><p class="math-container">\[f
+\: = \:
+L(x) \, e\]</p><p>For every state <span>$x$</span>, the matrix <span>$L(x)$</span> is skew-symmetric. It follows that exergetic power is conserved:</p><p class="math-container">\[\langle e \mid f \rangle
+\: = \:
+0\]</p><p>To guarantee thermodynamic consistency, <span>$L$</span> has to satisfy some extra conditions stated in the article. In particular, the extensive quantities present in the environment (entropy and volume) need to be conserved.</p><p>As an example, we consider a <a href="../../Reference/Components/#EPHS.Components.ReversibleComponent"><code>ReversibleComponent</code></a> that models the coupling between the kinetic energy domain of a piston and the two hydraulic energy domains on its front and backside:</p><pre><code class="language-julia hljs">hkc = let
+  a = Par(:a, 2e-2) # cross-sectional area of cylinder/piston
+  p₊e = EVar(:p)
+  v₁₊e = EVar(:v₁)
+  v₂₊e = EVar(:v₂)
+  p₊f = a * (v₁₊e - v₂₊e)
+  v₁₊f = -(a * p₊e)
+  v₂₊f = a * p₊e
+  ReversibleComponent(
+    Dtry(
+      :p =&gt; Dtry(ReversiblePort(FlowPort(momentum, p₊f))),
+      :v₁ =&gt; Dtry(ReversiblePort(FlowPort(volume, v₁₊f))),
+      :v₂ =&gt; Dtry(ReversiblePort(FlowPort(volume, v₂₊f))),
+    ))
+end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">ReversibleComponent
+■
+├─ p =&gt; Quantity(:momentum, :ℝ, false)
+│       f = a * (v₁.e + -1.0 * v₂.e)
+├─ v₁ =&gt; Quantity(:volume, :ℝ, true)
+│        f = -1.0 * a * p.e
+└─ v₂ =&gt; Quantity(:volume, :ℝ, true)
+         f = a * p.e</code></pre><p>The above defines a skew-symmetric relation:</p><p class="math-container">\[\begin{bmatrix}
+  \mathtt{p.f} \\
+  \mathtt{v_1.f} \\
+  \mathtt{v_2.f}
+\end{bmatrix}
+\: = \:
+\begin{bmatrix}
+   0 &amp; a &amp; -a \\
+  -a &amp; 0 &amp;  0 \\
+   a &amp; 0 &amp;  0 \\
+\end{bmatrix}
+\,
+\begin{bmatrix}
+  \mathtt{p.e} \\
+  \mathtt{v_1.e} \\
+  \mathtt{v_2.e}
+\end{bmatrix}\]</p><p>The condition for conservation of volume is satisfied:</p><p class="math-container">\[\begin{bmatrix}
+  0 \\
+  0 \\
+  0
+\end{bmatrix}
+\: = \:
+\begin{bmatrix}
+   0 &amp; a &amp; -a \\
+  -a &amp; 0 &amp;  0 \\
+   a &amp; 0 &amp;  0 \\
+\end{bmatrix}
+\,
+\begin{bmatrix}
+  0 \\
+  -\pi_0 \\
+  -\pi_0
+\end{bmatrix}\]</p><h3 id="Generalized-transformers"><a class="docs-heading-anchor" href="#Generalized-transformers">Generalized transformers</a><a id="Generalized-transformers-1"></a><a class="docs-heading-anchor-permalink" href="#Generalized-transformers" title="Permalink"></a></h3><p>The power ports and their combined flow and effort variables are split into two parts. We write <span>$f = (f_1, \, f_2)$</span> and <span>$e = (e_1, \, e_2)$</span>. The relation defining a generalized transformer is of the following form:</p><p class="math-container">\[\begin{bmatrix}
+  f_1 \\
+  e_2
+\end{bmatrix}
+\: = \:
+\begin{bmatrix}
+  0 &amp; -g(x) \\
+  g^*(x) &amp; 0
+\end{bmatrix}
+\,
+\begin{bmatrix}
+  e_1 \\
+  f_2
+\end{bmatrix}\]</p><p>Again, conservation of exergy follows from skew-symmetry. Regarding thermodynamic consistency, conditions on <span>$g$</span> (in particular for conservation of entropy and volume) are stated in the article.</p><p>As an example, we consider a simple mechanical lever:</p><pre><code class="language-julia hljs">lever = let
+  r = Par(:r, 2.)  # ratio (mechanical advantage of lever)
+  q₁₊e = EVar(:q₁)
+  q₂₊f = FVar(:q₂)
+  q₁₊f = -(r * q₂₊f)
+  q₂₊e = r * q₁₊e
+  ReversibleComponent(
+    Dtry(
+      :q₁ =&gt; Dtry(ReversiblePort(FlowPort(displacement, q₁₊f))),
+      :q₂ =&gt; Dtry(ReversiblePort(EffortPort(displacement, q₂₊e)))
+    )
+  )
+end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">ReversibleComponent
+■
+├─ q₁ =&gt; Quantity(:displacement, :ℝ, true)
+│        f = -1.0 * r * q₂.f
+└─ q₂ =&gt; Quantity(:displacement, :ℝ, true)
+         e = r * q₁.e</code></pre><p>The above defines a skew-symmetric relation:</p><p class="math-container">\[\begin{bmatrix}
+  \mathtt{q_1.f} \\
+  \mathtt{q_2.e}
+\end{bmatrix}
+\: = \:
+\begin{bmatrix}
+   0 &amp; a \\
+  -a &amp; 0
+\end{bmatrix}
+\,
+\begin{bmatrix}
+  \mathtt{q_1.e} \\
+  \mathtt{q_2.f}
+\end{bmatrix}\]</p><h3 id="Constraints"><a class="docs-heading-anchor" href="#Constraints">Constraints</a><a id="Constraints-1"></a><a class="docs-heading-anchor-permalink" href="#Constraints" title="Permalink"></a></h3><p>The relation defining a constraint is of the following form:</p><p class="math-container">\[\begin{bmatrix}
+  f \\
+  0
+\end{bmatrix}
+\: = \:
+\begin{bmatrix}
+  0 &amp; C^*(x) \\
+  -C(x) &amp; 0
+\end{bmatrix}
+\,
+\begin{bmatrix}
+  e \\
+  \lambda_c
+\end{bmatrix}\]</p><p>Here, the constraint variable (or multiplier) <span>$\lambda_c$</span> is determined by the constraint equation <span>$0 = C(x) \, e$</span>.</p><p>As an example, we consider a component that allows to combine two springs in series:</p><pre><code class="language-julia hljs">ssc = let
+  λ = CVar(:λ)  # constraint variable
+  ReversibleComponent(
+    Dtry(
+      :q =&gt; Dtry(ReversiblePort(FlowPort(displacement, λ))),
+      :q₂ =&gt; Dtry(ReversiblePort(FlowPort(displacement, -λ))),
+      :λ =&gt; Dtry(ReversiblePort(Constraint(-EVar(:q) + EVar(:q₂))))
+    )
+  )
+end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">ReversibleComponent
+■
+├─ q =&gt; Quantity(:displacement, :ℝ, true)
+│       f = λ
+├─ q₂ =&gt; Quantity(:displacement, :ℝ, true)
+│        f = -1.0 * λ
+└─ λ =&gt; constraint: 0 = -1.0 * q.e + q₂.e</code></pre><p>The above defines a skew-symmetric relation:</p><p class="math-container">\[\begin{bmatrix}
+  \mathtt{q.f} \\
+  \mathtt{q_2.f} \\
+  0
+\end{bmatrix}
+\: = \:
+\begin{bmatrix}
+  0  &amp; 0 &amp;  1 \\
+  0  &amp; 0 &amp; -1 \\
+  -1 &amp; 1 &amp;  0
+\end{bmatrix}
+\,
+\begin{bmatrix}
+  \mathtt{q.e} \\
+  \mathtt{q_2.e} \\
+  \lambda_c
+\end{bmatrix}\]</p><h2 id="Irreversible-components"><a class="docs-heading-anchor" href="#Irreversible-components">Irreversible components</a><a id="Irreversible-components-1"></a><a class="docs-heading-anchor-permalink" href="#Irreversible-components" title="Permalink"></a></h2><p>Irreversible components represent irreversible processes. They have a non-negative exergy destruction rate. They conserve energy and all extensive quantities also present in the environment, except entropy. Thus, they have a non-negative entropy production rate.</p><p>The relation defining an irreversible component is of the following form:</p><p class="math-container">\[f
+\: = \:
+\frac{1}{\theta_0} \, M(x, e) \, e\]</p><p>Here, for every state <span>$x$</span> and every effort <span>$e$</span>, the matrix <span>$M(x, \, e)$</span> is symmetric, non-negative definite. The symmetry property corresponds to Onsager&#39;s reciprocal relations and non-negative definiteness implies a non-negative exergy destruction rate:</p><p class="math-container">\[\langle e \mid f \rangle
+\: \geq \:
+0\]</p><p>To guarantee thermodynamic consistency, <span>$M$</span> has to satisfy some extra conditions stated in the article. In particular, energy and the extensive quantities present in the environment, except entropy, need to be conserved.</p><p>As an example, we consider an <a href="../../Reference/Components/#EPHS.Components.IrreversibleComponent"><code>IrreversibleComponent</code></a> that models mechanical friction:</p><pre><code class="language-julia hljs">mf = let
+  d = Par(:d, 0.02) # friction coefficient
+  p₊e = EVar(:p)
+  s₊e = EVar(:s)
+  p₊f = d * p₊e
+  s₊f = -((d * p₊e * p₊e) / (θ₀ + s₊e))
+  IrreversibleComponent(
+    Dtry(
+      :p =&gt; Dtry(IrreversiblePort(momentum, p₊f)),
+      :s =&gt; Dtry(IrreversiblePort(entropy, s₊f)),
+    )
+  )
+end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">IrreversibleComponent
+■
+├─ p =&gt; Quantity(:momentum, :ℝ, false)
+│       f = d * p.e
+└─ s =&gt; Quantity(:entropy, :ℝ, true)
+        f = -1.0 * d * (p.e^2.0) * ((ENV.θ + s.e)^-1.0)</code></pre><p>The above defines a symmetric, non-negative definite relation:</p><p class="math-container">\[\begin{bmatrix}
+  \mathtt{p.f} \\
+  \mathtt{s.f}
+\end{bmatrix}
+\: = \:
+\frac{1}{\theta_{0}} \, d \,
+\begin{bmatrix}
+  \theta &amp; \upsilon  \\
+  - \upsilon &amp; \frac{\upsilon^2}{\theta}
+\end{bmatrix}
+\,
+\begin{bmatrix}
+  \mathtt{p.e} \\
+  \mathtt{s.e}
+\end{bmatrix}
+\: = \:
+\begin{bmatrix}
+  d \, \upsilon \\
+  -\frac{d \, \upsilon^2}{\theta}
+\end{bmatrix}\]</p><p>Here, <span>$\upsilon = \mathtt{p.e}$</span> is the velocity and <span>$\theta = \theta_{0} + \mathtt{s.e}$</span> is the absolute temperature at which kinetic energy is dissipated into the thermal energy domain.</p><p>The condition for conservation of energy is satisfied:</p><p class="math-container">\[\begin{bmatrix}
+  0 \\
+  0
+\end{bmatrix}
+\: = \:
+\frac{1}{\theta_{0}} \, d \,
+\begin{bmatrix}
+  \theta &amp; \upsilon  \\
+  - \upsilon &amp; \frac{\upsilon^2}{\theta}
+\end{bmatrix}
+\,
+\begin{bmatrix}
+  \upsilon \\
+  \theta
+\end{bmatrix}\]</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../Patterns/">« Patterns</a><a class="docs-footer-nextpage" href="../../Examples/Overview/">Overview »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.14.1 on <span class="colophon-date" title="Friday 5 September 2025 07:53">Friday 5 September 2025</span>. Using Julia version 1.11.6.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

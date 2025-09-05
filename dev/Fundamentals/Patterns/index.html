@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Patterns · EPHS.jl</title><meta name="title" content="Patterns · EPHS.jl"/><meta property="og:title" content="Patterns · EPHS.jl"/><meta property="twitter:title" content="Patterns · EPHS.jl"/><meta name="description" content="Documentation for EPHS.jl."/><meta property="og:description" content="Documentation for EPHS.jl."/><meta property="twitter:description" content="Documentation for EPHS.jl."/><meta property="og:url" content="https://MarkusLohmayer.github.io/EPHS.jl/stable/Fundamentals/Patterns/"/><meta property="twitter:url" content="https://MarkusLohmayer.github.io/EPHS.jl/stable/Fundamentals/Patterns/"/><link rel="canonical" href="https://MarkusLohmayer.github.io/EPHS.jl/stable/Fundamentals/Patterns/"/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script><link href="../../assets/favicon.ico" rel="icon" type="image/x-icon"/></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../../"><img src="../../assets/logo.svg" alt="EPHS.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="../../">EPHS.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><input class="collapse-toggle" id="menuitem-2" type="checkbox"/><label class="tocitem" for="menuitem-2"><span class="docs-label">Background</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../Background/Overview/">Overview</a></li><li><a class="tocitem" href="../../Background/EnergyBased/">Energy-based modeling</a></li><li><a class="tocitem" href="../../Background/PortBased/">Port-based modeling</a></li><li><a class="tocitem" href="../../Background/Discussion/">Discussion</a></li><li><a class="tocitem" href="../../Background/Approach/">The approach behind EPHS.jl</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-3" type="checkbox" checked/><label class="tocitem" for="menuitem-3"><span class="docs-label">Fundamentals</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../Overview/">Overview</a></li><li><a class="tocitem" href="../Directories/">Directories</a></li><li class="is-active"><a class="tocitem" href>Patterns</a><ul class="internal"><li><a class="tocitem" href="#Example"><span>Example</span></a></li><li><a class="tocitem" href="#Composition"><span>Composition</span></a></li><li><a class="tocitem" href="#Functorial-semantics"><span>Functorial semantics</span></a></li></ul></li><li><a class="tocitem" href="../Components/">Components</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4" type="checkbox"/><label class="tocitem" for="menuitem-4"><span class="docs-label">Examples</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../Examples/Overview/">Overview</a></li><li><a class="tocitem" href="../../Examples/Oscillator/">Oscillator</a></li><li><a class="tocitem" href="../../Examples/Oscillator_constraint/">Constrained oscillator</a></li><li><a class="tocitem" href="../../Examples/CPD/">Cylinder-piston device</a></li><li><a class="tocitem" href="../../Examples/Motor/">DC shunt motor</a></li></ul></li><li><a class="tocitem" href="../../Vision/">Vision</a></li><li><input class="collapse-toggle" id="menuitem-6" type="checkbox"/><label class="tocitem" for="menuitem-6"><span class="docs-label">Reference</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../Reference/Overview/">Overview</a></li><li><a class="tocitem" href="../../Reference/Directories/">Directories</a></li><li><a class="tocitem" href="../../Reference/SymbolicExpressions/">SymbolicExpressions</a></li><li><a class="tocitem" href="../../Reference/AbstractSystems/">AbstractSystems</a></li><li><a class="tocitem" href="../../Reference/Patterns/">Patterns</a></li><li><a class="tocitem" href="../../Reference/Components/">Components</a></li><li><a class="tocitem" href="../../Reference/CompositeSystems/">CompositeSystems</a></li><li><a class="tocitem" href="../../Reference/Simulations/">Simulations</a></li><li><a class="tocitem" href="../../Reference/ComponentLibrary/">ComponentLibrary</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Fundamentals</a></li><li class="is-active"><a href>Patterns</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Patterns</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/MarkusLohmayer/EPHS.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/MarkusLohmayer/EPHS.jl/blob/main/docs/src/Fundamentals/Patterns.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="PatternsIntro"><a class="docs-heading-anchor" href="#PatternsIntro">Patterns</a><a id="PatternsIntro-1"></a><a class="docs-heading-anchor-permalink" href="#PatternsIntro" title="Permalink"></a></h1><p>Interconnection patterns provide a simple, graphical syntax for composing systems.</p><h2 id="Example"><a class="docs-heading-anchor" href="#Example">Example</a><a id="Example-1"></a><a class="docs-heading-anchor-permalink" href="#Example" title="Permalink"></a></h2><p>A pattern is defined by a directory of <a href="../../Reference/Patterns/#EPHS.Patterns.Junction"><code>Junction</code></a>s and a directory of <a href="../../Reference/Patterns/#EPHS.Patterns.InnerBox"><code>InnerBox</code></a>es. For graphical display, junctions and inner boxes can be placed on a grid by annotating their <a href="../../Reference/Patterns/#EPHS.Patterns.Position"><code>Position</code></a>s. Here is an example:</p><pre><code class="language-julia hljs">osc = Pattern(
+  Dtry( # junctions
+    :q =&gt; Dtry(Junction(displacement, Position(1, 2))),
+    :p =&gt; Dtry(Junction(momentum, Position(1, 4), exposed=true)),
+  ),
+  Dtry( # inner boxes
+    :pe =&gt; Dtry(
+      InnerBox(
+        Dtry(
+          :q =&gt; Dtry(InnerPort(■.q)),
+        ),
+        Position(1, 1)
+      ),
+    ),
+    :ke =&gt; Dtry(
+      InnerBox(
+        Dtry(
+          :p =&gt; Dtry(InnerPort(■.p)),
+        ),
+        Position(1, 5)
+      ),
+    ),
+    :pkc =&gt; Dtry(
+      InnerBox(
+        Dtry(
+          :q =&gt; Dtry(InnerPort(■.q)),
+          :p =&gt; Dtry(InnerPort(■.p))
+        ),
+        Position(1, 3)
+      ),
+    ),
+  )
+)</code></pre><img src='data:image/svg+xml;utf-8,<?xml version="1.0" encoding="UTF-8"?>
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="1000px" height="200px"
+  viewBox="95 95 1010 210"
+>
+<rect x="100" y="100" width="1000" height="200"
+  stroke="black" stroke-width="2"
+  fill="white"
+/>
+<line x1="800" y1="100" x2="800" y2="200"
+  stroke="black" stroke-width="2"
+  stroke-dasharray="none"
+/>
+<line x1="800" y1="100" x2="800" y2="200" stroke="transparent" stroke-width="10">
+  <title>p</title>
+</line>
+<line x1="1000" y1="200" x2="800" y2="200"
+  stroke="black" stroke-width="2"
+  stroke-dasharray="none"
+/>
+<line x1="1000" y1="200" x2="800" y2="200" stroke="transparent" stroke-width="10">
+  <title>p</title>
+</line>
+<g transform="translate(1000, 200)">
+  <circle r="75" stroke="black" stroke-width="2" fill="white" />
+<text
+    stroke="black"
+    text-anchor="middle"
+    dominant-baseline="middle"
+    dy="0"
+    font-family="JuliaMono"
+    font-size="22"
+    >ke</text>
+</g>
+<line x1="200" y1="200" x2="400" y2="200"
+  stroke="black" stroke-width="2"
+  stroke-dasharray="none"
+/>
+<line x1="200" y1="200" x2="400" y2="200" stroke="transparent" stroke-width="10">
+  <title>q</title>
+</line>
+<g transform="translate(200, 200)">
+  <circle r="75" stroke="black" stroke-width="2" fill="white" />
+<text
+    stroke="black"
+    text-anchor="middle"
+    dominant-baseline="middle"
+    dy="0"
+    font-family="JuliaMono"
+    font-size="22"
+    >pe</text>
+</g>
+<line x1="600" y1="200" x2="800" y2="200"
+  stroke="black" stroke-width="2"
+  stroke-dasharray="none"
+/>
+<line x1="600" y1="200" x2="800" y2="200" stroke="transparent" stroke-width="10">
+  <title>p</title>
+</line>
+<line x1="600" y1="200" x2="400" y2="200"
+  stroke="black" stroke-width="2"
+  stroke-dasharray="none"
+/>
+<line x1="600" y1="200" x2="400" y2="200" stroke="transparent" stroke-width="10">
+  <title>q</title>
+</line>
+<g transform="translate(600, 200)">
+  <circle r="75" stroke="black" stroke-width="2" fill="white" />
+<text
+    stroke="black"
+    text-anchor="middle"
+    dominant-baseline="middle"
+    dy="0"
+    font-family="JuliaMono"
+    font-size="22"
+    >pkc</text>
+</g>
+<circle cx="800" cy="200" r="8" fill="black">
+  <title>p : (momentum, ℝ)</title>
+</circle>
+<circle cx="400" cy="200" r="8" fill="black">
+  <title>q : (displacement, ℝ)</title>
+</circle>
+</svg>
+'/><p>The <a href="../../Reference/AbstractSystems/#EPHS.AbstractSystems.Interface"><code>Interface</code></a> of each <a href="../../Reference/Patterns/#EPHS.Patterns.InnerBox"><code>InnerBox</code></a> is given by its directory of <a href="../../Reference/Patterns/#EPHS.Patterns.InnerPort"><code>InnerPort</code></a>s. Each port is connected to a <a href="../../Reference/Patterns/#EPHS.Patterns.Junction"><code>Junction</code></a> according to the given <a href="../../Reference/Directories/#EPHS.Directories.DtryPath"><code>DtryPath</code></a>. Since only ports with the same associated physical <a href="../../Reference/AbstractSystems/#EPHS.AbstractSystems.Quantity"><code>Quantity</code></a> can be connected, the quantity is assigned only once at the junctions. The outer ports connected to the <em>exposed</em> junctions define the outer interface of the pattern.</p><p>Let&#39;s briefly spell out the physical interpretation: Junctions represent energy domains. Here, junction <code>q</code> (displacement) on the left represents the potential energy domain and junction <code>p</code>(momentum) on the right represents the kinetic energy domain of a mechanical oscillator. Inner boxes represent (sub)systems, which are combined into a composite system according to the given pattern. Here, box <code>pe</code> represents storage of <em>potential energy</em> (spring) and box <code>ke</code> represents storage of <em>kinetic energy</em> (mass). Box <code>pkc</code> represents the <em>potential-kinetic coupling</em>, known as the (canonical) symplectic structure in mechanics.</p><h2 id="Composition"><a class="docs-heading-anchor" href="#Composition">Composition</a><a id="Composition-1"></a><a class="docs-heading-anchor-permalink" href="#Composition" title="Permalink"></a></h2><p>To see how patterns compose, we need to define a second pattern:</p><pre><code class="language-julia hljs">damped_osc = Pattern(
+  Dtry(
+    :p =&gt; Dtry(Junction(momentum, Position(1, 2))),
+    :s =&gt; Dtry(Junction(entropy, Position(1, 4))),
+  ),
+  Dtry(
+    :osc =&gt; Dtry(
+      InnerBox(
+        Dtry(
+          :p =&gt; Dtry(InnerPort(■.p)),
+        ),
+        Position(1, 1)
+      ),
+    ),
+    :mf =&gt; Dtry(
+      InnerBox(
+        Dtry(
+          :p =&gt; Dtry(InnerPort(■.p)),
+          :s =&gt; Dtry(InnerPort(■.s)),
+        ),
+        Position(1, 3)
+      ),
+    ),
+    :tc =&gt; Dtry(
+      InnerBox(
+        Dtry(
+          :s =&gt; Dtry(InnerPort(■.s)),
+        ),
+        Position(1, 5)
+      ),
+    ),
+  )
+)</code></pre><img src='data:image/svg+xml;utf-8,<?xml version="1.0" encoding="UTF-8"?>
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="1000px" height="200px"
+  viewBox="95 95 1010 210"
+>
+<rect x="100" y="100" width="1000" height="200"
+  stroke="black" stroke-width="2"
+  fill="white"
+/>
+<line x1="600" y1="200" x2="400" y2="200"
+  stroke="black" stroke-width="2"
+  stroke-dasharray="none"
+/>
+<line x1="600" y1="200" x2="400" y2="200" stroke="transparent" stroke-width="10">
+  <title>p</title>
+</line>
+<line x1="600" y1="200" x2="800" y2="200"
+  stroke="black" stroke-width="2"
+  stroke-dasharray="none"
+/>
+<line x1="600" y1="200" x2="800" y2="200" stroke="transparent" stroke-width="10">
+  <title>s</title>
+</line>
+<g transform="translate(600, 200)">
+  <circle r="75" stroke="black" stroke-width="2" fill="white" />
+<text
+    stroke="black"
+    text-anchor="middle"
+    dominant-baseline="middle"
+    dy="0"
+    font-family="JuliaMono"
+    font-size="22"
+    >mf</text>
+</g>
+<line x1="200" y1="200" x2="400" y2="200"
+  stroke="black" stroke-width="2"
+  stroke-dasharray="none"
+/>
+<line x1="200" y1="200" x2="400" y2="200" stroke="transparent" stroke-width="10">
+  <title>p</title>
+</line>
+<g transform="translate(200, 200)">
+  <circle r="75" stroke="black" stroke-width="2" fill="white" />
+<text
+    stroke="black"
+    text-anchor="middle"
+    dominant-baseline="middle"
+    dy="0"
+    font-family="JuliaMono"
+    font-size="22"
+    >osc</text>
+</g>
+<line x1="1000" y1="200" x2="800" y2="200"
+  stroke="black" stroke-width="2"
+  stroke-dasharray="none"
+/>
+<line x1="1000" y1="200" x2="800" y2="200" stroke="transparent" stroke-width="10">
+  <title>s</title>
+</line>
+<g transform="translate(1000, 200)">
+  <circle r="75" stroke="black" stroke-width="2" fill="white" />
+<text
+    stroke="black"
+    text-anchor="middle"
+    dominant-baseline="middle"
+    dy="0"
+    font-family="JuliaMono"
+    font-size="22"
+    >tc</text>
+</g>
+<circle cx="400" cy="200" r="8" fill="black">
+  <title>p : (momentum, ℝ)</title>
+</circle>
+<circle cx="800" cy="200" r="8" fill="black">
+  <title>s : (entropy, ℝ)</title>
+</circle>
+</svg>
+'/><p>The two patterns are composable since the outer interface of the first pattern matches the interface of the inner box <code>osc</code> of the second pattern:</p><pre><code class="language-julia hljs">interface(osc) == interface(damped_osc, ■.osc)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">true</code></pre><p>In this way, a (reversible) oscillator model can be reused as a subsystem of a damped oscillator model. Box <code>mf</code> represents <em>mechanical friction</em> and box <code>tc</code> represents a <em>thermal capacity</em> that stores the dissipated energy.</p><p>The rest of this page is just an exercise to understand how composition works. It does not reflect how to use the framework in practice.</p><p>Patterns are composable whenever interfaces match. This is made precise by demonstrating that the syntax forms a directory-multicategory with interfaces as objects and patterns as morphisms. However, this mathematical framework does not include positions for graphical display. Breaking down a complex system into small, manageable parts is meaningful only if the parts can be unambiguously composed, yielding again the original, complex system. The multicategory structure guarantees just that. As we do not intend to work directly with the flat, monolithic description, there is basically no need to display it graphically.</p><p>To illustrate visually what happens when we compose the two patterns defined above, we manually define the result, choosing the positions at will:</p><pre><code class="language-julia hljs">damped_osc_flat = Pattern(
+  Dtry(
+    :p =&gt; Dtry(Junction(momentum, Position(1, 4))),
+    :s =&gt; Dtry(Junction(entropy, Position(0, 5))),
+    :osc =&gt; Dtry(
+      :q =&gt; Dtry(Junction(displacement, Position(1, 2))),
+    ),
+  ),
+  Dtry(
+    :osc =&gt; Dtry(
+      :pe =&gt; Dtry(
+        InnerBox(
+          Dtry(
+            :q =&gt; Dtry(InnerPort(■.osc.q)),
+          ),
+          Position(1, 1)
+        ),
+      ),
+      :ke =&gt; Dtry(
+        InnerBox(
+          Dtry(
+            :p =&gt; Dtry(InnerPort(■.p)),
+          ),
+          Position(1, 5)
+        ),
+      ),
+      :pkc =&gt; Dtry(
+        InnerBox(
+          Dtry(
+            :q =&gt; Dtry(InnerPort(■.osc.q)),
+            :p =&gt; Dtry(InnerPort(■.p))
+          ),
+          Position(1, 3)
+        ),
+      ),
+    ),
+    :mf =&gt; Dtry(
+      InnerBox(
+        Dtry(
+          :p =&gt; Dtry(InnerPort(■.p)),
+          :s =&gt; Dtry(InnerPort(■.s)),
+        ),
+        Position(0, 4)
+      ),
+    ),
+    :tc =&gt; Dtry(
+      InnerBox(
+        Dtry(
+          :s =&gt; Dtry(InnerPort(■.s)),
+        ),
+        Position(0, 6)
+      ),
+    ),
+  )
+)</code></pre><img src='data:image/svg+xml;utf-8,<?xml version="1.0" encoding="UTF-8"?>
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="1200px" height="400px"
+  viewBox="95 -105 1210 410"
+>
+<rect x="100" y="-100" width="1200" height="400"
+  stroke="black" stroke-width="2"
+  fill="white"
+/>
+<line x1="800" y1="0" x2="800" y2="200"
+  stroke="black" stroke-width="2"
+  stroke-dasharray="none"
+/>
+<line x1="800" y1="0" x2="800" y2="200" stroke="transparent" stroke-width="10">
+  <title>p</title>
+</line>
+<line x1="800" y1="0" x2="1000" y2="0"
+  stroke="black" stroke-width="2"
+  stroke-dasharray="none"
+/>
+<line x1="800" y1="0" x2="1000" y2="0" stroke="transparent" stroke-width="10">
+  <title>s</title>
+</line>
+<g transform="translate(800, 0)">
+  <circle r="75" stroke="black" stroke-width="2" fill="white" />
+<text
+    stroke="black"
+    text-anchor="middle"
+    dominant-baseline="middle"
+    dy="0"
+    font-family="JuliaMono"
+    font-size="22"
+    >mf</text>
+</g>
+<line x1="1000" y1="200" x2="800" y2="200"
+  stroke="black" stroke-width="2"
+  stroke-dasharray="none"
+/>
+<line x1="1000" y1="200" x2="800" y2="200" stroke="transparent" stroke-width="10">
+  <title>p</title>
+</line>
+<g transform="translate(1000, 200)">
+  <circle r="75" stroke="black" stroke-width="2" fill="white" />
+<text
+    stroke="black"
+    text-anchor="middle"
+    dominant-baseline="middle"
+    dy="0"
+    font-family="JuliaMono"
+    font-size="22"
+    >osc.ke</text>
+</g>
+<line x1="200" y1="200" x2="400" y2="200"
+  stroke="black" stroke-width="2"
+  stroke-dasharray="none"
+/>
+<line x1="200" y1="200" x2="400" y2="200" stroke="transparent" stroke-width="10">
+  <title>q</title>
+</line>
+<g transform="translate(200, 200)">
+  <circle r="75" stroke="black" stroke-width="2" fill="white" />
+<text
+    stroke="black"
+    text-anchor="middle"
+    dominant-baseline="middle"
+    dy="0"
+    font-family="JuliaMono"
+    font-size="22"
+    >osc.pe</text>
+</g>
+<line x1="600" y1="200" x2="800" y2="200"
+  stroke="black" stroke-width="2"
+  stroke-dasharray="none"
+/>
+<line x1="600" y1="200" x2="800" y2="200" stroke="transparent" stroke-width="10">
+  <title>p</title>
+</line>
+<line x1="600" y1="200" x2="400" y2="200"
+  stroke="black" stroke-width="2"
+  stroke-dasharray="none"
+/>
+<line x1="600" y1="200" x2="400" y2="200" stroke="transparent" stroke-width="10">
+  <title>q</title>
+</line>
+<g transform="translate(600, 200)">
+  <circle r="75" stroke="black" stroke-width="2" fill="white" />
+<text
+    stroke="black"
+    text-anchor="middle"
+    dominant-baseline="middle"
+    dy="0"
+    font-family="JuliaMono"
+    font-size="22"
+    >osc.pkc</text>
+</g>
+<line x1="1200" y1="0" x2="1000" y2="0"
+  stroke="black" stroke-width="2"
+  stroke-dasharray="none"
+/>
+<line x1="1200" y1="0" x2="1000" y2="0" stroke="transparent" stroke-width="10">
+  <title>s</title>
+</line>
+<g transform="translate(1200, 0)">
+  <circle r="75" stroke="black" stroke-width="2" fill="white" />
+<text
+    stroke="black"
+    text-anchor="middle"
+    dominant-baseline="middle"
+    dy="0"
+    font-family="JuliaMono"
+    font-size="22"
+    >tc</text>
+</g>
+<circle cx="400" cy="200" r="8" fill="black">
+  <title>osc.q : (displacement, ℝ)</title>
+</circle>
+<circle cx="800" cy="200" r="8" fill="black">
+  <title>p : (momentum, ℝ)</title>
+</circle>
+<circle cx="1000" cy="0" r="8" fill="black">
+  <title>s : (entropy, ℝ)</title>
+</circle>
+</svg>
+'/><p>We can now assert that this is exactly what the mathematical framework gives us:</p><pre><code class="language-julia hljs">osc = Pattern{Nothing,Nothing}(osc)
+damped_osc = Pattern{Nothing,Nothing}(damped_osc)
+damped_osc_flat = Pattern{Nothing,Nothing}(damped_osc_flat)
+
+id_mf = identity(interface(damped_osc, ■.mf))
+id_tc = identity(interface(damped_osc, ■.tc))
+
+compose(damped_osc, Dtry(
+  :osc =&gt; Dtry(osc),
+  :mf =&gt; Dtry(id_mf),
+  :tc =&gt; Dtry(id_tc),
+)) == damped_osc_flat</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">true</code></pre><p>First, we reduced the three patterns to their mathematical content as morphisms. by reconstructing them with the <a href="../../Reference/Patterns/#EPHS.Patterns.Pattern-Union{Tuple{Pattern}, Tuple{Nothing}} where Nothing"><code>Pattern{Nothing,Nothing}(::Pattern)</code></a> constructor. Then, we constructed identity patterns/morphisms for the boxes/interfaces/objects <code>mf</code> and <code>tc</code>. Finally, we <a href="../../Reference/Patterns/#EPHS.Patterns.compose-Tuple{Pattern{Nothing, Nothing}, Dtry{Pattern{Nothing, Nothing}}}"><code>compose</code></a>d the morphism <code>damped_osc</code> with the morphism <code>osc</code> and the two identity morphisms. This indeed resulted in the morphism <code>damped_osc_flat</code>.</p><p>To conclude, it is straightforward to work with a hierarchy of simple patterns, rather than with a single complex pattern, because composition is uniquely defined and associative. Two adjacent levels of description are related, as they share interfaces in common. For each pattern on the lower-level, the outer box matches with an inner box of the pattern on the higher level. To form the composed/flattened pattern, for each port of each shared interface, the two assigned junctions (one on the lower-level and one on the higher-level) are identified.</p><p>More information about the Julia implementation of patterns is provided in the <a href="../../Reference/Patterns/#Patterns">reference</a>.</p><h2 id="Functorial-semantics"><a class="docs-heading-anchor" href="#Functorial-semantics">Functorial semantics</a><a id="Functorial-semantics-1"></a><a class="docs-heading-anchor-permalink" href="#Functorial-semantics" title="Permalink"></a></h2><p>Each port has associated variables, like the flow and effort variables known from bond graphs. At each junction, the variables of the connected ports satisfy a relation, similar to 0-junctions in bond graphs.</p><p>The outer box of a pattern as well as each of its inner boxes each represent an interface, given by a directory of ports, see <a href="../../Reference/Patterns/#EPHS.AbstractSystems.interface-Tuple{Pattern}"><code>interface(::Pattern)</code></a> and <a href="../../Reference/Patterns/#EPHS.AbstractSystems.interface-Tuple{Pattern, DtryPath}"><code>interface(::Pattern, ::DtryPath)</code></a>. Since each port is connected to exactly one junction, the mathematical content of a pattern is a partition of all involved (inner and outer) ports. For instance, in the above pattern, the inner ports <code>osc.pkc.p</code>, <code>osc.ke.p</code>, and <code>mf.p</code> constitute one of the three parts (or junctions).</p><p>To use a pattern as a means to interconnect systems (whose interfaces match the inner boxes) into a composite system (whose interface matches the outer box), the mathematical content of the pattern needs to be translated into a relation among the associated port variables.</p><p>State ports have a state variable and power ports additionally have a flow variable and an effort variable. Given a power port named <span>$p$</span>, its state, flow, and effort variables are denoted by <span>$p \mathtt{.x}$</span>, <span>$p \mathtt{.f}$</span>, and <span>$p \mathtt{.e}$</span>, respectively. Considering for instance an interface <span>$I$</span> with two power ports named <span>$\mathtt{p_1}$</span> and <span>$\mathtt{p_2}$</span>, as well as a state port named <span>$\mathtt{s}$</span>, its associated bundle of port variables <span>$\mathcal{P}_I$</span> has seven port variables:</p><p class="math-container">\[\left(
+  \mathtt{p_1.x}, \, \mathtt{p_1.f}, \, \mathtt{p_1.e}, \,
+  \mathtt{p_2.x}, \, \mathtt{p_2.f}, \, \mathtt{p_2.e}, \,
+  \mathtt{s.x}
+\right)
+\, \in \,
+\mathcal{P}_I\]</p><p>The port variables form a <a href="https://en.wikipedia.org/wiki/Vector_bundle">vector bundle</a>, where the state variables live in the base space and the flow/effort variables live in the corresponding tangent/cotangent spaces. For the moment, we simply assume that all port variables are real-valued. We can thus identify <span>$\mathcal{P}_I \cong \mathbb{R}^7$</span>.</p><p>At every junction, the following holds:</p><ol><li><strong>Equality of state</strong>: the state variables of all connected ports are equal.</li><li><strong>Equality of effort</strong>: the effort variables of all connected power ports are equal.</li><li><strong>Equality of net flow</strong>: the sum of the flow variables of all connected inner power ports is equal to the sum of the flow variables of all connected outer power ports.</li></ol><p>In the remaining part of this page, we discuss some important mathematical aspects, which should be addressed in more detail in a future paper.</p><p>The translation from combinatorial syntax to relational semantics is mathematically understood as a functor <span>$F \colon \mathrm{Syntax} \to \mathrm{Rel}$</span>. On objects, it sends an interface <span>$I$</span> to its bundle of port variables <span>$F(I) = \mathcal{P}_I$</span>. On morphisms, it sends a pattern <span>$f$</span> to the relation <span>$F(f)$</span>, defined by equality of state, equality of effort, and equality of net flow.</p><p>For instance, let&#39;s consider a pattern <span>$f$</span> with three inner boxes named <span>$\mathtt{a}$</span>, <span>$\mathtt{b}$</span>, and <span>$\mathtt{c}$</span>. Let <span>$I$</span> denote the interface of its outer box, called the <em>outer interface</em> of <span>$f$</span>. Further, Let <span>$I_a$</span>, <span>$I_b$</span>, and <span>$I_c$</span> denote the interfaces of the inner boxes. We write <span>$I_i = \sum[ a \mapsto I_a, \, b \mapsto I_b, \, c \mapsto I_c ]$</span> for the combined interface, called the <em>inner interface</em> of <span>$f$</span>. Assuming that <span>$I_a$</span> has two ports named <span>$\mathtt{q}$</span> and <span>$\mathtt{p}$</span>, <span>$I_b$</span> has two ports named <span>$\mathtt{p}$</span> and <span>$\mathtt{s}$</span>, and <span>$I_c$</span> has one port named <span>$\mathtt{s}$</span>, the inner interface <span>$I_i$</span> has five ports named <span>$\mathtt{a.q}$</span>, <span>$\mathtt{a.p}$</span>, <span>$\mathtt{b.p}$</span>, <span>$\mathtt{b.s}$</span>, and <span>$\mathtt{c.s}$</span>. Here, <span>$\sum$</span> denotes the <em>named sum</em> in the <em>directory-multicategory</em> <span>$\mathrm{Syntax}$</span>. In contrast to a symmetric monoidal category (SMC), a directory-multicategory uses human-friendly names to combine objects or morphisms in parallel. This means that we don&#39;t have to worry about parentheses and coherence isomorphisms such as <span>$(I_a \oplus I_b) \oplus I_c \cong I_a \oplus (I_b \oplus I_c)$</span>, where <span>$\oplus$</span> denotes the binary <a href="https://en.wikipedia.org/wiki/Monoidal_category">monoidal product</a> of the equivalent SMC.</p><p>As a functor, <span>$F$</span> preserves source and target of morphisms. For the pattern <span>$f \colon I_i \to I$</span>, we hence get a relation of the form <span>$F(f) \colon F(I_i) \to F(I)$</span>. To be more precise, we think of <span>$F$</span> as a <em>lax directory-multifunctor</em> to the directory-multicategory <span>$\mathrm{Rel}$</span>, cf. <a href="https://en.wikipedia.org/wiki/Monoidal_functor">lax monoidal functor</a>. This means that <span>$F$</span> comes with a natural transformation of the form <span>$\sum[ a \mapsto F(I_a), \, b \mapsto F(I_b), \, c \mapsto F(I_c)] \to F(\sum[ a \mapsto I_a, \, b \mapsto I_b, \, c \mapsto I_c ])$</span> for every parallel combination of interfaces. Again, we don&#39;t have to worry about the difference between, say, <span>$((\mathtt{a.q.x}, \, \mathtt{a.p.x}), \, (\mathtt{b.p.x}, \, \mathtt{b.s.x}))$</span> and <span>$(((\mathtt{a.q.x}, \, \mathtt{a.p.x}), \, \mathtt{b.p.x}), \, \mathtt{b.s.x})$</span>, since the names already do the job. Precomposing (or &#39;whiskering&#39;) <span>$F$</span> with the &#39;lax&#39; transformation, yields the semantics of the pattern <span>$f$</span>, given by a morphism in <span>$\mathrm{Rel}$</span> of the form <span>$\sum[ a \mapsto F(I_a), \, b \mapsto F(I_b), \, c \mapsto F(I_c)] \to F(I)$</span>. This is simply a relation among the port variables of all involved interfaces, written in a way that distinguishes between the subsystems on one side and the composite system on the other side.</p><p>As a functor, <span>$F$</span> also preserves composite morphisms. This means that the semantics of patterns is well-behaved in the sense that we can flatten a hierarchy of patterns and then ask for the relation associated to the composed pattern, or we can ask for the relation associated to each pattern in the hierarchy and then compose those relations. Either way results in the same relation.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../Directories/">« Directories</a><a class="docs-footer-nextpage" href="../Components/">Components »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.14.1 on <span class="colophon-date" title="Friday 5 September 2025 07:53">Friday 5 September 2025</span>. Using Julia version 1.11.6.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
