@@ -10,7 +10,7 @@ as an embedded domain specific modeling language
 for interconnected/complex physical systems.
 
 The implementation is based on the theory presented in
-[*Exergetic Port-Hamiltonian Systems Modeling Language*](https://www.researchgate.net/publication/378567463_Exergetic_Port-Hamiltonian_Systems_Modeling_Language).
+[*Exergetic Port-Hamiltonian Systems Modeling Language*](https://www.researchgate.net/publication/398910031_Exergetic_Port-Hamiltonian_systems_modeling_language).
 Please consult this article for further details and references to other literature.
 
 

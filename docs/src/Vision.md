@@ -15,7 +15,7 @@ as well as
 fluid and plasma models (formulated using exterior calculus):
 
 * [Exergetic port-Hamiltonian systems for multibody dynamics](https://www.researchgate.net/publication/385560090_Exergetic_port-Hamiltonian_systems_for_multibody_dynamics)
-* [Energy-based, geometric, and compositional formulation of fluid and plasma models](https://www.researchgate.net/publication/384069969_Energy-based_geometric_and_compositional_formulation_of_fluid_and_plasma_models?_tp=eyJjb250ZXh0Ijp7ImZpcnN0UGFnZSI6InByb2ZpbGUiLCJwYWdlIjoicHJvZmlsZSJ9fQ)
+* [Energy-based, geometric, and compositional formulation of fluid and plasma models](https://www.researchgate.net/publication/396336370_Energy-based_geometric_and_compositional_formulation_of_fluid_and_plasma_models)
 
 
 !!! tip
