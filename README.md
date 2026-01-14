@@ -2,10 +2,30 @@
 
 **A compositional, energy-based software framework for modeling mechanical, electromagnetic and thermodynamic systems**
 
-Documentation:
+EPHS.jl lets you represent physical systems as **composable energy-flow diagrams** grounded in the **port-Hamiltonian** approach.
+Crucially, the graphical syntax and the port-Hamiltonian semantics compose in compatible ways, enabling seamless **hierarchical (de)composition of systems**.
+Additional structural properties guarantee not just passivity, but thermodynamic consistency (1st & 2nd law).
+The primary goal is to **make complex energy-based models easier to build, understand, reuse, and refactor** without sacrificing mathematical rigor.
+
+## Highlights
+
+- Hierarchical model structure to manage complexity  
+- Simple reuse of models at all levels of abstraction  
+- Thermodynamic consistency follows recursively from consistency of subsystems  
+
+## Documentation
+
+📘 **Online documentation:**  
 https://MarkusLohmayer.github.io/EPHS.jl
 
-Feel free to reach out
+
+## Vision
+
+- Extend the underlying computer algebra system to multiple theories (Lie groups and algebras, exterior calculus)
+- Add capabilities for optimization of symbolic expressions and theorem proofing using (slotted) e-graphs
+- Provide tooling for data-driven parameter identification
+- Implement various numerical integrators as natural transformations
+- Demonstrate that the port-Hamiltonian modeling language provides a well-suited target language for generative AI in physical modeling
 
 
 ## Peer-reviewed journal publications
